@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export default ({
   locale,
   biImage,
@@ -9,9 +10,11 @@ export default ({
 }) => `
     <div class="tui-image-editor-main-container" style="${commonStyle}">
         <div class="tui-image-editor-header" style="${headerStyle}">
+            ${biImage ? `
             <div class="tui-image-editor-header-logo">
                 <img src="${biImage}" />
             </div>
+            ` : ''}
             <div class="tui-image-editor-header-buttons">
                 <div style="${loadButtonStyle}">
                     ${locale.localize('Load')}

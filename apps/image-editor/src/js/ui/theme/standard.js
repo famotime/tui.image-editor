@@ -141,7 +141,7 @@
 };
  */
 export default {
-  'common.bi.image': 'https://uicdn.toast.com/toastui/img/tui-image-editor-bi.png',
+  'common.bi.image': '',
   'common.bisize.width': '251px',
   'common.bisize.height': '21px',
   'common.backgroundImage': 'none',

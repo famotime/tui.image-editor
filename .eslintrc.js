@@ -19,6 +19,7 @@ module.exports = {
   },
   ignorePatterns: ['node_modules/*', 'dist', 'examples'],
   rules: {
+    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'prefer-destructuring': [
       'error',
       {
