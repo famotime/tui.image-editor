@@ -166,3 +166,193 @@
                 margin: 0 auto;
                 width: 0;
                 height: 0;
+
+/* 序号标注自定义样式，继承 TUI 原生子菜单视觉风格 */
+.tui-image-editor-container {
+    .tui-image-editor-submenu {
+        .custom-annotation-color-button {
+            display: inline-flex !important;
+            align-items: center;
+            height: 48px;
+            vertical-align: top;
+        }
+        .color-item-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .color-preview-container {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .color-preview-circle {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, border-color 0.2s;
+            &:hover {
+                transform: scale(1.15);
+                border-color: #fff;
+            }
+        }
+        .color-preview-inner {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: transparent;
+        }
+        .preset-colors-popup {
+            position: absolute;
+            bottom: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e1e1e;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            width: 110px;
+        }
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            justify-items: center;
+            align-items: center;
+        }
+        .preset-color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid #555;
+            box-sizing: border-box;
+            transition: transform 0.15s;
+            &:hover {
+                transform: scale(1.2);
+            }
+        }
+        .preset-color-custom {
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+            width: 16px;
+            height: 16px;
+            &:hover {
+                transform: scale(1.2);
+            }
+        }
+        .custom-slider-container {
+            display: inline-block;
+            width: 100px;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+        .custom-tui-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            background: #444;
+            border-radius: 1px;
+            outline: none;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        .custom-tui-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #151515;
+            border: 2px solid #007aff;
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.15s;
+            &:hover {
+                border-color: #0099ff;
+            }
+        }
+        .custom-tui-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #151515;
+            border: 2px solid #007aff;
+            cursor: pointer;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.15s;
+            &:hover {
+                border-color: #0099ff;
+            }
+        }
+        .custom-annotation-step-wrap {
+            display: inline-flex !important;
+            align-items: center;
+            height: 48px;
+            vertical-align: top;
+        }
+        .step-control-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-control-row {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-value-input {
+            width: 40px !important;
+            text-align: center;
+        }
+        .custom-reset-btn {
+            margin-left: 8px;
+            color: #007aff;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border: 1px solid #3c3c3c;
+            border-radius: 3px;
+            background: #252525;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+            &:hover {
+                background: #303030;
+                border-color: #007aff;
+                color: #fff;
+            }
+        }
+        .custom-label {
+            display: block;
+            font-size: 11px;
+            color: #8c8c8c;
+            margin-top: 6px;
+            cursor: default;
+            user-select: none;
+            font-family: "Noto Sans", sans-serif;
+            text-align: center;
+        }
+    }
+}

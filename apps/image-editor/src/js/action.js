@@ -23,6 +23,7 @@ export default {
       icon: this._iconAction(),
       filter: this._filterAction(),
       history: this._historyAction(),
+      annotation: this._annotationAction(),
     };
   },
 
@@ -643,10 +644,43 @@ export default {
    * @returns {Object} common actions for ui
    * @private
    */
+  _annotationAction() {
+    return extend(
+      {
+        setStep: (step) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.setStep(step);
+        },
+        setShape: (shape) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.setShape(shape);
+        },
+        setColor: (color) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.setColor(color);
+        },
+        setTextColor: (textColor) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.setTextColor(textColor);
+        },
+        setFontSize: (fontSize) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.setFontSize(fontSize);
+        },
+        onStepChanged: (callback) => {
+          const annotation = this._graphics.getComponent('ANNOTATION');
+          annotation.on('annotationStepChanged', callback);
+        }
+      },
+      this._commonAction()
+    );
+  },
+
   _commonAction() {
-    const { TEXT, CROPPER, SHAPE, ZOOM, RESIZE } = drawingModes;
+    const { TEXT, CROPPER, SHAPE, ZOOM, RESIZE, ANNOTATION } = drawingModes;
 
     return {
+      // eslint-disable-next-line complexity
       modeChange: (menu) => {
         switch (menu) {
           case drawingMenuNames.TEXT:
@@ -664,6 +698,9 @@ export default {
             break;
           case drawingMenuNames.RESIZE:
             this.startDrawingMode(RESIZE);
+            break;
+          case drawingMenuNames.ANNOTATION:
+            this._changeActivateMode(ANNOTATION);
             break;
           default:
             break;

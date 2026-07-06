@@ -77,7 +77,8 @@ export const componentNames = keyMirror(
   'FILTER',
   'SHAPE',
   'ZOOM',
-  'RESIZE'
+  'RESIZE',
+  'ANNOTATION'
 );
 
 /**
@@ -216,7 +217,8 @@ export const drawingModes = keyMirror(
   'SHAPE',
   'ICON',
   'ZOOM',
-  'RESIZE'
+  'RESIZE',
+  'ANNOTATION'
 );
 
 /**
@@ -229,6 +231,7 @@ export const drawingMenuNames = {
   RESIZE: 'resize',
   SHAPE: 'shape',
   ZOOM: 'zoom',
+  ANNOTATION: 'annotation',
 };
 
 /**

@@ -37,6 +37,8 @@ import {
 } from '@/consts';
 import Resize from '@/component/resize';
 import ResizeDrawingMode from '@/drawingMode/resize';
+import Annotation from '@/component/annotation';
+import AnnotationDrawingMode from '@/drawingMode/annotation';
 
 const DEFAULT_CSS_MAX_WIDTH = 1000;
 const DEFAULT_CSS_MAX_HEIGHT = 800;
@@ -994,6 +996,7 @@ class Graphics {
     this._register(this._drawingModeMap, new IconDrawingMode());
     this._register(this._drawingModeMap, new ZoomDrawingMode());
     this._register(this._drawingModeMap, new ResizeDrawingMode());
+    this._register(this._drawingModeMap, new AnnotationDrawingMode());
   }
 
   /**
@@ -1013,6 +1016,7 @@ class Graphics {
     this._register(this._componentMap, new Shape(this));
     this._register(this._componentMap, new Zoom(this));
     this._register(this._componentMap, new Resize(this));
+    this._register(this._componentMap, new Annotation(this));
   }
 
   /**

@@ -23,6 +23,7 @@ import Mask from '@/ui/mask';
 import Icon from '@/ui/icon';
 import Draw from '@/ui/draw';
 import Filter from '@/ui/filter';
+import Annotation from '@/ui/annotation';
 import History from '@/ui/history';
 import Locale from '@/ui/locale/locale';
 
@@ -37,6 +38,7 @@ const SUB_UI_COMPONENT = {
   Icon,
   Draw,
   Filter,
+  Annotation,
 };
 
 const BI_EXPRESSION_MINSIZE_WHEN_TOP_POSITION = '1300';
