@@ -10,7 +10,7 @@ const zhCN = {
   Shape: '形状',
   Icon: '图标',
   Text: '文字',
-  Mask: '水印',
+  Mask: '蒙版',
   Filter: '滤镜',
   Annotation: '序号标注',
   Resize: '调整尺寸',
@@ -73,8 +73,8 @@ const zhCN = {
   Right: '居右',
   'Text size': '字体大小',
 
-  // 水印
-  'Load Mask Image': '加载水印图片',
+  // 蒙版
+  'Load Mask Image': '加载蒙版图片',
 
   // 滤镜
   Grayscale: '灰度',
