@@ -73,7 +73,7 @@ describe('Invoker', () => {
       invoker.on(spyEvents);
       await invoker.undo();
 
-      expect(spyEvents.undoStackChanged).not.toHaveBeenCalled();
+      expect(spyEvents.undoStackChanged).toHaveBeenCalledWith(1);
       expect(spyEvents.redoStackChanged).toHaveBeenCalledWith(1);
     });
 
@@ -97,7 +97,7 @@ describe('Invoker', () => {
       await invoker.redo();
 
       expect(spyEvents.undoStackChanged).toHaveBeenCalledWith(1);
-      expect(spyEvents.redoStackChanged).not.toHaveBeenCalled();
+      expect(spyEvents.redoStackChanged).toHaveBeenCalledWith(1);
     });
 
     it('should fire redo event when undoStack is empty after', async () => {
