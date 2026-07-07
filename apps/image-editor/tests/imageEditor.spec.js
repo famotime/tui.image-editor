@@ -52,4 +52,35 @@ describe('ImageEditor', () => {
       expect(imageEditor.fire).toHaveBeenCalledWith(OBJECT_ROTATED, expect.any(Object));
     });
   });
+
+  describe('Visibility Control', () => {
+    let imageEditor, el;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+      imageEditor = new ImageEditor(el, { usageStatistics: false });
+    });
+
+    afterEach(() => {
+      imageEditor.destroy();
+    });
+
+    it('should hide all objects', () => {
+      const spy = jest.spyOn(imageEditor._graphics, 'changeVisibilityAll');
+      imageEditor.hideAllObjects();
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+
+    it('should show all objects', () => {
+      const spy = jest.spyOn(imageEditor._graphics, 'changeVisibilityAll');
+      imageEditor.showAllObjects();
+      expect(spy).toHaveBeenCalledWith(true);
+    });
+
+    it('should toggle all objects visibility', () => {
+      const spy = jest.spyOn(imageEditor._graphics, 'toggleVisibilityAll');
+      imageEditor.toggleAllObjectsVisibility();
+      expect(spy).toHaveBeenCalled();
+    });
+  });
 });

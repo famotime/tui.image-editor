@@ -588,6 +588,34 @@ class ImageEditor {
   }
 
   /**
+   * Hide all objects on the canvas (excluding background image)
+   * @example
+   * imageEditor.hideAllObjects();
+   */
+  hideAllObjects() {
+    this._graphics.changeVisibilityAll(false);
+  }
+
+  /**
+   * Show all objects on the canvas
+   * @example
+   * imageEditor.showAllObjects();
+   */
+  showAllObjects() {
+    this._graphics.changeVisibilityAll(true);
+  }
+
+  /**
+   * Toggle visibility of all objects on the canvas
+   * @returns {boolean} Current visibility state (true if visible, false if hidden)
+   * @example
+   * const isVisible = imageEditor.toggleAllObjectsVisibility();
+   */
+  toggleAllObjectsVisibility() {
+    return this._graphics.toggleVisibilityAll();
+  }
+
+  /**
    * Deactivate all objects
    * @example
    * imageEditor.deactivateAll();

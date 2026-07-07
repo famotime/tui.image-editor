@@ -279,6 +279,41 @@ class Graphics {
   }
 
   /**
+   * Change visibility of all objects (excluding cropzone)
+   * @param {boolean} visible - visibility
+   */
+  changeVisibilityAll(visible) {
+    if (!visible) {
+      this.discardSelection();
+    }
+    const objects = this.getObjects();
+    objects.forEach((obj) => {
+      if (obj.type !== 'cropzone') {
+        obj.visible = visible;
+      }
+    });
+    this.getCanvas().renderAll();
+  }
+
+  /**
+   * Toggle visibility of all objects (excluding cropzone)
+   * @returns {boolean} new visibility state
+   */
+  toggleVisibilityAll() {
+    const objects = this.getObjects();
+    const editableObjects = objects.filter((obj) => obj.type !== 'cropzone');
+
+    let currentVisible = true;
+    if (editableObjects.length > 0) {
+      currentVisible = editableObjects[0].visible;
+    }
+
+    this.changeVisibilityAll(!currentVisible);
+
+    return !currentVisible;
+  }
+
+  /**
    * Removes an object or group by id
    * @param {number} id - object id
    * @returns {Array} removed objects

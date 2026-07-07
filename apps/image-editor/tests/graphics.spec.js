@@ -201,4 +201,35 @@ describe('Graphics', () => {
       expect(canvas.getObjects()).toHaveLength(3);
     });
   });
+
+  describe('Visibility Control', () => {
+    it('changeVisibilityAll should change visibility of all non-cropzone objects', () => {
+      const canvas = graphics.getCanvas();
+      const obj1 = new fabric.Object({ type: 'rect', visible: true });
+      const obj2 = new fabric.Object({ type: 'text', visible: true });
+      const cropzone = new fabric.Object({ type: 'cropzone', visible: true });
+      
+      canvas.add(obj1, obj2, cropzone);
+      
+      graphics.changeVisibilityAll(false);
+      
+      expect(obj1.visible).toBe(false);
+      expect(obj2.visible).toBe(false);
+      expect(cropzone.visible).toBe(true);
+    });
+
+    it('toggleVisibilityAll should toggle visibility based on current state', () => {
+      const canvas = graphics.getCanvas();
+      const obj1 = new fabric.Object({ type: 'rect', visible: true });
+      canvas.add(obj1);
+      
+      let newState = graphics.toggleVisibilityAll();
+      expect(newState).toBe(false);
+      expect(obj1.visible).toBe(false);
+
+      newState = graphics.toggleVisibilityAll();
+      expect(newState).toBe(true);
+      expect(obj1.visible).toBe(true);
+    });
+  });
 });
