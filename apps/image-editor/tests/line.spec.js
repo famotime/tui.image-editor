@@ -11,7 +11,7 @@ describe('Line', () => {
     canvas = graphics.getCanvas();
     jest.spyOn(canvas, 'getPointer').mockReturnValue({ x: 30, y: 60 });
     line = new Line(graphics);
-    line._line = new fabric.Line([10, 20, 10, 20]);
+    line._line = new fabric.Line([10, 20, 30, 40]);
     mockImage = new fabric.Image();
     graphics.setCanvasImage('mockImage', mockImage);
     fEvent = { e: {} };
@@ -33,7 +33,7 @@ describe('Line', () => {
     canvas.add(line._line);
     const [object] = canvas.getObjects();
 
-    expect(object).toMatchObject({ x2: 10, y2: 20 });
+    expect(object).toMatchObject({ x2: 30, y2: 40 });
 
     line._onFabricMouseMove(fEvent);
 
