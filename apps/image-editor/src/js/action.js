@@ -138,6 +138,7 @@ export default {
             })
             ['catch']((message) => Promise.reject(message));
         },
+        viewOriginal: () => this.toggleAllObjectsVisibility(),
         download: () => {
           const dataURL = this.toDataURL();
           let imageName = this.getImageName();

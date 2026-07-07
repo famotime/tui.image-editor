@@ -412,7 +412,15 @@ class Ui {
    * @private
    */
   _makeHelpMenuWithPartition() {
-    return [...ZOOM_HELP_MENUS, '', ...COMMAND_HELP_MENUS, '', ...DELETE_HELP_MENUS];
+    return [
+      ...ZOOM_HELP_MENUS,
+      '',
+      ...COMMAND_HELP_MENUS,
+      '',
+      ...DELETE_HELP_MENUS,
+      '',
+      'viewOriginal',
+    ];
   }
 
   /**
@@ -690,6 +698,7 @@ class Ui {
     this._removeHelpActionEvent();
     this._removeDownloadEvent();
     this._removeLoadEvent();
+    this._removeMenuEvent();
     this._removeMainMenuEvent();
     this._historyMenu.removeEvent();
   }

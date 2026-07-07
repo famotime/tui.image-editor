@@ -19,10 +19,21 @@ export const COMMAND_HELP_MENUS = ['history', 'undo', 'redo', 'reset'];
 export const DELETE_HELP_MENUS = ['delete', 'deleteAll'];
 
 /**
+ * Help features for view
+ * @type {Array.<string>}
+ */
+export const VIEW_HELP_MENUS = ['viewOriginal'];
+
+/**
  * Editor help features
  * @type {Array.<string>}
  */
-export const HELP_MENUS = [...ZOOM_HELP_MENUS, ...COMMAND_HELP_MENUS, ...DELETE_HELP_MENUS];
+export const HELP_MENUS = [
+  ...ZOOM_HELP_MENUS,
+  ...COMMAND_HELP_MENUS,
+  ...DELETE_HELP_MENUS,
+  ...VIEW_HELP_MENUS,
+];
 
 /**
  * Fill type for shape

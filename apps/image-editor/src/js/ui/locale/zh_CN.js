@@ -28,6 +28,7 @@ const zhCN = {
   Redo: '重做',
   Load: '加载',
   Download: '下载',
+  ViewOriginal: '查看原图',
   History: '历史记录',
 
   // 裁剪
