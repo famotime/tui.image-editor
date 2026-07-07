@@ -1,3 +1,4 @@
+import { fabric } from 'fabric';
 import extend from 'tui-code-snippet/object/extend';
 import Imagetracer from '@/helper/imagetracer';
 import { isSupportFileApi, base64ToBlob, toInteger, isEmptyCropzone, includes } from '@/util';
@@ -261,11 +262,28 @@ export default {
     };
 
     /**
-     * 计算路径末尾方向向量
+     * 计算路径末尾切线方向向量（尾部箭头朝向外侧，即沿切线正方向）
      */
     const getEndDirection = (pathData) => {
       if (pathData.length < 2) return null;
-      const endPt = getSegmentEndPoint(pathData[pathData.length - 1]);
+      const lastSeg = pathData[pathData.length - 1];
+      const [type] = lastSeg;
+
+      if (type === 'Q' && lastSeg.length >= 5) {
+        // 二次贝塞尔曲线末端切线方向：终点减去控制点
+        const dx = lastSeg[3] - lastSeg[1];
+        const dy = lastSeg[4] - lastSeg[2];
+        if (dx !== 0 || dy !== 0) return { dx, dy };
+      }
+      if (type === 'C' && lastSeg.length >= 7) {
+        // 三次贝塞尔曲线末端切线方向：终点减去第二个控制点
+        const dx = lastSeg[5] - lastSeg[3];
+        const dy = lastSeg[6] - lastSeg[4];
+        if (dx !== 0 || dy !== 0) return { dx, dy };
+      }
+
+      // 如果是线性段段（L/M/Z），或者贝塞尔曲线计算出零向量，回退为割线方向计算
+      const endPt = getSegmentEndPoint(lastSeg);
       if (!endPt) return null;
       for (let i = pathData.length - 2; i >= 0; i -= 1) {
         const prevSeg = pathData[i];
@@ -283,11 +301,28 @@ export default {
     };
 
     /**
-     * 计算路径起始方向向量
+     * 计算路径起始切线方向向量（头部箭头朝向外侧，即沿切线反方向）
      */
     const getStartDirection = (pathData) => {
       if (pathData.length < 2) return null;
       const startPt = { x: pathData[0][1], y: pathData[0][2] };
+      const [, nextSeg] = pathData;
+      const [type] = nextSeg;
+
+      if (type === 'Q' && nextSeg.length >= 5) {
+        // 二次贝塞尔曲线起点反向切线：起点减去第一个控制点
+        const dx = startPt.x - nextSeg[1];
+        const dy = startPt.y - nextSeg[2];
+        if (dx !== 0 || dy !== 0) return { dx, dy };
+      }
+      if (type === 'C' && nextSeg.length >= 7) {
+        // 三次贝塞尔曲线起点反向切线：起点减去第一个控制点
+        const dx = startPt.x - nextSeg[1];
+        const dy = startPt.y - nextSeg[2];
+        if (dx !== 0 || dy !== 0) return { dx, dy };
+      }
+
+      // 回退为首段割线反向向量
       for (let i = 1; i < pathData.length; i += 1) {
         const nextPt = getSegmentEndPoint(pathData[i]);
         if (nextPt) {
@@ -364,7 +399,10 @@ export default {
           }
         }
 
-        originalPath._setPath(newPathData);
+        originalPath.path = newPathData;
+        if (fabric.Polyline && fabric.Polyline.prototype._setPositionDimensions) {
+          fabric.Polyline.prototype._setPositionDimensions.call(originalPath, {});
+        }
         originalPath.setCoords();
         canvas.renderAll();
       });
