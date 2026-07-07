@@ -25,6 +25,8 @@ class Draw extends Submenu {
 
     this._els = {
       lineSelectButton: this.selector('.tie-draw-line-select-button'),
+      // 箭头类型选择容器
+      arrowSelectButton: this.selector('.tie-draw-arrow-select-button'),
       drawColorPicker: new Colorpicker(this.selector('.tie-draw-color'), {
         defaultColor: '#00a9ff',
         toggleDirection: this.toggleDirection,
@@ -42,6 +44,8 @@ class Draw extends Submenu {
     this.type = null;
     this.color = this._els.drawColorPicker.color;
     this.width = this._els.drawRange.value;
+    // 当前箭头类型：'none' | 'single' | 'double'
+    this.arrowType = 'none';
 
     this.colorPickerInputBox = this._els.drawColorPicker.colorpickerElement.querySelector(
       selectorNames.COLOR_PICKER_INPUT_BOX
@@ -66,9 +70,15 @@ class Draw extends Submenu {
    */
   addEvent(actions) {
     this.eventHandler.changeDrawType = this._changeDrawType.bind(this);
+    // 箭头类型切换事件处理器
+    this.eventHandler.changeArrowType = this._changeArrowType.bind(this);
 
     this.actions = actions;
     this._els.lineSelectButton.addEventListener('click', this.eventHandler.changeDrawType);
+    // 绑定箭头类型选择容器的点击事件（事件委托）
+    if (this._els.arrowSelectButton) {
+      this._els.arrowSelectButton.addEventListener('click', this.eventHandler.changeArrowType);
+    }
     this._els.drawColorPicker.on('change', this._changeDrawColor.bind(this));
     this._els.drawRange.on('change', this._changeDrawRange.bind(this));
 
@@ -88,6 +98,9 @@ class Draw extends Submenu {
    */
   _removeEvent() {
     this._els.lineSelectButton.removeEventListener('click', this.eventHandler.changeDrawType);
+    if (this._els.arrowSelectButton) {
+      this._els.arrowSelectButton.removeEventListener('click', this.eventHandler.changeArrowType);
+    }
     this._els.drawColorPicker.off();
     this._els.drawRange.off();
 
@@ -153,6 +166,31 @@ class Draw extends Submenu {
       this._els.lineSelectButton.classList.add(lineType);
       this.setDrawMode();
     }
+  }
+
+  /**
+   * 切换箭头类型并更新 active 状态
+   * @param {MouseEvent} event - 点击事件
+   * @private
+   */
+  _changeArrowType(event) {
+    const button = event.target.closest('.tui-image-editor-button');
+    if (!button) return;
+
+    // 从 class 中解析箭头类型（arrow-none / arrow-single / arrow-double）
+    let newType = 'none';
+    if (button.classList.contains('arrow-single')) {
+      newType = 'single';
+    } else if (button.classList.contains('arrow-double')) {
+      newType = 'double';
+    }
+
+    this.arrowType = newType;
+
+    // 更新 active 样式：清除所有按钮的 active，再激活当前按钮
+    const allBtns = this._els.arrowSelectButton.querySelectorAll('.tui-image-editor-button');
+    allBtns.forEach((btn) => btn.classList.remove('active'));
+    button.classList.add('active');
   }
 
   /**

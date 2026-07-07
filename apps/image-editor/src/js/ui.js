@@ -262,6 +262,7 @@ class Ui {
           'text',
           'mask',
           'filter',
+          'annotation',
         ],
         initMenu: '',
         uiSize: {

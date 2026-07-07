@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - textbox "Search" [ref=e2]
+  - generic [ref=e3]:
+    - heading "~ /" [level=1] [ref=e4]:
+      - link "~" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - text: /
+    - list [ref=e6]:
+      - listitem [ref=e7]:
+        - link "css 2026/7/6 23:17:06" [ref=e8] [cursor=pointer]:
+          - /url: /css
+          - generic [ref=e9]: css
+          - generic [ref=e10]: 2026/7/6 23:17:06
+      - listitem [ref=e11]:
+        - link "img 2026/7/6 23:17:06" [ref=e12] [cursor=pointer]:
+          - /url: /img
+          - generic [ref=e13]: img
+          - generic [ref=e14]: 2026/7/6 23:17:06
+      - listitem [ref=e15]:
+        - link "js 2026/7/6 23:17:06" [ref=e16] [cursor=pointer]:
+          - /url: /js
+          - generic [ref=e17]: js
+          - generic [ref=e18]: 2026/7/6 23:17:06
+      - listitem [ref=e19]:
+        - link "example01-includeUi.html 1986 2026/7/6 23:17:06" [ref=e20] [cursor=pointer]:
+          - /url: /example01-includeUi.html
+          - generic [ref=e21]: example01-includeUi.html
+          - generic [ref=e22]: "1986"
+          - generic [ref=e23]: 2026/7/6 23:17:06
+      - listitem [ref=e24]:
+        - link "example02-useApiDirect.html 14967 2026/7/6 23:17:06" [ref=e25] [cursor=pointer]:
+          - /url: /example02-useApiDirect.html
+          - generic [ref=e26]: example02-useApiDirect.html
+          - generic [ref=e27]: "14967"
+          - generic [ref=e28]: 2026/7/6 23:17:06
+      - listitem [ref=e29]:
+        - link "example03-mobile.html 10616 2026/7/6 23:17:06" [ref=e30] [cursor=pointer]:
+          - /url: /example03-mobile.html
+          - generic [ref=e31]: example03-mobile.html
+          - generic [ref=e32]: "10616"
+          - generic [ref=e33]: 2026/7/6 23:17:06
+      - listitem [ref=e34]:
+        - link "examples.json 205 2026/7/6 23:17:06" [ref=e35] [cursor=pointer]:
+          - /url: /examples.json
+          - generic [ref=e36]: examples.json
+          - generic [ref=e37]: "205"
+          - generic [ref=e38]: 2026/7/6 23:17:06

@@ -242,10 +242,211 @@ export default {
    * @private
    */
   _drawAction() {
+    // 初始化 canvas 箭头事件监听（在首次 setDrawMode 时调用一次）
+    this._arrowListenersInitialized = false;
+
+    /**
+     * 获取路径段终点坐标
+     * @param {Array} segment - SVG 路径段数组
+     * @returns {{x: number, y: number}|null}
+     */
+    const getSegmentEndPoint = (segment) => {
+      if (!segment || segment.length < 3) return null;
+      const [type] = segment;
+      if (type === 'M' || type === 'L') return { x: segment[1], y: segment[2] };
+      if (type === 'Q') return { x: segment[3], y: segment[4] };
+      if (type === 'C') return { x: segment[5], y: segment[6] };
+
+      return null;
+    };
+
+    /**
+     * 计算路径末尾方向向量
+     */
+    const getEndDirection = (pathData) => {
+      if (pathData.length < 2) return null;
+      const endPt = getSegmentEndPoint(pathData[pathData.length - 1]);
+      if (!endPt) return null;
+      for (let i = pathData.length - 2; i >= 0; i -= 1) {
+        const prevSeg = pathData[i];
+        const prevPt =
+          getSegmentEndPoint(prevSeg) ||
+          (i === 0 ? { x: pathData[0][1], y: pathData[0][2] } : null);
+        if (prevPt) {
+          const dx = endPt.x - prevPt.x;
+          const dy = endPt.y - prevPt.y;
+          if (dx !== 0 || dy !== 0) return { dx, dy };
+        }
+      }
+
+      return null;
+    };
+
+    /**
+     * 计算路径起始方向向量
+     */
+    const getStartDirection = (pathData) => {
+      if (pathData.length < 2) return null;
+      const startPt = { x: pathData[0][1], y: pathData[0][2] };
+      for (let i = 1; i < pathData.length; i += 1) {
+        const nextPt = getSegmentEndPoint(pathData[i]);
+        if (nextPt) {
+          const dx = startPt.x - nextPt.x;
+          const dy = startPt.y - nextPt.y;
+          if (dx !== 0 || dy !== 0) return { dx, dy };
+        }
+      }
+
+      return null;
+    };
+
+    /**
+     * 初始化 canvas 箭头事件监听（只执行一次）
+     */
+    const initArrowListeners = () => {
+      if (this._arrowListenersInitialized) return;
+      this._arrowListenersInitialized = true;
+
+      const canvas = this._graphics.getCanvas();
+
+      // 监听自由画笔路径创建
+      canvas.on('path:created', (options) => {
+        const { arrowType } = this.ui.draw;
+        if (!arrowType || arrowType === 'none') return;
+
+        const originalPath = options.path;
+        if (!originalPath) return;
+        const pathData = originalPath.path;
+        if (!pathData || pathData.length < 2) return;
+
+        const strokeWidth = originalPath.strokeWidth || 1;
+        const len = Math.max(12, strokeWidth * 3);
+        const arrowAngle = (Math.PI * 5) / 6;
+        const newPathData = [...pathData];
+
+        // 尾部箭头（单向或双向）
+        if (arrowType === 'single' || arrowType === 'double') {
+          const endPt = getSegmentEndPoint(pathData[pathData.length - 1]);
+          const endDir = getEndDirection(pathData);
+          if (endPt && endDir) {
+            const angle = Math.atan2(endDir.dy, endDir.dx);
+            newPathData.push([
+              'M',
+              endPt.x + len * Math.cos(angle + arrowAngle),
+              endPt.y + len * Math.sin(angle + arrowAngle),
+            ]);
+            newPathData.push(['L', endPt.x, endPt.y]);
+            newPathData.push([
+              'L',
+              endPt.x + len * Math.cos(angle - arrowAngle),
+              endPt.y + len * Math.sin(angle - arrowAngle),
+            ]);
+          }
+        }
+
+        // 头部箭头（双向）
+        if (arrowType === 'double') {
+          const startPt = { x: pathData[0][1], y: pathData[0][2] };
+          const startDir = getStartDirection(pathData);
+          if (startDir) {
+            const angle = Math.atan2(startDir.dy, startDir.dx);
+            newPathData.push([
+              'M',
+              startPt.x + len * Math.cos(angle + arrowAngle),
+              startPt.y + len * Math.sin(angle + arrowAngle),
+            ]);
+            newPathData.push(['L', startPt.x, startPt.y]);
+            newPathData.push([
+              'L',
+              startPt.x + len * Math.cos(angle - arrowAngle),
+              startPt.y + len * Math.sin(angle - arrowAngle),
+            ]);
+          }
+        }
+
+        originalPath._setPath(newPathData);
+        originalPath.setCoords();
+        canvas.renderAll();
+      });
+
+      // 监听直线工具对象添加（fabric.Line）
+      canvas.on('object:added', (options) => {
+        const { arrowType } = this.ui.draw;
+        if (!arrowType || arrowType === 'none') return;
+
+        const obj = options.target;
+        if (!obj || obj.type !== 'line' || obj._arrowProcessed) return;
+
+        obj._arrowProcessed = true;
+        const capturedArrowType = arrowType; // 捕获当前箭头类型
+        const strokeWidth = obj.strokeWidth || 1;
+        const len = Math.max(12, strokeWidth * 3);
+        const arrowAngle = (Math.PI * 5) / 6;
+        const originalRender = obj._render.bind(obj);
+
+        obj._render = function (ctx) {
+          // 先绘制原本的直线
+          originalRender(ctx);
+
+          // 计算相对于直线中心点的局部坐标
+          const cx = (this.x1 + this.x2) / 2;
+          const cy = (this.y1 + this.y2) / 2;
+          const startPt = { x: this.x1 - cx, y: this.y1 - cy };
+          const endPt = { x: this.x2 - cx, y: this.y2 - cy };
+
+          ctx.save();
+          ctx.strokeStyle = this.stroke;
+          ctx.lineWidth = this.strokeWidth;
+          ctx.lineCap = this.strokeLineCap;
+          ctx.lineJoin = this.strokeLineJoin;
+
+          // 尾部箭头
+          if (capturedArrowType === 'single' || capturedArrowType === 'double') {
+            const dx = endPt.x - startPt.x;
+            const dy = endPt.y - startPt.y;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.moveTo(
+              endPt.x + len * Math.cos(angle + arrowAngle),
+              endPt.y + len * Math.sin(angle + arrowAngle)
+            );
+            ctx.lineTo(endPt.x, endPt.y);
+            ctx.lineTo(
+              endPt.x + len * Math.cos(angle - arrowAngle),
+              endPt.y + len * Math.sin(angle - arrowAngle)
+            );
+            ctx.stroke();
+          }
+
+          // 头部箭头
+          if (capturedArrowType === 'double') {
+            const dx = startPt.x - endPt.x;
+            const dy = startPt.y - endPt.y;
+            const angle = Math.atan2(dy, dx);
+            ctx.beginPath();
+            ctx.moveTo(
+              startPt.x + len * Math.cos(angle + arrowAngle),
+              startPt.y + len * Math.sin(angle + arrowAngle)
+            );
+            ctx.lineTo(startPt.x, startPt.y);
+            ctx.lineTo(
+              startPt.x + len * Math.cos(angle - arrowAngle),
+              startPt.y + len * Math.sin(angle - arrowAngle)
+            );
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        };
+      });
+    };
+
     return extend(
       {
         setDrawMode: (type, settings) => {
           this.stopDrawingMode();
+          // 首次调用时初始化箭头事件监听
+          initArrowListeners();
           if (type === 'free') {
             this.startDrawingMode('FREE_DRAWING', settings);
           } else {
@@ -668,8 +869,7 @@ export default {
           annotation.setFontSize(fontSize);
         },
         onStepChanged: (callback) => {
-          const annotation = this._graphics.getComponent('ANNOTATION');
-          annotation.on('annotationStepChanged', callback);
+          this._graphics.on('annotationStepChanged', callback);
         }
       },
       this._commonAction()

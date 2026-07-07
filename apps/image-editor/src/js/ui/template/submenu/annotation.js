@@ -120,7 +120,7 @@ export default ({ locale }) => `
         </li>
         
         <!-- 字体大小滑块（另起一行，全宽延伸，符合原生布局） -->
-        <li class="tui-image-editor-newline tui-image-editor-range-wrap">
+        <li class="tui-image-editor-newline tui-image-editor-range-wrap custom-annotation-range-wrap">
             <label class="range">${locale.localize('Text size')}</label>
             <div class="custom-slider-container">
                 <input type="range" min="12" max="60" value="20" class="custom-tui-slider tie-annotation-fontsize-range" />

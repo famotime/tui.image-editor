@@ -76,7 +76,8 @@
     .{prefix}-main.{prefix}-menu-icon .{prefix}-submenu > div.{prefix}-menu-icon,
     .{prefix}-main.{prefix}-menu-draw .{prefix}-submenu > div.{prefix}-menu-draw,
     .{prefix}-main.{prefix}-menu-filter .{prefix}-submenu > div.{prefix}-menu-filter,
-    .{prefix}-main.{prefix}-menu-zoom .{prefix}-submenu > div.{prefix}-menu-zoom
+    .{prefix}-main.{prefix}-menu-zoom .{prefix}-submenu > div.{prefix}-menu-zoom,
+    .{prefix}-main.{prefix}-menu-annotation .{prefix}-submenu > div.{prefix}-menu-annotation
         display: table-cell;
     .{prefix}-main.{prefix}-menu-crop,
     .{prefix}-main.{prefix}-menu-resize,
@@ -88,7 +89,8 @@
     .{prefix}-main.{prefix}-menu-icon,
     .{prefix}-main.{prefix}-menu-draw,
     .{prefix}-main.{prefix}-menu-filter,
-    .{prefix}-main.{prefix}-menu-zoom
+    .{prefix}-main.{prefix}-menu-zoom,
+    .{prefix}-main.{prefix}-menu-annotation
       .{prefix}-submenu
         display: table;
 
@@ -170,6 +172,7 @@
 /* 序号标注自定义样式，继承 TUI 原生子菜单视觉风格 */
 .tui-image-editor-container {
     .tui-image-editor-submenu {
+        .custom-annotation-shape-button,
         .custom-annotation-color-button {
             display: inline-flex !important;
             align-items: center;
@@ -325,6 +328,32 @@
         .step-value-input {
             width: 40px !important;
             text-align: center;
+            margin-top: 0 !important;
+            margin-left: 0 !important;
+        }
+        .custom-annotation-range-wrap {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            margin-top: 16px !important;
+        }
+        .custom-annotation-range-wrap label.range {
+            margin: 0 7px 0 0 !important;
+            line-height: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .custom-annotation-range-wrap .custom-slider-container {
+            display: flex;
+            align-items: center;
+            height: 24px;
+            margin: 0 10px;
+        }
+        .custom-annotation-range-wrap .tie-annotation-fontsize-input {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            margin-left: 10px !important;
         }
         .custom-reset-btn {
             margin-left: 8px;
@@ -353,6 +382,25 @@
             user-select: none;
             font-family: "Noto Sans", sans-serif;
             text-align: center;
+        }
+        /* 画笔子菜单：箭头类型选择按钮容器 */
+        .custom-arrow-select-button {
+            display: inline-flex !important;
+            align-items: center;
+            height: 48px;
+            vertical-align: top;
+        }
+        /* 箭头 SVG 图标颜色继承 TUI 原生风格 */
+        .tui-image-editor-button svg {
+            stroke: #8c8c8c;
+            fill: none;
+            transition: stroke 0.2s;
+        }
+        .tui-image-editor-button.active svg {
+            stroke: #fff;
+        }
+        .tui-image-editor-button:hover svg {
+            stroke: #fff;
         }
     }
 }
