@@ -71,6 +71,8 @@ export const componentNames = keyMirror(
   'FLIP',
   'ROTATION',
   'FREE_DRAWING',
+  'HIGHLIGHT_DRAWING',
+  'HIGHLIGHT_LINE',
   'LINE',
   'TEXT',
   'ICON',
@@ -213,6 +215,8 @@ export const drawingModes = keyMirror(
   'CROPPER',
   'FREE_DRAWING',
   'LINE_DRAWING',
+  'HIGHLIGHT_DRAWING',
+  'HIGHLIGHT_LINE',
   'TEXT',
   'SHAPE',
   'ICON',
@@ -332,6 +336,12 @@ export const defaultDrawRangeValues = {
   min: 5,
   max: 30,
   value: 12,
+};
+
+export const defaultHighlightsRangeValues = {
+  min: 20,
+  max: 100,
+  value: 37,
 };
 
 export const defaultShapeStrokeValues = {

@@ -21,6 +21,7 @@ export default {
       text: this._textAction(),
       mask: this._maskAction(),
       draw: this._drawAction(),
+      highlights: this._highlightsAction(),
       icon: this._iconAction(),
       filter: this._filterAction(),
       history: this._historyAction(),
@@ -490,6 +491,28 @@ export default {
   },
 
   /**
+   * HIGHLIGHT_LINE Action
+   * @returns {Object} actions for ui draw
+   * @private
+   */
+  _highlightsAction() {
+    return extend(
+      {
+        setHighlightsMode: (type, settings) => {
+          this.stopDrawingMode();
+          this.startDrawingMode('HIGHLIGHT_LINE', settings);
+        },
+        setColor: (color) => {
+          this.setBrush({
+            color,
+          });
+        },
+      },
+      this._commonAction()
+    );
+  },
+
+  /**
    * Mask Action
    * @returns {Object} actions for ui mask
    * @private
@@ -793,6 +816,11 @@ export default {
           if (this.ui.submenu !== 'draw') {
             this.ui.changeMenu('draw', false, false);
             this.ui.draw.changeStandbyMode();
+          }
+        } else if (obj.type === 'highlight-line') {
+          if (this.ui.submenu !== 'highlights') {
+            this.ui.changeMenu('highlights', false, false);
+            this.ui.highlights.changeStandbyMode();
           }
         } else if (['i-text', 'text'].indexOf(obj.type) > -1) {
           if (this.ui.submenu !== 'text') {

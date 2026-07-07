@@ -22,6 +22,7 @@ import Text from '@/ui/text';
 import Mask from '@/ui/mask';
 import Icon from '@/ui/icon';
 import Draw from '@/ui/draw';
+import Highlights from '@/ui/highlights';
 import Filter from '@/ui/filter';
 import Annotation from '@/ui/annotation';
 import History from '@/ui/history';
@@ -37,6 +38,7 @@ const SUB_UI_COMPONENT = {
   Mask,
   Icon,
   Draw,
+  Highlights,
   Filter,
   Annotation,
 };
@@ -257,6 +259,7 @@ class Ui {
           'flip',
           'rotate',
           'draw',
+          'highlights',
           'shape',
           'icon',
           'text',

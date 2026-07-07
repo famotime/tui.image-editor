@@ -11,6 +11,7 @@ import Flip from '@/component/flip';
 import Rotation from '@/component/rotation';
 import FreeDrawing from '@/component/freeDrawing';
 import Line from '@/component/line';
+import HighlightLine from '@/component/highlightLine';
 import Text from '@/component/text';
 import Icon from '@/component/icon';
 import Filter from '@/component/filter';
@@ -19,6 +20,7 @@ import Zoom from '@/component/zoom';
 import CropperDrawingMode from '@/drawingMode/cropper';
 import FreeDrawingMode from '@/drawingMode/freeDrawing';
 import LineDrawingMode from '@/drawingMode/lineDrawing';
+import HighlightLineMode from '@/drawingMode/highlightLine';
 import ShapeDrawingMode from '@/drawingMode/shape';
 import TextDrawingMode from '@/drawingMode/text';
 import IconDrawingMode from '@/drawingMode/icon';
@@ -754,6 +756,10 @@ class Graphics {
       compName = components.LINE;
     }
 
+    if (drawingMode === drawingModes.HIGHLIGHT_LINE) {
+      compName = components.HIGHLIGHT_LINE;
+    }
+
     this.getComponent(compName).setBrush(option);
   }
 
@@ -838,13 +844,42 @@ class Graphics {
     const object = this.getObject(id);
     const clone = extend({}, props);
 
-    object.set(clone);
+    if (props.type && (props.type === 'line' || props.type === 'highlight-line')) {
+      this.deepCopyWithCircularRefs(clone, object);
+    } else {
+      object.set(clone);
+    }
 
     object.setCoords();
 
     this.getCanvas().renderAll();
 
     return clone;
+  }
+
+  // eslint-disable-next-line complexity
+  deepCopyWithCircularRefs(source, target = {}, seen = new WeakMap()) {
+    if (seen.has(source)) {
+      return seen.get(source);
+    }
+
+    for (const key in source) {
+      if (key === 'canvas' || key === 'ctx' || key === 'ownMatrixCache') {
+        continue;
+      }
+      if (source.hasOwnProperty(key)) {
+        const value = source[key];
+        if (value && typeof value === 'object') {
+          target[key] = Array.isArray(value) ? [] : {};
+          seen.set(value, target[key]);
+          this.deepCopyWithCircularRefs(value, target[key], seen);
+        } else {
+          target[key] = value;
+        }
+      }
+    }
+
+    return target;
   }
 
   /**
@@ -1000,6 +1035,7 @@ class Graphics {
     this._register(this._drawingModeMap, new CropperDrawingMode());
     this._register(this._drawingModeMap, new FreeDrawingMode());
     this._register(this._drawingModeMap, new LineDrawingMode());
+    this._register(this._drawingModeMap, new HighlightLineMode());
     this._register(this._drawingModeMap, new ShapeDrawingMode());
     this._register(this._drawingModeMap, new TextDrawingMode());
     this._register(this._drawingModeMap, new IconDrawingMode());
@@ -1018,6 +1054,7 @@ class Graphics {
     this._register(this._componentMap, new Flip(this));
     this._register(this._componentMap, new Rotation(this));
     this._register(this._componentMap, new FreeDrawing(this));
+    this._register(this._componentMap, new HighlightLine(this));
     this._register(this._componentMap, new Line(this));
     this._register(this._componentMap, new Text(this));
     this._register(this._componentMap, new Icon(this));

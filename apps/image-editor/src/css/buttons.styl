@@ -22,6 +22,17 @@
   &.free .{prefix}-button.free svg > use.active
     display: block;
 
+/* HIHGLIGHT BUTTON */
+.tie-draw-highlights-select-button
+  &.line .{prefix}-button.line svg > use.normal,
+  &.free .{prefix}-button.free svg > use.normal
+    display: none;
+
+  &.line .{prefix}-button.line svg > use.active,
+  &.free .{prefix}-button.free svg > use.active
+    display: block;
+
+
 /* FLIP BUTTON */
 .tie-flip-button
   &.resetFlip .{prefix}-button.resetFlip,
