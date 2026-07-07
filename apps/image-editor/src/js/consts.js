@@ -334,6 +334,12 @@ export const defaultDrawRangeValues = {
   value: 12,
 };
 
+export const defaultDrawOpacityRangeValues = {
+  min: 1,
+  max: 100,
+  value: 100,
+};
+
 export const defaultShapeStrokeValues = {
   realTimeEvent: true,
   min: 2,

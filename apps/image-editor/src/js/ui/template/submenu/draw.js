@@ -38,6 +38,14 @@ export default ({ locale, makeSvgIcon }) => `
             <div class="tie-draw-range"></div>
             <input class="tie-draw-range-value tui-image-editor-range-value" value="0" />
         </li>
+        <li class="tui-image-editor-partition only-left-right">
+            <div></div>
+        </li>
+        <li class="tui-image-editor-newline tui-image-editor-range-wrap">
+            <label class="range">${locale.localize('Opacity')}</label>
+            <div class="tie-draw-opacity-range"></div>
+            <input class="tie-draw-opacity-range-value tui-image-editor-range-value" value="1" />
+        </li>
         <!-- 箭头类型选择：无箭头 / 单向箭头 / 双向箭头 -->
         <li class="tui-image-editor-partition only-left-right">
             <div></div>
