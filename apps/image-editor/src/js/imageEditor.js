@@ -733,7 +733,7 @@ class ImageEditor {
     imageName = imageName || imgFile.name;
 
     return this.loadImageFromURL(imgUrl, imageName).then((value) => {
-      URL.revokeObjectURL(imgFile);
+      URL.revokeObjectURL(imgUrl);
 
       return value;
     });

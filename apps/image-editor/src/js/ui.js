@@ -585,7 +585,13 @@ class Ui {
    * @private
    */
   _addLoadEvent() {
-    this.eventHandler.loadImage = (event) => this._actions.main.load(event.target.files[0]);
+    this.eventHandler.loadImage = (event) => {
+      const [file] = event.target.files;
+      if (file) {
+        this._actions.main.load(file);
+        event.target.value = '';
+      }
+    };
 
     forEach(this._buttonElements.load, (element) => {
       element.addEventListener('change', this.eventHandler.loadImage);
