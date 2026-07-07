@@ -333,6 +333,9 @@ class Ui {
       this.changeHandButtonStatus(true);
     });
     this.on(eventNames.HAND_STOPPED, () => this.changeHandButtonStatus(false));
+    this.on(eventNames.ZOOM_CHANGED, () => {
+      this.resizeEditor();
+    });
   }
 
   /**

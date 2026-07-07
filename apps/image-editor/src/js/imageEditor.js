@@ -300,6 +300,7 @@ class ImageEditor {
       AFTER_REDO,
       HAND_STARTED,
       HAND_STOPPED,
+      ZOOM_CHANGED,
     } = events;
 
     /**
@@ -332,6 +333,7 @@ class ImageEditor {
 
       canvas.on(HAND_STARTED, () => this.ui.fire(HAND_STARTED));
       canvas.on(HAND_STOPPED, () => this.ui.fire(HAND_STOPPED));
+      canvas.on(ZOOM_CHANGED, () => this.ui.fire(ZOOM_CHANGED));
     }
   }
 

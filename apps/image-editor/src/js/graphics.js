@@ -495,6 +495,15 @@ class Graphics {
   }
 
   /**
+   * Zoom in one step
+   */
+  zoomIn() {
+    const zoom = this.getComponent(components.ZOOM);
+
+    zoom.zoomIn();
+  }
+
+  /**
    * Zoom out one step
    */
   zoomOut() {

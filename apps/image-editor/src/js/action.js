@@ -56,17 +56,7 @@ export default {
 
       return result;
     };
-    const toggleZoomMode = () => {
-      const zoomMode = this._graphics.getZoomMode();
 
-      this.stopDrawingMode();
-      if (zoomMode !== zoomModes.ZOOM) {
-        this.startDrawingMode(drawingModes.ZOOM);
-        this._graphics.startZoomInMode();
-      } else {
-        this._graphics.endZoomInMode();
-      }
-    };
     const toggleHandMode = () => {
       const zoomMode = this._graphics.getZoomMode();
 
@@ -169,9 +159,7 @@ export default {
           this.ui.toggleHistoryMenu(event);
         },
         zoomIn: () => {
-          this.ui.toggleZoomButtonStatus('zoomIn');
-          this.deactivateAll();
-          toggleZoomMode();
+          this._graphics.zoomIn();
         },
         zoomOut: () => {
           this._graphics.zoomOut();
