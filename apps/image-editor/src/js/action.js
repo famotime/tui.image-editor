@@ -241,11 +241,77 @@ export default {
      * @returns {{x: number, y: number}|null}
      */
     const getSegmentEndPoint = (segment) => {
-      if (!segment || segment.length < 3) return null;
+      if (!segment || segment.length < 3) {
+        return null;
+      }
       const [type] = segment;
-      if (type === 'M' || type === 'L') return { x: segment[1], y: segment[2] };
-      if (type === 'Q') return { x: segment[3], y: segment[4] };
-      if (type === 'C') return { x: segment[5], y: segment[6] };
+      const typeMap = {
+        M: { x: segment[1], y: segment[2] },
+        L: { x: segment[1], y: segment[2] },
+        Q: { x: segment[3], y: segment[4] },
+        C: { x: segment[5], y: segment[6] },
+      };
+
+      return typeMap[type] || null;
+    };
+
+    /**
+     * 计算贝塞尔曲线末端切线方向向量
+     */
+    const getBezierEndDirection = (lastSeg, type) => {
+      if (type === 'Q' && lastSeg.length >= 5) {
+        return { dx: lastSeg[3] - lastSeg[1], dy: lastSeg[4] - lastSeg[2] };
+      }
+      if (type === 'C' && lastSeg.length >= 7) {
+        return { dx: lastSeg[5] - lastSeg[3], dy: lastSeg[6] - lastSeg[4] };
+      }
+
+      return null;
+    };
+
+    /**
+     * 获取画笔或路径的描边宽度，默认为 1
+     */
+    const getStrokeWidth = (pathObj) => pathObj.strokeWidth || 1;
+
+    /**
+     * 更新 Polyline 路径维度属性
+     */
+    const updatePositionDimensions = (pathObj) => {
+      if (fabric.Polyline && fabric.Polyline.prototype._setPositionDimensions) {
+        fabric.Polyline.prototype._setPositionDimensions.call(pathObj, {});
+      }
+    };
+
+    /**
+     * 判断对象是否为尚未处理箭头的直线对象
+     */
+    const isLineWithoutArrow = (obj) => obj && obj.type === 'line' && !obj._arrowProcessed;
+
+    /**
+     * 判断箭头类型是否有效
+     */
+    const isValidArrowType = (type) => type === 'single' || type === 'double';
+
+    /**
+     * 判断路径数据是否有效
+     */
+    const isValidPathData = (pathData) => pathData && pathData.length >= 2;
+
+    /**
+     * 回退计算路径末尾割线方向向量
+     */
+    const getFallbackEndDirection = (pathData, endPt) => {
+      for (let i = pathData.length - 2; i >= 0; i -= 1) {
+        const prevPt = getSegmentEndPoint(pathData[i]);
+        if (prevPt) {
+          const dx = endPt.x - prevPt.x;
+          const dy = endPt.y - prevPt.y;
+          if (dx !== 0 || dy !== 0) {
+            return { dx, dy };
+          }
+        }
+      }
 
       return null;
     };
@@ -254,35 +320,51 @@ export default {
      * 计算路径末尾切线方向向量（尾部箭头朝向外侧，即沿切线正方向）
      */
     const getEndDirection = (pathData) => {
-      if (pathData.length < 2) return null;
+      if (pathData.length < 2) {
+        return null;
+      }
       const lastSeg = pathData[pathData.length - 1];
       const [type] = lastSeg;
 
-      if (type === 'Q' && lastSeg.length >= 5) {
-        // 二次贝塞尔曲线末端切线方向：终点减去控制点
-        const dx = lastSeg[3] - lastSeg[1];
-        const dy = lastSeg[4] - lastSeg[2];
-        if (dx !== 0 || dy !== 0) return { dx, dy };
-      }
-      if (type === 'C' && lastSeg.length >= 7) {
-        // 三次贝塞尔曲线末端切线方向：终点减去第二个控制点
-        const dx = lastSeg[5] - lastSeg[3];
-        const dy = lastSeg[6] - lastSeg[4];
-        if (dx !== 0 || dy !== 0) return { dx, dy };
+      const bezierDir = getBezierEndDirection(lastSeg, type);
+      if (bezierDir && (bezierDir.dx !== 0 || bezierDir.dy !== 0)) {
+        return bezierDir;
       }
 
-      // 如果是线性段段（L/M/Z），或者贝塞尔曲线计算出零向量，回退为割线方向计算
       const endPt = getSegmentEndPoint(lastSeg);
-      if (!endPt) return null;
-      for (let i = pathData.length - 2; i >= 0; i -= 1) {
-        const prevSeg = pathData[i];
-        const prevPt =
-          getSegmentEndPoint(prevSeg) ||
-          (i === 0 ? { x: pathData[0][1], y: pathData[0][2] } : null);
-        if (prevPt) {
-          const dx = endPt.x - prevPt.x;
-          const dy = endPt.y - prevPt.y;
-          if (dx !== 0 || dy !== 0) return { dx, dy };
+      if (!endPt) {
+        return null;
+      }
+
+      return getFallbackEndDirection(pathData, endPt);
+    };
+
+    /**
+     * 计算贝塞尔曲线起点反向切线方向向量
+     */
+    const getBezierStartDirection = (nextSeg, type, startPt) => {
+      if (type === 'Q' && nextSeg.length >= 5) {
+        return { dx: startPt.x - nextSeg[1], dy: startPt.y - nextSeg[2] };
+      }
+      if (type === 'C' && nextSeg.length >= 7) {
+        return { dx: startPt.x - nextSeg[1], dy: startPt.y - nextSeg[2] };
+      }
+
+      return null;
+    };
+
+    /**
+     * 回退计算路径起始首段割线反向向量
+     */
+    const getFallbackStartDirection = (pathData, startPt) => {
+      for (let i = 1; i < pathData.length; i += 1) {
+        const nextPt = getSegmentEndPoint(pathData[i]);
+        if (nextPt) {
+          const dx = startPt.x - nextPt.x;
+          const dy = startPt.y - nextPt.y;
+          if (dx !== 0 || dy !== 0) {
+            return { dx, dy };
+          }
         }
       }
 
@@ -293,35 +375,63 @@ export default {
      * 计算路径起始切线方向向量（头部箭头朝向外侧，即沿切线反方向）
      */
     const getStartDirection = (pathData) => {
-      if (pathData.length < 2) return null;
+      if (pathData.length < 2) {
+        return null;
+      }
       const startPt = { x: pathData[0][1], y: pathData[0][2] };
       const [, nextSeg] = pathData;
       const [type] = nextSeg;
 
-      if (type === 'Q' && nextSeg.length >= 5) {
-        // 二次贝塞尔曲线起点反向切线：起点减去第一个控制点
-        const dx = startPt.x - nextSeg[1];
-        const dy = startPt.y - nextSeg[2];
-        if (dx !== 0 || dy !== 0) return { dx, dy };
-      }
-      if (type === 'C' && nextSeg.length >= 7) {
-        // 三次贝塞尔曲线起点反向切线：起点减去第一个控制点
-        const dx = startPt.x - nextSeg[1];
-        const dy = startPt.y - nextSeg[2];
-        if (dx !== 0 || dy !== 0) return { dx, dy };
+      const bezierDir = getBezierStartDirection(nextSeg, type, startPt);
+      if (bezierDir && (bezierDir.dx !== 0 || bezierDir.dy !== 0)) {
+        return bezierDir;
       }
 
-      // 回退为首段割线反向向量
-      for (let i = 1; i < pathData.length; i += 1) {
-        const nextPt = getSegmentEndPoint(pathData[i]);
-        if (nextPt) {
-          const dx = startPt.x - nextPt.x;
-          const dy = startPt.y - nextPt.y;
-          if (dx !== 0 || dy !== 0) return { dx, dy };
-        }
-      }
+      return getFallbackStartDirection(pathData, startPt);
+    };
 
-      return null;
+    /**
+     * 添加尾部箭头数据到路径
+     */
+    const addEndArrow = (newPathData, pathData, len, arrowAngle) => {
+      const endPt = getSegmentEndPoint(pathData[pathData.length - 1]);
+      const endDir = getEndDirection(pathData);
+      if (endPt && endDir) {
+        const angle = Math.atan2(endDir.dy, endDir.dx);
+        newPathData.push([
+          'M',
+          endPt.x + len * Math.cos(angle + arrowAngle),
+          endPt.y + len * Math.sin(angle + arrowAngle),
+        ]);
+        newPathData.push(['L', endPt.x, endPt.y]);
+        newPathData.push([
+          'L',
+          endPt.x + len * Math.cos(angle - arrowAngle),
+          endPt.y + len * Math.sin(angle - arrowAngle),
+        ]);
+      }
+    };
+
+    /**
+     * 添加头部箭头数据到路径
+     */
+    const addStartArrow = (newPathData, pathData, len, arrowAngle) => {
+      const startPt = { x: pathData[0][1], y: pathData[0][2] };
+      const startDir = getStartDirection(pathData);
+      if (startDir) {
+        const angle = Math.atan2(startDir.dy, startDir.dx);
+        newPathData.push([
+          'M',
+          startPt.x + len * Math.cos(angle + arrowAngle),
+          startPt.y + len * Math.sin(angle + arrowAngle),
+        ]);
+        newPathData.push(['L', startPt.x, startPt.y]);
+        newPathData.push([
+          'L',
+          startPt.x + len * Math.cos(angle - arrowAngle),
+          startPt.y + len * Math.sin(angle - arrowAngle),
+        ]);
+      }
     };
 
     /**
@@ -336,62 +446,32 @@ export default {
       // 监听自由画笔路径创建
       canvas.on('path:created', (options) => {
         const { arrowType } = this.ui.draw;
-        if (!arrowType || arrowType === 'none') return;
+        const originalPath = options ? options.path : null;
+        if (!originalPath) {
+          return;
+        }
 
-        const originalPath = options.path;
-        if (!originalPath) return;
         const pathData = originalPath.path;
-        if (!pathData || pathData.length < 2) return;
+        if (!isValidPathData(pathData)) {
+          return;
+        }
 
-        const strokeWidth = originalPath.strokeWidth || 1;
+        const strokeWidth = getStrokeWidth(originalPath);
         const len = Math.max(12, strokeWidth * 3);
         const arrowAngle = (Math.PI * 5) / 6;
         const newPathData = [...pathData];
 
-        // 尾部箭头（单向或双向）
-        if (arrowType === 'single' || arrowType === 'double') {
-          const endPt = getSegmentEndPoint(pathData[pathData.length - 1]);
-          const endDir = getEndDirection(pathData);
-          if (endPt && endDir) {
-            const angle = Math.atan2(endDir.dy, endDir.dx);
-            newPathData.push([
-              'M',
-              endPt.x + len * Math.cos(angle + arrowAngle),
-              endPt.y + len * Math.sin(angle + arrowAngle),
-            ]);
-            newPathData.push(['L', endPt.x, endPt.y]);
-            newPathData.push([
-              'L',
-              endPt.x + len * Math.cos(angle - arrowAngle),
-              endPt.y + len * Math.sin(angle - arrowAngle),
-            ]);
-          }
-        }
-
-        // 头部箭头（双向）
         if (arrowType === 'double') {
-          const startPt = { x: pathData[0][1], y: pathData[0][2] };
-          const startDir = getStartDirection(pathData);
-          if (startDir) {
-            const angle = Math.atan2(startDir.dy, startDir.dx);
-            newPathData.push([
-              'M',
-              startPt.x + len * Math.cos(angle + arrowAngle),
-              startPt.y + len * Math.sin(angle + arrowAngle),
-            ]);
-            newPathData.push(['L', startPt.x, startPt.y]);
-            newPathData.push([
-              'L',
-              startPt.x + len * Math.cos(angle - arrowAngle),
-              startPt.y + len * Math.sin(angle - arrowAngle),
-            ]);
-          }
+          addStartArrow(newPathData, pathData, len, arrowAngle);
+          addEndArrow(newPathData, pathData, len, arrowAngle);
+        } else if (arrowType === 'single') {
+          addEndArrow(newPathData, pathData, len, arrowAngle);
+        } else {
+          return;
         }
 
         originalPath.path = newPathData;
-        if (fabric.Polyline && fabric.Polyline.prototype._setPositionDimensions) {
-          fabric.Polyline.prototype._setPositionDimensions.call(originalPath, {});
-        }
+        updatePositionDimensions(originalPath);
         originalPath.setCoords();
         canvas.renderAll();
       });
@@ -399,14 +479,14 @@ export default {
       // 监听直线工具对象添加（fabric.Line）
       canvas.on('object:added', (options) => {
         const { arrowType } = this.ui.draw;
-        if (!arrowType || arrowType === 'none') return;
-
         const obj = options.target;
-        if (!obj || obj.type !== 'line' || obj._arrowProcessed) return;
+        if (!isLineWithoutArrow(obj) || !isValidArrowType(arrowType)) {
+          return;
+        }
 
         obj._arrowProcessed = true;
         const capturedArrowType = arrowType; // 捕获当前箭头类型
-        const strokeWidth = obj.strokeWidth || 1;
+        const strokeWidth = getStrokeWidth(obj);
         const len = Math.max(12, strokeWidth * 3);
         const arrowAngle = (Math.PI * 5) / 6;
         const originalRender = obj._render.bind(obj);

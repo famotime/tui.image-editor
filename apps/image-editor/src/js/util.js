@@ -5,14 +5,7 @@ import extend from 'tui-code-snippet/object/extend';
 import isString from 'tui-code-snippet/type/isString';
 import pick from 'tui-code-snippet/object/pick';
 import inArray from 'tui-code-snippet/array/inArray';
-export {
-  base64ToBlob,
-  clamp,
-  getRgb,
-  keyMirror,
-  makeStyleText,
-  toCamelCase,
-} from '@/basicUtil';
+export { base64ToBlob, clamp, getRgb, keyMirror, makeStyleText, toCamelCase } from '@/basicUtil';
 import {
   commandNames,
   filterType,

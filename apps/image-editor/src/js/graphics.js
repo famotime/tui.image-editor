@@ -1242,7 +1242,8 @@ class Graphics {
    * @private
    */
   _onObjectSelected(fEvent) {
-    const target = fEvent.target || (fEvent.selected && fEvent.selected[0]) || this._canvas.getActiveObject();
+    const target =
+      fEvent.target || (fEvent.selected && fEvent.selected[0]) || this._canvas.getActiveObject();
     if (!target) {
       return;
     }
@@ -1287,7 +1288,8 @@ class Graphics {
    * @private
    */
   _onSelectionCreated(fEvent) {
-    const target = fEvent.target || (fEvent.selected && fEvent.selected[0]) || this._canvas.getActiveObject();
+    const target =
+      fEvent.target || (fEvent.selected && fEvent.selected[0]) || this._canvas.getActiveObject();
     if (!target) {
       return;
     }

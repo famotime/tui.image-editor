@@ -177,6 +177,29 @@ class Filter extends Component {
   }
 
   /**
+   * 检查滤镜对象是否与请求的类型和模式匹配
+   * @param {Object} item - 滤镜对象
+   * @param {string} fabricType - Fabric 滤镜类型
+   * @param {string} type - 滤镜类型
+   * @returns {boolean} 是否匹配
+   * @private
+   */
+  _matchesFilter(item, fabricType, type) {
+    if (item.type !== fabricType) {
+      return false;
+    }
+    if (fabricType !== 'BlendColor') {
+      return true;
+    }
+    const { mode } = item;
+    if (type === 'tint' || type === 'multiply') {
+      return mode === type;
+    }
+
+    return mode !== 'tint' && mode !== 'multiply';
+  }
+
+  /**
    * Get applied filter instance
    * @param {fabric.Image} sourceImg - Source image to apply filter
    * @param {string} type - Filter type
@@ -184,38 +207,12 @@ class Filter extends Component {
    * @private
    */
   _getFilter(sourceImg, type) {
-    let imgFilter = null;
-
-    if (sourceImg) {
-      const fabricType = this._getFabricFilterType(type);
-      const { length } = sourceImg.filters;
-      let item, i;
-
-      for (i = 0; i < length; i += 1) {
-        item = sourceImg.filters[i];
-        if (item.type === fabricType) {
-          if (fabricType === 'BlendColor') {
-            if (type === 'tint' && item.mode === 'tint') {
-              imgFilter = item;
-              break;
-            }
-            if (type === 'multiply' && item.mode === 'multiply') {
-              imgFilter = item;
-              break;
-            }
-            if (type === 'blendColor' && item.mode !== 'tint' && item.mode !== 'multiply') {
-              imgFilter = item;
-              break;
-            }
-          } else {
-            imgFilter = item;
-            break;
-          }
-        }
-      }
+    if (!sourceImg) {
+      return null;
     }
+    const fabricType = this._getFabricFilterType(type);
 
-    return imgFilter;
+    return sourceImg.filters.find((item) => this._matchesFilter(item, fabricType, type)) || null;
   }
 
   /**
@@ -226,24 +223,9 @@ class Filter extends Component {
    */
   _removeFilter(sourceImg, type) {
     const fabricType = this._getFabricFilterType(type);
-    sourceImg.filters = sourceImg.filters.filter((value) => {
-      if (value.type !== fabricType) {
-        return true;
-      }
-      if (fabricType === 'BlendColor') {
-        if (type === 'tint' && value.mode === 'tint') {
-          return false;
-        }
-        if (type === 'multiply' && value.mode === 'multiply') {
-          return false;
-        }
-        if (type === 'blendColor' && value.mode !== 'tint' && value.mode !== 'multiply') {
-          return false;
-        }
-        return true;
-      }
-      return false;
-    });
+    sourceImg.filters = sourceImg.filters.filter(
+      (item) => !this._matchesFilter(item, fabricType, type)
+    );
   }
 
   /**
@@ -258,7 +240,7 @@ class Filter extends Component {
     if (fabricType === 'Tint' || fabricType === 'Multiply') {
       return 'BlendColor';
     }
-    
+
     return fabricType;
   }
 }

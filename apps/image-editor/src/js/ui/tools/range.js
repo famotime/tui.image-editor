@@ -235,22 +235,37 @@ class Range {
     return value;
   }
 
+  /**
+   * 检查输入的按键代码是否有效
+   * @param {number} keyCode - 按键代码
+   * @returns {boolean} 是否有效
+   * @private
+   */
+  _isValidKey(keyCode) {
+    if (keyCode >= keyCodes.DIGIT_0 && keyCode <= keyCodes.DIGIT_9) {
+      return true;
+    }
+    if (keyCode >= keyCodes.NUMPAD_0 && keyCode <= keyCodes.NUMPAD_9) {
+      return true;
+    }
+    const validCodes = [
+      keyCodes.MINUS,
+      keyCodes.NUMPAD_MINUS,
+      keyCodes.DOT,
+      keyCodes.NUMPAD_DOT,
+      keyCodes.BACKSPACE,
+      keyCodes.DEL,
+      37, // ARROW_LEFT
+      39, // ARROW_RIGHT
+    ];
+
+    return validCodes.indexOf(keyCode) > -1;
+  }
+
   _changeInput(event) {
     clearTimeout(this._userInputTimer);
 
-    const { keyCode } = event;
-    const isDigit = keyCode >= keyCodes.DIGIT_0 && keyCode <= keyCodes.DIGIT_9;
-    const isNumpad = keyCode >= keyCodes.NUMPAD_0 && keyCode <= keyCodes.NUMPAD_9;
-    const isMinus = keyCode === keyCodes.MINUS || keyCode === keyCodes.NUMPAD_MINUS;
-    const isDot = keyCode === keyCodes.DOT || keyCode === keyCodes.NUMPAD_DOT;
-    const isControl = [
-      keyCodes.BACKSPACE, 
-      keyCodes.DEL,
-      37, // ARROW_LEFT
-      39  // ARROW_RIGHT
-    ].indexOf(keyCode) > -1;
-
-    if (!isDigit && !isNumpad && !isMinus && !isDot && !isControl) {
+    if (!this._isValidKey(event.keyCode)) {
       event.preventDefault();
 
       return;

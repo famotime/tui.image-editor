@@ -29,6 +29,7 @@ const zhCN = {
   Load: '加载',
   Download: '下载',
   ViewOriginal: '查看原图',
+  viewOriginal: '查看原图',
   History: '历史记录',
 
   // 裁剪
@@ -40,11 +41,15 @@ const zhCN = {
   // 翻转与旋转
   'Flip X': '水平翻转',
   'Flip Y': '垂直翻转',
+  Angle: '角度',
+  angle: '角度',
 
   // 画笔
   Straight: '直线',
   Color: '颜色',
   Range: '粗细',
+  Opacity: '不透明度',
+  opacity: '不透明度',
 
   // 形状
   Rectangle: '矩形',

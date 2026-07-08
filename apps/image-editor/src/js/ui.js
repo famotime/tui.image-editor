@@ -2,13 +2,7 @@ import CustomEvents from 'tui-code-snippet/customEvents/customEvents';
 import extend from 'tui-code-snippet/object/extend';
 import forEach from 'tui-code-snippet/collection/forEach';
 import { getSelector, assignmentForDestroy, cls, getHistoryTitle, isSilentCommand } from '@/util';
-import {
-  ZOOM_HELP_MENUS,
-  COMMAND_HELP_MENUS,
-  DELETE_HELP_MENUS,
-  eventNames,
-  HELP_MENUS,
-} from '@/consts';
+import { ZOOM_HELP_MENUS, eventNames, HELP_MENUS } from '@/consts';
 import mainContainer from '@/ui/template/mainContainer';
 import controls from '@/ui/template/controls';
 
