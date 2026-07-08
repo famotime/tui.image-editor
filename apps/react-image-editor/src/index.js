@@ -3,6 +3,29 @@ import TuiImageEditor from 'tui-image-editor';
 
 const isEventHandlerKeys = (key) => /on[A-Z][a-zA-Z]+/.test(key);
 
+const getEventName = (key) => key[2].toLowerCase() + key.slice(3);
+
+const getEventHandlerKeys = (props) => Object.keys(props).filter(isEventHandlerKeys);
+
+const syncEventHandlers = (imageEditor, currentProps, previousProps = {}) => {
+  const eventHandlerKeys = Array.from(
+    new Set([...getEventHandlerKeys(previousProps), ...getEventHandlerKeys(currentProps)])
+  );
+
+  eventHandlerKeys.forEach((key) => {
+    const eventName = getEventName(key);
+    const currentHandler = currentProps[key];
+    const previousHandler = previousProps[key];
+
+    if (previousHandler && previousHandler !== currentHandler) {
+      imageEditor.off(eventName);
+    }
+    if (currentHandler && previousHandler !== currentHandler) {
+      imageEditor.on(eventName, currentHandler);
+    }
+  });
+};
+
 const ImageEditorComponent = forwardRef((props, ref) => {
   const rootEl = useRef(null);
   const imageEditorInst = useRef(null);
@@ -14,24 +37,16 @@ const ImageEditorComponent = forwardRef((props, ref) => {
         ...props,
       });
 
-      Object.keys(props)
-        .filter(isEventHandlerKeys)
-        .forEach((key) => {
-          const eventName = key[2].toLowerCase() + key.slice(3);
-          imageEditorInst.current.on(eventName, props[key]);
-        });
+      syncEventHandlers(imageEditorInst.current, props);
 
       prevProps.current = { ...props };
     }
 
     return () => {
       if (imageEditorInst.current) {
-        Object.keys(props)
-          .filter(isEventHandlerKeys)
-          .forEach((key) => {
-            const eventName = key[2].toLowerCase() + key.slice(3);
-            imageEditorInst.current.off(eventName);
-          });
+        getEventHandlerKeys(props).forEach((key) => {
+          imageEditorInst.current.off(getEventName(key));
+        });
         imageEditorInst.current.destroy();
         imageEditorInst.current = null;
       }
@@ -44,15 +59,7 @@ const ImageEditorComponent = forwardRef((props, ref) => {
       const currentProps = props;
       const previousProps = prevProps.current;
 
-      Object.keys(currentProps)
-        .filter(isEventHandlerKeys)
-        .forEach((key) => {
-          const eventName = key[2].toLowerCase() + key.slice(3);
-          if (previousProps[key] !== currentProps[key]) {
-            imageEditorInst.current.off(eventName);
-            imageEditorInst.current.on(eventName, currentProps[key]);
-          }
-        });
+      syncEventHandlers(imageEditorInst.current, currentProps, previousProps);
 
       prevProps.current = { ...props };
     }

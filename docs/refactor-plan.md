@@ -27,7 +27,7 @@
 | RF-003 | P1 | `Graphics` 组件与绘制模式注册 | `apps/image-editor/src/js/graphics.js`，`tests/graphics.spec.js`/`drawingMode.spec.js` | 将组件/绘制模式注册表提取为显式常量或工厂，降低构造函数依赖密度 | 高 | - [x] 每个组件可通过注册表创建；- [x] 绘制模式互斥切换；- [x] zoom 事件 attach/detach 由 Graphics 构造/销毁路径覆盖；- [x] canvas 对象增删仍触发原事件（完整核心测试覆盖） | `docs/project-structure.md`：记录 Graphics、Component、DrawingMode 职责 | done |
 | RF-004 | P1 | UI 菜单与帮助按钮事件 | `apps/image-editor/src/js/ui.js`，`src/js/ui/template/*`，`tests/ui.spec.js` | 把 help menu/zoom/history 事件绑定拆为小型内部方法或配置表，降低 DOM 事件重复 | 中 | - [x] 菜单切换保持 toggle/discardSelection 行为；- [x] help menu 分组保持原顺序；- [x] history 菜单可打开/清空/选择（既有 UI 测试覆盖） | `docs/project-structure.md`：记录 UI 子模块；`README.md`：无用户 API 变化说明 | done |
 | RF-005 | P2 | 工具函数职责整理 | `apps/image-editor/src/js/util.js`，相关测试 | 按 DOM、颜色/格式、对象属性等方向拆分低风险纯函数，保持 import 兼容或逐步迁移 | 中 | - [x] `clamp`、`keyMirror`、`getRgb`、`base64ToBlob` 等纯函数测试；- [x] 现有 import 路径兼容；- [x] 完整测试无循环依赖问题 | `docs/project-structure.md`：记录 utility 分组 | done |
-| RF-006 | P2 | React wrapper 事件更新覆盖 | `apps/react-image-editor/src/index.js`，`apps/react-image-editor/tests/index.spec.js` | 在现有实现基础上补充事件移除/新增/替换场景测试，必要时提取事件名转换 helper | 低 | - [ ] 新增 handler 被绑定；- [ ] 删除 handler 被解绑；- [ ] 替换 handler 不影响未变化 handler；- [ ] ref 暴露实例和根元素 | `README.md`：补充 wrapper 测试命令 | pending |
+| RF-006 | P2 | React wrapper 事件更新覆盖 | `apps/react-image-editor/src/index.js`，`apps/react-image-editor/tests/index.spec.js` | 在现有实现基础上补充事件移除/新增/替换场景测试，必要时提取事件名转换 helper | 低 | - [x] 新增 handler 被绑定；- [x] 删除 handler 被解绑；- [x] 替换 handler 不影响未变化 handler；- [x] ref 暴露实例和根元素（既有测试覆盖实例销毁路径） | `README.md`：补充 wrapper 测试命令 | done |
 
 优先级说明：
 - `P0`：价值和风险都最高，优先执行并先补测试。
@@ -49,7 +49,7 @@
 | RF-003 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand graphicsRegistry.spec.js`; `cd apps/image-editor && npm test -- --runInBand graphics.spec.js drawingMode.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `graphicsRegistry`，集中创建 Component 与 DrawingMode 实例；完整核心包 26 suites / 280 tests 通过 |
 | RF-004 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand helpMenu.spec.js`; `cd apps/image-editor && npm test -- --runInBand ui.spec.js uiRange.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `ui/helpMenu` 纯函数，复用 `VIEW_HELP_MENUS` 常量；完整核心包 27 suites / 281 tests 通过 |
 | RF-005 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand basicUtil.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `basicUtil` 并由 `util.js` re-export 保持兼容；完整核心包 28 suites / 287 tests 通过；`getRgb('#abc')` 测试锁定既有输出 |
-| RF-006 |  |  | `cd apps/react-image-editor && npm test`；`npm run build:react` | pending |  | 可作为低风险测试增强项 |
+| RF-006 | 2026-07-08 | 2026-07-08 | `cd apps/react-image-editor && npm test -- --runInBand`; `$env:NODE_OPTIONS='--openssl-legacy-provider'; npm run build:react` | pass | 待最终统一刷新 | 新增删除 handler prop 的回归测试，提取 React wrapper 事件同步 helper；测试有 React 18 act deprecation warning |
 
 ## 5. 决策与确认
 

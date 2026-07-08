@@ -81,4 +81,23 @@ describe('ImageEditor Component', () => {
     // mousedown should not be unbound/rebound as it did not change
     expect(mockInstance.off).not.toHaveBeenCalledWith('mousedown');
   });
+
+  it('unbinds an event when its handler prop is removed', () => {
+    const onMousedown = jest.fn();
+    const onObjectMoved = jest.fn();
+
+    const { rerender } = render(
+      <ImageEditor onMousedown={onMousedown} onObjectMoved={onObjectMoved} />
+    );
+
+    const mockInstance = TuiImageEditor.mock.results[0].value;
+    mockInstance.off.mockClear();
+    mockInstance.on.mockClear();
+
+    rerender(<ImageEditor onMousedown={onMousedown} />);
+
+    expect(mockInstance.off).toHaveBeenCalledWith('objectMoved');
+    expect(mockInstance.on).not.toHaveBeenCalledWith('objectMoved', onObjectMoved);
+    expect(mockInstance.off).not.toHaveBeenCalledWith('mousedown');
+  });
 });
