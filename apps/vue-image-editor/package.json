@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build": "webpack",
-    "storybook": "start-storybook -s .storybook -p 6006"
+    "storybook": "start-storybook -s .storybook -p 6006",
+    "test": "jest"
   },
   "homepage": "https://github.com/nhn/tui.image-editor",
   "bugs": "https://github.com/nhn/tui.image-editor/issues",

@@ -3,16 +3,8 @@
 </template>
 <script>
 import ImageEditor from 'tui-image-editor';
+import { buildEditorOptions, editorDefaultOptions } from './options';
 
-const includeUIOptions = {
-  includeUI: {
-    initMenu: 'filter',
-  },
-};
-const editorDefaultOptions = {
-  cssMaxWidth: 700,
-  cssMaxHeight: 500,
-};
 export default {
   name: 'TuiImageEditor',
   props: {
@@ -28,10 +20,7 @@ export default {
     },
   },
   mounted() {
-    let options = this.options;
-    if (this.includeUi) {
-      options = Object.assign(includeUIOptions, this.options);
-    }
+    const options = buildEditorOptions(this.includeUi, this.options);
     this.editorInstance = new ImageEditor(this.$refs.tuiImageEditor, options);
     this.addEventListener();
   },
