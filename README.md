@@ -161,6 +161,29 @@ $ cd [[repo name]]
 $ npm install
 ```
 
+### Project Structure
+
+This repository uses Lerna and npm workspaces. Core editor code is in `apps/image-editor`, the React wrapper is in `apps/react-image-editor`, and the Vue 2 wrapper is in `apps/vue-image-editor`. See [Project Structure](./docs/project-structure.md) for module responsibilities and test locations.
+
+### Development Commands
+
+```sh
+$ npm run build
+$ npm run build:image-editor
+$ npm run build:react
+$ npm run build:vue
+$ cd apps/image-editor && npm test
+$ cd apps/image-editor && npm run test:types
+$ cd apps/react-image-editor && npm test
+$ cd apps/vue-image-editor && npm test
+```
+
+On newer Node/OpenSSL versions, webpack builds may require:
+
+```sh
+$ export NODE_OPTIONS=--openssl-legacy-provider
+```
+
 ### Pull Request
 
 Before uploading your PR, run test one last time to check if there are any errors.
