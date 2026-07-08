@@ -698,7 +698,6 @@ class Ui {
     this._removeHelpActionEvent();
     this._removeDownloadEvent();
     this._removeLoadEvent();
-    this._removeMenuEvent();
     this._removeMainMenuEvent();
     this._historyMenu.removeEvent();
   }

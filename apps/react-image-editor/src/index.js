@@ -1,68 +1,89 @@
-import React from 'react';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import TuiImageEditor from 'tui-image-editor';
 
-export default class ImageEditor extends React.Component {
-  rootEl = React.createRef();
+const isEventHandlerKeys = (key) => /on[A-Z][a-zA-Z]+/.test(key);
 
-  imageEditorInst = null;
+const ImageEditorComponent = forwardRef((props, ref) => {
+  const rootEl = useRef(null);
+  const imageEditorInst = useRef(null);
+  const prevProps = useRef({});
 
-  componentDidMount() {
-    this.imageEditorInst = new TuiImageEditor(this.rootEl.current, {
-      ...this.props,
-    });
+  useEffect(() => {
+    if (!imageEditorInst.current && rootEl.current) {
+      imageEditorInst.current = new TuiImageEditor(rootEl.current, {
+        ...props,
+      });
 
-    this.bindEventHandlers(this.props);
+      Object.keys(props)
+        .filter(isEventHandlerKeys)
+        .forEach((key) => {
+          const eventName = key[2].toLowerCase() + key.slice(3);
+          imageEditorInst.current.on(eventName, props[key]);
+        });
+
+      prevProps.current = { ...props };
+    }
+
+    return () => {
+      if (imageEditorInst.current) {
+        Object.keys(props)
+          .filter(isEventHandlerKeys)
+          .forEach((key) => {
+            const eventName = key[2].toLowerCase() + key.slice(3);
+            imageEditorInst.current.off(eventName);
+          });
+        imageEditorInst.current.destroy();
+        imageEditorInst.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (imageEditorInst.current) {
+      const currentProps = props;
+      const previousProps = prevProps.current;
+
+      Object.keys(currentProps)
+        .filter(isEventHandlerKeys)
+        .forEach((key) => {
+          const eventName = key[2].toLowerCase() + key.slice(3);
+          if (previousProps[key] !== currentProps[key]) {
+            imageEditorInst.current.off(eventName);
+            imageEditorInst.current.on(eventName, currentProps[key]);
+          }
+        });
+
+      prevProps.current = { ...props };
+    }
+  });
+
+  useImperativeHandle(ref, () => ({
+    getInstance: () => imageEditorInst.current,
+    getRootElement: () => rootEl.current,
+  }));
+
+  return <div ref={rootEl} />;
+});
+
+// For backwards compatibility with static properties or class-based identification
+class ImageEditor extends React.Component {
+  constructor(props) {
+    super(props);
+    this.editorRef = React.createRef();
   }
-
-  componentWillUnmount() {
-    this.unbindEventHandlers();
-
-    this.imageEditorInst.destroy();
-
-    this.imageEditorInst = null;
-  }
-
-  shouldComponentUpdate(nextProps) {
-    this.bindEventHandlers(this.props, nextProps);
-
-    return false;
-  }
-
+  
   getInstance() {
-    return this.imageEditorInst;
+    return this.editorRef.current ? this.editorRef.current.getInstance() : null;
   }
-
+  
   getRootElement() {
-    return this.rootEl.current;
+    return this.editorRef.current ? this.editorRef.current.getRootElement() : null;
   }
-
-  bindEventHandlers(props, prevProps) {
-    Object.keys(props)
-      .filter(this.isEventHandlerKeys)
-      .forEach((key) => {
-        const eventName = key[2].toLowerCase() + key.slice(3);
-        // For <ImageEditor onFocus={condition ? onFocus1 : onFocus2} />
-        if (prevProps && prevProps[key] !== props[key]) {
-          this.imageEditorInst.off(eventName);
-        }
-        this.imageEditorInst.on(eventName, props[key]);
-      });
-  }
-
-  unbindEventHandlers() {
-    Object.keys(this.props)
-      .filter(this.isEventHandlerKeys)
-      .forEach((key) => {
-        const eventName = key[2].toLowerCase() + key.slice(3);
-        this.imageEditorInst.off(eventName);
-      });
-  }
-
-  isEventHandlerKeys(key) {
-    return /on[A-Z][a-zA-Z]+/.test(key);
-  }
-
+  
   render() {
-    return <div ref={this.rootEl} />;
+    return <ImageEditorComponent ref={this.editorRef} {...this.props} />;
   }
 }
+
+export default ImageEditor;
