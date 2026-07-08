@@ -28,6 +28,7 @@ const DEFAULT_HORIZONTAL_SCROLL_RATIO = {
   BORDER_RADIUS: 0.003,
 };
 const DEFAULT_ZOOM_LEVEL = 1.0;
+const MAX_ZOOM_LEVEL = 5.0;
 const {
   ZOOM_CHANGED,
   ADD_TEXT,
@@ -475,7 +476,7 @@ class Zoom extends Component {
     const center = canvas.getVpCenter();
     const { x, y } = center;
     const prevZoomLevel = this.zoomLevel;
-    const nextZoomLevel = Math.min(this.zoomLevel + 1.0, 5.0);
+    const nextZoomLevel = Math.min(this.zoomLevel + 1.0, MAX_ZOOM_LEVEL);
 
     this._centerPoints.push({
       x,
@@ -539,12 +540,12 @@ class Zoom extends Component {
   }
 
   /**
-   * Whether zoom level is max (5.0)
+   * Whether zoom level is max
    * @returns {boolean}
    * @private
    */
   _isMaxZoomLevel() {
-    return this.zoomLevel >= 5.0;
+    return this.zoomLevel >= MAX_ZOOM_LEVEL;
   }
 
   /**
@@ -667,10 +668,13 @@ class Zoom extends Component {
 
     const canvasImage = this.getCanvasImage();
     if (canvasImage) {
-      const { width, height } = canvasImage.getBoundingRect();
-      const maxDimension = this.graphics._calcMaxDimension(width, height);
-      const newMaxWidth = Math.min(maxDimension.width * zoomLevel, this.graphics.cssMaxWidth);
-      const newMaxHeight = Math.min(maxDimension.height * zoomLevel, this.graphics.cssMaxHeight);
+      const { width: newMaxWidth, height: newMaxHeight } =
+        this._getZoomedDisplayDimension(zoomLevel);
+
+      this.graphics.setCanvasBackstoreDimension({
+        width: newMaxWidth,
+        height: newMaxHeight,
+      });
 
       if (canvas.wrapperEl) {
         canvas.wrapperEl.style.width = `${newMaxWidth}px`;
@@ -698,6 +702,7 @@ class Zoom extends Component {
         'max-height': `${newMaxHeight}px`,
       });
       canvas.calcOffset();
+      viewport = canvas.calcViewportBoundaries();
     }
 
     const canvasWidth = canvas.width;
@@ -750,6 +755,64 @@ class Zoom extends Component {
   }
 
   /**
+   * Get available display dimension for zoomed canvas.
+   * @returns {{width: number, height: number}} available display dimension
+   * @private
+   */
+  _getAvailableDisplayDimension() {
+    const canvas = this.getCanvas();
+    const { wrapperEl } = canvas;
+    let { cssMaxWidth: width, cssMaxHeight: height } = this.graphics;
+
+    if (wrapperEl && wrapperEl.closest) {
+      const editorWrap = wrapperEl.closest('.tui-image-editor-wrap');
+
+      if (editorWrap) {
+        width = editorWrap.clientWidth || width;
+        height = editorWrap.clientHeight || height;
+      }
+    }
+
+    return { width, height };
+  }
+
+  /**
+   * Get display dimension for current zoom level.
+   * @param {number} zoomLevel - zoom level
+   * @returns {{width: number, height: number}} zoomed display dimension
+   * @private
+   */
+  _getZoomedDisplayDimension(zoomLevel) {
+    const canvasImage = this.getCanvasImage();
+    const { width, height } = canvasImage.getBoundingRect();
+    const baseDimension = this.graphics._calcMaxDimension(width, height);
+    const availableDimension = this._getAvailableDisplayDimension();
+    const targetDimension = {
+      width: Math.max(baseDimension.width, availableDimension.width),
+      height: Math.max(baseDimension.height, availableDimension.height),
+    };
+    const progress = clamp(
+      (zoomLevel - DEFAULT_ZOOM_LEVEL) / (MAX_ZOOM_LEVEL - DEFAULT_ZOOM_LEVEL),
+      0,
+      1
+    );
+
+    const displayDimension = {
+      width: Math.round(
+        baseDimension.width + (targetDimension.width - baseDimension.width) * progress
+      ),
+      height: Math.round(
+        baseDimension.height + (targetDimension.height - baseDimension.height) * progress
+      ),
+    };
+
+    return {
+      width: Math.max(displayDimension.width, Math.round(baseDimension.width * zoomLevel)),
+      height: Math.max(displayDimension.height, Math.round(baseDimension.height * zoomLevel)),
+    };
+  }
+
+  /**
    * Handle mouse wheel event for zoom in/out
    * @param {{e: WheelEvent}} opt - Fabric event object
    * @private
@@ -770,7 +833,7 @@ class Zoom extends Component {
 
     if (delta < 0) {
       // 向上滚动，放大
-      nextZoomLevel = Math.min(this.zoomLevel + step, 5.0);
+      nextZoomLevel = Math.min(this.zoomLevel + step, MAX_ZOOM_LEVEL);
     } else if (delta > 0) {
       // 向下滚动，缩小
       nextZoomLevel = Math.max(this.zoomLevel - step, DEFAULT_ZOOM_LEVEL);
