@@ -194,8 +194,23 @@ class Filter extends Component {
       for (i = 0; i < length; i += 1) {
         item = sourceImg.filters[i];
         if (item.type === fabricType) {
-          imgFilter = item;
-          break;
+          if (fabricType === 'BlendColor') {
+            if (type === 'tint' && item.mode === 'tint') {
+              imgFilter = item;
+              break;
+            }
+            if (type === 'multiply' && item.mode === 'multiply') {
+              imgFilter = item;
+              break;
+            }
+            if (type === 'blendColor' && item.mode !== 'tint' && item.mode !== 'multiply') {
+              imgFilter = item;
+              break;
+            }
+          } else {
+            imgFilter = item;
+            break;
+          }
         }
       }
     }
@@ -211,7 +226,24 @@ class Filter extends Component {
    */
   _removeFilter(sourceImg, type) {
     const fabricType = this._getFabricFilterType(type);
-    sourceImg.filters = sourceImg.filters.filter((value) => value.type !== fabricType);
+    sourceImg.filters = sourceImg.filters.filter((value) => {
+      if (value.type !== fabricType) {
+        return true;
+      }
+      if (fabricType === 'BlendColor') {
+        if (type === 'tint' && value.mode === 'tint') {
+          return false;
+        }
+        if (type === 'multiply' && value.mode === 'multiply') {
+          return false;
+        }
+        if (type === 'blendColor' && value.mode !== 'tint' && value.mode !== 'multiply') {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    });
   }
 
   /**
@@ -222,7 +254,12 @@ class Filter extends Component {
    * @returns {string} Fabric filter class name
    */
   _getFabricFilterType(type) {
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    const fabricType = type.charAt(0).toUpperCase() + type.slice(1);
+    if (fabricType === 'Tint' || fabricType === 'Multiply') {
+      return 'BlendColor';
+    }
+    
+    return fabricType;
   }
 }
 

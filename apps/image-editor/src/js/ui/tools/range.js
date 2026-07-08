@@ -239,7 +239,18 @@ class Range {
     clearTimeout(this._userInputTimer);
 
     const { keyCode } = event;
-    if (keyCode < keyCodes.DIGIT_0 || keyCode > keyCodes.DIGIT_9) {
+    const isDigit = keyCode >= keyCodes.DIGIT_0 && keyCode <= keyCodes.DIGIT_9;
+    const isNumpad = keyCode >= keyCodes.NUMPAD_0 && keyCode <= keyCodes.NUMPAD_9;
+    const isMinus = keyCode === keyCodes.MINUS || keyCode === keyCodes.NUMPAD_MINUS;
+    const isDot = keyCode === keyCodes.DOT || keyCode === keyCodes.NUMPAD_DOT;
+    const isControl = [
+      keyCodes.BACKSPACE, 
+      keyCodes.DEL,
+      37, // ARROW_LEFT
+      39  // ARROW_RIGHT
+    ].indexOf(keyCode) > -1;
+
+    if (!isDigit && !isNumpad && !isMinus && !isDot && !isControl) {
       event.preventDefault();
 
       return;
