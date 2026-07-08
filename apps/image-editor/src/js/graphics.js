@@ -5,29 +5,12 @@ import isString from 'tui-code-snippet/type/isString';
 import forEachArray from 'tui-code-snippet/collection/forEachArray';
 import forEachOwnProperties from 'tui-code-snippet/collection/forEachOwnProperties';
 import CustomEvents from 'tui-code-snippet/customEvents/customEvents';
-import ImageLoader from '@/component/imageLoader';
-import Cropper from '@/component/cropper';
-import Flip from '@/component/flip';
-import Rotation from '@/component/rotation';
-import FreeDrawing from '@/component/freeDrawing';
-import Line from '@/component/line';
-import Text from '@/component/text';
-import Icon from '@/component/icon';
-import Filter from '@/component/filter';
-import Shape from '@/component/shape';
-import Zoom from '@/component/zoom';
-import CropperDrawingMode from '@/drawingMode/cropper';
-import FreeDrawingMode from '@/drawingMode/freeDrawing';
-import LineDrawingMode from '@/drawingMode/lineDrawing';
-import ShapeDrawingMode from '@/drawingMode/shape';
-import TextDrawingMode from '@/drawingMode/text';
-import IconDrawingMode from '@/drawingMode/icon';
-import ZoomDrawingMode from '@/drawingMode/zoom';
 import {
   makeSelectionUndoData,
   makeSelectionUndoDatum,
   setCachedUndoDataForDimension,
 } from '@/helper/selectionModifyHelper';
+import { createComponentInstances, createDrawingModeInstances } from '@/graphicsRegistry';
 import { getProperties, includes, isShape, stamp } from '@/util';
 import {
   componentNames as components,
@@ -35,10 +18,6 @@ import {
   drawingModes,
   fObjectOptions,
 } from '@/consts';
-import Resize from '@/component/resize';
-import ResizeDrawingMode from '@/drawingMode/resize';
-import Annotation from '@/component/annotation';
-import AnnotationDrawingMode from '@/drawingMode/annotation';
 
 const DEFAULT_CSS_MAX_WIDTH = 1000;
 const DEFAULT_CSS_MAX_HEIGHT = 800;
@@ -1032,15 +1011,9 @@ class Graphics {
    * @private
    */
   _createDrawingModeInstances() {
-    this._register(this._drawingModeMap, new CropperDrawingMode());
-    this._register(this._drawingModeMap, new FreeDrawingMode());
-    this._register(this._drawingModeMap, new LineDrawingMode());
-    this._register(this._drawingModeMap, new ShapeDrawingMode());
-    this._register(this._drawingModeMap, new TextDrawingMode());
-    this._register(this._drawingModeMap, new IconDrawingMode());
-    this._register(this._drawingModeMap, new ZoomDrawingMode());
-    this._register(this._drawingModeMap, new ResizeDrawingMode());
-    this._register(this._drawingModeMap, new AnnotationDrawingMode());
+    createDrawingModeInstances().forEach((drawingMode) => {
+      this._register(this._drawingModeMap, drawingMode);
+    });
   }
 
   /**
@@ -1048,19 +1021,9 @@ class Graphics {
    * @private
    */
   _createComponents() {
-    this._register(this._componentMap, new ImageLoader(this));
-    this._register(this._componentMap, new Cropper(this));
-    this._register(this._componentMap, new Flip(this));
-    this._register(this._componentMap, new Rotation(this));
-    this._register(this._componentMap, new FreeDrawing(this));
-    this._register(this._componentMap, new Line(this));
-    this._register(this._componentMap, new Text(this));
-    this._register(this._componentMap, new Icon(this));
-    this._register(this._componentMap, new Filter(this));
-    this._register(this._componentMap, new Shape(this));
-    this._register(this._componentMap, new Zoom(this));
-    this._register(this._componentMap, new Resize(this));
-    this._register(this._componentMap, new Annotation(this));
+    createComponentInstances(this).forEach((component) => {
+      this._register(this._componentMap, component);
+    });
   }
 
   /**
