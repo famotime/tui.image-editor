@@ -8,6 +8,7 @@ import UI from '@/ui';
 import action from '@/action';
 import commandFactory from '@/factory/command';
 import Graphics from '@/graphics';
+import { bindEvents } from '@/eventBinder';
 import { makeSelectionUndoData, makeSelectionUndoDatum } from '@/helper/selectionModifyHelper';
 import { sendHostName, getObjectType } from '@/util';
 import {
@@ -36,6 +37,24 @@ const {
   SELECTION_CREATED,
   ADD_OBJECT_AFTER,
 } = events;
+
+const GRAPHICS_EVENT_HANDLER_NAMES = {
+  [MOUSE_DOWN]: 'mousedown',
+  [OBJECT_MOVED]: 'objectMoved',
+  [OBJECT_SCALED]: 'objectScaled',
+  [OBJECT_ROTATED]: 'objectRotated',
+  [OBJECT_ACTIVATED]: 'objectActivated',
+  [OBJECT_ADDED]: 'objectAdded',
+  [OBJECT_MODIFIED]: 'objectModified',
+  [ADD_TEXT]: 'addText',
+  [ADD_OBJECT]: 'addObject',
+  [TEXT_EDITING]: 'textEditing',
+  [TEXT_CHANGED]: 'textChanged',
+  [ICON_CREATE_RESIZE]: 'iconCreateResize',
+  [ICON_CREATE_END]: 'iconCreateEnd',
+  [SELECTION_CLEARED]: 'selectionCleared',
+  [SELECTION_CREATED]: 'selectionCreated',
+};
 
 /**
  * Image filter result
@@ -342,23 +361,7 @@ class ImageEditor {
    * @private
    */
   _attachGraphicsEvents() {
-    this._graphics.on({
-      [MOUSE_DOWN]: this._handlers.mousedown,
-      [OBJECT_MOVED]: this._handlers.objectMoved,
-      [OBJECT_SCALED]: this._handlers.objectScaled,
-      [OBJECT_ROTATED]: this._handlers.objectRotated,
-      [OBJECT_ACTIVATED]: this._handlers.objectActivated,
-      [OBJECT_ADDED]: this._handlers.objectAdded,
-      [OBJECT_MODIFIED]: this._handlers.objectModified,
-      [ADD_TEXT]: this._handlers.addText,
-      [ADD_OBJECT]: this._handlers.addObject,
-      [TEXT_EDITING]: this._handlers.textEditing,
-      [TEXT_CHANGED]: this._handlers.textChanged,
-      [ICON_CREATE_RESIZE]: this._handlers.iconCreateResize,
-      [ICON_CREATE_END]: this._handlers.iconCreateEnd,
-      [SELECTION_CLEARED]: this._handlers.selectionCleared,
-      [SELECTION_CREATED]: this._handlers.selectionCreated,
-    });
+    bindEvents(this._graphics, this._handlers, GRAPHICS_EVENT_HANDLER_NAMES);
   }
 
   /**
