@@ -5,6 +5,14 @@ import extend from 'tui-code-snippet/object/extend';
 import isString from 'tui-code-snippet/type/isString';
 import pick from 'tui-code-snippet/object/pick';
 import inArray from 'tui-code-snippet/array/inArray';
+export {
+  base64ToBlob,
+  clamp,
+  getRgb,
+  keyMirror,
+  makeStyleText,
+  toCamelCase,
+} from '@/basicUtil';
 import {
   commandNames,
   filterType,
@@ -16,7 +24,6 @@ import {
 
 const FLOATING_POINT_DIGIT = 2;
 const CSS_PREFIX = 'tui-image-editor-';
-const { min, max } = Math;
 let hostnameSent = false;
 let lastId = 0;
 
@@ -40,50 +47,6 @@ export function isNil(value) {
 
 export function isFunction(value) {
   return typeof value === 'function';
-}
-
-/**
- * Clamp value
- * @param {number} value - Value
- * @param {number} minValue - Minimum value
- * @param {number} maxValue - Maximum value
- * @returns {number} clamped value
- */
-export function clamp(value, minValue, maxValue) {
-  if (minValue > maxValue) {
-    [minValue, maxValue] = [maxValue, minValue];
-  }
-
-  return max(minValue, min(value, maxValue));
-}
-
-/**
- * Make key-value object from arguments
- * @returns {object.<string, string>}
- */
-export function keyMirror(...args) {
-  const obj = {};
-
-  forEach(args, (key) => {
-    obj[key] = key;
-  });
-
-  return obj;
-}
-
-/**
- * Make CSSText
- * @param {Object} styleObj - Style info object
- * @returns {string} Connected string of style
- */
-export function makeStyleText(styleObj) {
-  let styleStr = '';
-
-  forEach(styleObj, (value, prop) => {
-    styleStr += `${prop}: ${value};`;
-  });
-
-  return styleStr;
 }
 
 /**
@@ -116,40 +79,12 @@ export function toInteger(value) {
 }
 
 /**
- * String to camelcase string
- * @param {string} targetString - change target
- * @returns {string}
- * @private
- */
-export function toCamelCase(targetString) {
-  return targetString.replace(/-([a-z])/g, ($0, $1) => $1.toUpperCase());
-}
-
-/**
  * Check browser file api support
  * @returns {boolean}
  * @private
  */
 export function isSupportFileApi() {
   return !!(window.File && window.FileList && window.FileReader);
-}
-
-/**
- * hex to rgb
- * @param {string} color - hex color
- * @param {string} alpha - color alpha value
- * @returns {string} rgb expression
- */
-export function getRgb(color, alpha) {
-  if (color.length === 4) {
-    color = `${color}${color.slice(1, 4)}`;
-  }
-  const r = parseInt(color.slice(1, 3), 16);
-  const g = parseInt(color.slice(3, 5), 16);
-  const b = parseInt(color.slice(5, 7), 16);
-  const a = alpha || 1;
-
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 /**
@@ -190,33 +125,6 @@ export function styleLoad(styleBuffer, tagId) {
  */
 export function getSelector(targetElement) {
   return (str) => targetElement.querySelector(str);
-}
-
-/**
- * Change base64 to blob
- * @param {String} data - base64 string data
- * @returns {Blob} Blob Data
- */
-export function base64ToBlob(data) {
-  const rImageType = /data:(image\/.+);base64,/;
-  let mimeString = '';
-  let raw, uInt8Array, i;
-
-  raw = data.replace(rImageType, (header, imageType) => {
-    mimeString = imageType;
-
-    return '';
-  });
-
-  raw = atob(raw);
-  const rawLength = raw.length;
-  uInt8Array = new Uint8Array(rawLength); // eslint-disable-line
-
-  for (i = 0; i < rawLength; i += 1) {
-    uInt8Array[i] = raw.charCodeAt(i);
-  }
-
-  return new Blob([uInt8Array], { type: mimeString });
 }
 
 /**
