@@ -246,6 +246,7 @@ class Shape extends Submenu {
     this.actions.changeShape({
       fill: color,
     });
+    this.actions.setDrawingShape(this.type, this.options);
   }
 
   /**
@@ -259,6 +260,7 @@ class Shape extends Submenu {
     this.actions.changeShape({
       stroke: color,
     });
+    this.actions.setDrawingShape(this.type, this.options);
   }
 }
 
