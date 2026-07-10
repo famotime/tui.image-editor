@@ -133,6 +133,19 @@ class Icon extends Submenu {
   }
 
   /**
+   * Executed when the menu starts.
+   */
+  changeStartMode() {
+    this.actions.stopDrawingMode();
+    this.actions.discardSelection();
+    this.changeStandbyMode();
+    this.iconType = 'icon-arrow';
+    this._els.addIconButton.classList.add('icon-arrow');
+    this.actions.changeSelectableAll(false);
+    this.actions.addIcon('icon-arrow', this._els.iconColorpicker.color);
+  }
+
+  /**
    * Change icon color
    * @param {string} color - color for change
    * @private
@@ -140,6 +153,9 @@ class Icon extends Submenu {
   _changeColorHandler(color) {
     color = color || 'transparent';
     this.actions.changeColor(color);
+    if (this.iconType) {
+      this.actions.addIcon(this.iconType, color);
+    }
   }
 
   /**

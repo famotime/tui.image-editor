@@ -884,7 +884,9 @@ export default {
 
           this.ui.text.setTextStyleStateOnAction(obj);
         } else if (obj.type === 'icon') {
-          this.stopDrawingMode();
+          if (this.getDrawingMode() !== 'ICON') {
+            this.stopDrawingMode();
+          }
           if (this.ui.submenu !== 'icon') {
             this.ui.changeMenu('icon', false, false);
           }
@@ -905,7 +907,9 @@ export default {
       },
       addObjectAfter: (obj) => {
         if (obj.type === 'icon') {
-          this.ui.icon.changeStandbyMode();
+          if (this.getDrawingMode() !== 'ICON') {
+            this.ui.icon.changeStandbyMode();
+          }
         } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
           this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
           if (this.getDrawingMode() !== 'SHAPE') {
@@ -932,7 +936,7 @@ export default {
         this.activeObjectId = null;
         if (this.ui.submenu === 'text') {
           this.changeCursor('text');
-        } else if (!includes(['draw', 'crop', 'resize', 'shape'], this.ui.submenu)) {
+        } else if (!includes(['draw', 'crop', 'resize', 'shape', 'icon'], this.ui.submenu)) {
           this.stopDrawingMode();
         }
       },
