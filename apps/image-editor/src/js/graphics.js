@@ -1057,20 +1057,11 @@ class Graphics {
   _calcMaxDimension(width, height) {
     const wScaleFactor = this.cssMaxWidth / width;
     const hScaleFactor = this.cssMaxHeight / height;
-    let cssMaxWidth = Math.min(width, this.cssMaxWidth);
-    let cssMaxHeight = Math.min(height, this.cssMaxHeight);
-
-    if (wScaleFactor < 1 && wScaleFactor < hScaleFactor) {
-      cssMaxWidth = width * wScaleFactor;
-      cssMaxHeight = height * wScaleFactor;
-    } else if (hScaleFactor < 1 && hScaleFactor < wScaleFactor) {
-      cssMaxWidth = width * hScaleFactor;
-      cssMaxHeight = height * hScaleFactor;
-    }
+    const scaleFactor = Math.min(wScaleFactor, hScaleFactor);
 
     return {
-      width: Math.floor(cssMaxWidth),
-      height: Math.floor(cssMaxHeight),
+      width: Math.floor(width * scaleFactor),
+      height: Math.floor(height * scaleFactor),
     };
   }
 

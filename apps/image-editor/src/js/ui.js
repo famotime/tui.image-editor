@@ -328,9 +328,50 @@ class Ui {
       this.changeHandButtonStatus(true);
     });
     this.on(eventNames.HAND_STOPPED, () => this.changeHandButtonStatus(false));
-    this.on(eventNames.ZOOM_CHANGED, () => {
+    this.on(eventNames.ZOOM_CHANGED, (opt) => {
       this.resizeEditor();
+      if (opt && opt.zoomLevel) {
+        this._showZoomRatio(opt.zoomLevel);
+      }
     });
+  }
+
+  /**
+   * Show zoom ratio
+   * @param {number} zoomLevel - zoom level
+   * @private
+   */
+  _showZoomRatio(zoomLevel) {
+    if (!this._zoomRatioElement) {
+      this._zoomRatioElement = document.createElement('div');
+      this._zoomRatioElement.className = 'tui-image-editor-zoom-ratio';
+      Object.assign(this._zoomRatioElement.style, {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        padding: '10px 20px',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        color: '#fff',
+        borderRadius: '20px',
+        fontSize: '24px',
+        zIndex: '1000',
+        pointerEvents: 'none',
+        opacity: '0',
+        transition: 'opacity 0.2s ease-in-out',
+      });
+      this._editorElementWrap.appendChild(this._zoomRatioElement);
+    }
+
+    this._zoomRatioElement.innerText = `${Math.round(zoomLevel * 100)}%`;
+    this._zoomRatioElement.style.opacity = '1';
+
+    if (this._zoomRatioTimer) {
+      clearTimeout(this._zoomRatioTimer);
+    }
+    this._zoomRatioTimer = setTimeout(() => {
+      this._zoomRatioElement.style.opacity = '0';
+    }, 1000);
   }
 
   /**

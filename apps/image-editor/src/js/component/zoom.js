@@ -28,6 +28,7 @@ const DEFAULT_HORIZONTAL_SCROLL_RATIO = {
   BORDER_RADIUS: 0.003,
 };
 const DEFAULT_ZOOM_LEVEL = 1.0;
+const MIN_ZOOM_LEVEL = 0.1;
 const MAX_ZOOM_LEVEL = 5.0;
 const {
   ZOOM_CHANGED,
@@ -509,10 +510,10 @@ class Zoom extends Component {
 
       this.zoomLevel = prevZoomLevel;
       this._fireZoomChanged(canvas, this.zoomLevel);
-    } else if (this.zoomLevel > DEFAULT_ZOOM_LEVEL) {
+    } else if (this.zoomLevel > MIN_ZOOM_LEVEL) {
       const center = canvas.getVpCenter();
       const { x, y } = center;
-      const nextZoomLevel = Math.max(this.zoomLevel - 1.0, DEFAULT_ZOOM_LEVEL);
+      const nextZoomLevel = Math.max(this.zoomLevel - 1.0, MIN_ZOOM_LEVEL);
 
       if (this._isDefaultZoomLevel(nextZoomLevel)) {
         canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
@@ -601,7 +602,7 @@ class Zoom extends Component {
 
     const canvas = this.getCanvas();
 
-    if (this.zoomLevel <= DEFAULT_ZOOM_LEVEL) {
+    if (this.zoomLevel <= MIN_ZOOM_LEVEL) {
       return;
     }
 
@@ -668,38 +669,33 @@ class Zoom extends Component {
 
     const canvasImage = this.getCanvasImage();
     if (canvasImage) {
-      const { width: newMaxWidth, height: newMaxHeight } =
+      const { width: newCssWidth, height: newCssHeight } =
         this._getZoomedDisplayDimension(zoomLevel);
 
-      this.graphics.setCanvasBackstoreDimension({
-        width: newMaxWidth,
-        height: newMaxHeight,
-      });
-
       if (canvas.wrapperEl) {
-        canvas.wrapperEl.style.width = `${newMaxWidth}px`;
-        canvas.wrapperEl.style.height = `${newMaxHeight}px`;
-        canvas.wrapperEl.style.maxWidth = `${newMaxWidth}px`;
-        canvas.wrapperEl.style.maxHeight = `${newMaxHeight}px`;
+        canvas.wrapperEl.style.width = `${newCssWidth}px`;
+        canvas.wrapperEl.style.height = `${newCssHeight}px`;
+        canvas.wrapperEl.style.maxWidth = `${newCssWidth}px`;
+        canvas.wrapperEl.style.maxHeight = `${newCssHeight}px`;
       }
       if (canvas.lowerCanvasEl) {
-        canvas.lowerCanvasEl.style.width = `${newMaxWidth}px`;
-        canvas.lowerCanvasEl.style.height = `${newMaxHeight}px`;
-        canvas.lowerCanvasEl.style.maxWidth = `${newMaxWidth}px`;
-        canvas.lowerCanvasEl.style.maxHeight = `${newMaxHeight}px`;
+        canvas.lowerCanvasEl.style.width = `${newCssWidth}px`;
+        canvas.lowerCanvasEl.style.height = `${newCssHeight}px`;
+        canvas.lowerCanvasEl.style.maxWidth = `${newCssWidth}px`;
+        canvas.lowerCanvasEl.style.maxHeight = `${newCssHeight}px`;
       }
       if (canvas.upperCanvasEl) {
-        canvas.upperCanvasEl.style.width = `${newMaxWidth}px`;
-        canvas.upperCanvasEl.style.height = `${newMaxHeight}px`;
-        canvas.upperCanvasEl.style.maxWidth = `${newMaxWidth}px`;
-        canvas.upperCanvasEl.style.maxHeight = `${newMaxHeight}px`;
+        canvas.upperCanvasEl.style.width = `${newCssWidth}px`;
+        canvas.upperCanvasEl.style.height = `${newCssHeight}px`;
+        canvas.upperCanvasEl.style.maxWidth = `${newCssWidth}px`;
+        canvas.upperCanvasEl.style.maxHeight = `${newCssHeight}px`;
       }
 
       this.graphics.setCanvasCssDimension({
         width: '100%',
         height: '100%',
-        'max-width': `${newMaxWidth}px`,
-        'max-height': `${newMaxHeight}px`,
+        'max-width': `${newCssWidth}px`,
+        'max-height': `${newCssHeight}px`,
       });
       canvas.calcOffset();
       viewport = canvas.calcViewportBoundaries();
@@ -782,34 +778,13 @@ class Zoom extends Component {
    * @returns {{width: number, height: number}} zoomed display dimension
    * @private
    */
+  // eslint-disable-next-line no-unused-vars
   _getZoomedDisplayDimension(zoomLevel) {
     const canvasImage = this.getCanvasImage();
     const { width, height } = canvasImage.getBoundingRect();
     const baseDimension = this.graphics._calcMaxDimension(width, height);
-    const availableDimension = this._getAvailableDisplayDimension();
-    const targetDimension = {
-      width: Math.max(baseDimension.width, availableDimension.width),
-      height: Math.max(baseDimension.height, availableDimension.height),
-    };
-    const progress = clamp(
-      (zoomLevel - DEFAULT_ZOOM_LEVEL) / (MAX_ZOOM_LEVEL - DEFAULT_ZOOM_LEVEL),
-      0,
-      1
-    );
 
-    const displayDimension = {
-      width: Math.round(
-        baseDimension.width + (targetDimension.width - baseDimension.width) * progress
-      ),
-      height: Math.round(
-        baseDimension.height + (targetDimension.height - baseDimension.height) * progress
-      ),
-    };
-
-    return {
-      width: Math.max(displayDimension.width, Math.round(baseDimension.width * zoomLevel)),
-      height: Math.max(displayDimension.height, Math.round(baseDimension.height * zoomLevel)),
-    };
+    return baseDimension;
   }
 
   /**
@@ -836,7 +811,7 @@ class Zoom extends Component {
       nextZoomLevel = Math.min(this.zoomLevel + step, MAX_ZOOM_LEVEL);
     } else if (delta > 0) {
       // 向下滚动，缩小
-      nextZoomLevel = Math.max(this.zoomLevel - step, DEFAULT_ZOOM_LEVEL);
+      nextZoomLevel = Math.max(this.zoomLevel - step, MIN_ZOOM_LEVEL);
     }
 
     if (nextZoomLevel !== this.zoomLevel) {

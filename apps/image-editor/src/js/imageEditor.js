@@ -352,7 +352,7 @@ class ImageEditor {
 
       canvas.on(HAND_STARTED, () => this.ui.fire(HAND_STARTED));
       canvas.on(HAND_STOPPED, () => this.ui.fire(HAND_STOPPED));
-      canvas.on(ZOOM_CHANGED, () => this.ui.fire(ZOOM_CHANGED));
+      canvas.on(ZOOM_CHANGED, (opt) => this.ui.fire(ZOOM_CHANGED, opt));
     }
   }
 

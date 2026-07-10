@@ -9,7 +9,7 @@ module.exports = ({ minify, WEBPACK_BUILD }) => ({
   output: {
     library: {
       // 注释掉 export: 'default'，使打包出的 UMD 产物保留 default 属性导出，方便思源插件中正常 require.default 引入
-      // export: 'default',
+      export: 'default',
       type: 'umd',
       name: ['tui', 'ImageEditor'],
     },
