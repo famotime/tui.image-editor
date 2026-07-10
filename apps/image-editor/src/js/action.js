@@ -859,7 +859,9 @@ export default {
         if (obj.type === 'cropzone') {
           this.ui.crop.changeApplyButtonStatus(true);
         } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
-          this.stopDrawingMode();
+          if (this.getDrawingMode() !== 'SHAPE') {
+            this.stopDrawingMode();
+          }
           if (this.ui.submenu !== 'shape') {
             this.ui.changeMenu('shape', false, false);
           }
@@ -906,7 +908,9 @@ export default {
           this.ui.icon.changeStandbyMode();
         } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
           this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
-          this.ui.shape.changeStandbyMode();
+          if (this.getDrawingMode() !== 'SHAPE') {
+            this.ui.shape.changeStandbyMode();
+          }
         }
       },
       objectScaled: (obj) => {
@@ -928,7 +932,7 @@ export default {
         this.activeObjectId = null;
         if (this.ui.submenu === 'text') {
           this.changeCursor('text');
-        } else if (!includes(['draw', 'crop', 'resize'], this.ui.submenu)) {
+        } else if (!includes(['draw', 'crop', 'resize', 'shape'], this.ui.submenu)) {
           this.stopDrawingMode();
         }
       },
