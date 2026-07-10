@@ -99,6 +99,9 @@ export default ({
     .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button .color-picker-value {
         ${submenuColorpickerButton}
     }
+    .tui-colorpicker-palette-preview {
+        cursor: pointer !important;
+    }
     .tui-image-editor-container .svg_ic-menu {
         ${menuIconSize}
     }

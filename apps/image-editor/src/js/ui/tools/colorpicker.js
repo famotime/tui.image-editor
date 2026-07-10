@@ -41,6 +41,28 @@ class Colorpicker {
     this._makePickerButtonElement(defaultColor);
     this._makePickerLayerElement(colorpickerElement, colorpickerElement.getAttribute('title'));
     this._color = defaultColor;
+
+    // Create hidden native color input for eyedropper & spectrum
+    this._hiddenColorInput = document.createElement('input');
+    this._hiddenColorInput.type = 'color';
+    this._hiddenColorInput.style.position = 'absolute';
+    this._hiddenColorInput.style.width = '0';
+    this._hiddenColorInput.style.height = '0';
+    this._hiddenColorInput.style.opacity = '0';
+    this._hiddenColorInput.style.pointerEvents = 'none';
+    this.colorpickerElement.appendChild(this._hiddenColorInput);
+
+    const handleNativeColorChange = (e) => {
+      const { value } = e.target;
+      if (this._color !== value) {
+        this.color = value;
+        this.picker.setColor(value);
+        this.fire('change', value);
+      }
+    };
+    this._hiddenColorInput.addEventListener('input', handleNativeColorChange);
+    this._hiddenColorInput.addEventListener('change', handleNativeColorChange);
+
     this.picker = tuiColorPicker.create({
       container: this.pickerElement,
       preset: PICKER_COLOR,
@@ -139,15 +161,13 @@ class Colorpicker {
     colorpickerElement.appendChild(label);
   }
 
-  /**
-   * Add event
-   * @private
-   */
   _addEvent() {
     this.picker.on('selectColor', (value) => {
-      this._changeColorElement(value.color);
-      this._color = value.color;
-      this.fire('change', value.color);
+      if (this._color !== value.color) {
+        this._changeColorElement(value.color);
+        this._color = value.color;
+        this.fire('change', value.color);
+      }
     });
 
     this.eventHandler = {
@@ -157,6 +177,26 @@ class Colorpicker {
 
     this.colorpickerElement.addEventListener('click', this.eventHandler.pickerToggle);
     document.body.addEventListener('click', this.eventHandler.pickerHide);
+
+    // Click bottom preview to open native color picker via event delegation on pickerElement
+    this._onPickerClick = (event) => {
+      const { target } = event;
+      const previewEl = target.closest('.tui-colorpicker-palette-preview');
+      if (previewEl) {
+        event.stopPropagation();
+        this._hiddenColorInput.value = this._color || '#ffffff';
+        this._hiddenColorInput.click();
+      }
+    };
+    this._onPickerMouseOver = (event) => {
+      const { target } = event;
+      const previewEl = target.closest('.tui-colorpicker-palette-preview');
+      if (previewEl && !previewEl.title) {
+        previewEl.title = 'Click to open color spectrum / eyedropper';
+      }
+    };
+    this.pickerElement.addEventListener('click', this._onPickerClick);
+    this.pickerElement.addEventListener('mouseover', this._onPickerMouseOver);
   }
 
   /**
@@ -166,6 +206,14 @@ class Colorpicker {
   _removeEvent() {
     this.colorpickerElement.removeEventListener('click', this.eventHandler.pickerToggle);
     document.body.removeEventListener('click', this.eventHandler.pickerHide);
+
+    if (this._onPickerClick) {
+      this.pickerElement.removeEventListener('click', this._onPickerClick);
+    }
+    if (this._onPickerMouseOver) {
+      this.pickerElement.removeEventListener('mouseover', this._onPickerMouseOver);
+    }
+
     this.picker.off();
   }
 
