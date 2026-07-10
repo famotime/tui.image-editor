@@ -8,7 +8,8 @@ module.exports = ({ minify, WEBPACK_BUILD }) => ({
   entry: './src/index.js',
   output: {
     library: {
-      export: 'default',
+      // 注释掉 export: 'default'，使打包出的 UMD 产物保留 default 属性导出，方便思源插件中正常 require.default 引入
+      // export: 'default',
       type: 'umd',
       name: ['tui', 'ImageEditor'],
     },
@@ -24,22 +25,8 @@ module.exports = ({ minify, WEBPACK_BUILD }) => ({
       '@svg': path.resolve('src/svg'),
     },
   },
-  externals: [
-    {
-      'tui-code-snippet': {
-        commonjs: 'tui-code-snippet',
-        commonjs2: 'tui-code-snippet',
-        amd: 'tui-code-snippet',
-        root: ['tui', 'util'],
-      },
-      'tui-color-picker': {
-        commonjs: 'tui-color-picker',
-        commonjs2: 'tui-color-picker',
-        amd: 'tui-color-picker',
-        root: ['tui', 'colorPicker'],
-      },
-    },
-  ],
+  // 注释掉 externals，使 tui-code-snippet 和 tui-color-picker 打包进最终的 JS，解决思源笔记插件缺少依赖报错
+  externals: [],
   module: {
     rules: [
       {
