@@ -278,6 +278,7 @@ export const keyCodes = {
   NUMPAD_MINUS: 109,
   DOT: 190,
   NUMPAD_DOT: 110,
+  ENTER: 13,
 };
 
 /**

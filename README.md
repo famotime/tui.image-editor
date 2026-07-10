@@ -178,11 +178,7 @@ $ cd apps/react-image-editor && npm test
 $ cd apps/vue-image-editor && npm test
 ```
 
-On newer Node/OpenSSL versions, webpack builds may require:
-
-```sh
-$ export NODE_OPTIONS=--openssl-legacy-provider
-```
+The build configurations have been optimized (core package output.hashFunction configured to 'xxhash64', wrapper packages migrated to Rollup) so builds run seamlessly on newer Node/OpenSSL versions without requiring `NODE_OPTIONS=--openssl-legacy-provider`.
 
 ### Pull Request
 

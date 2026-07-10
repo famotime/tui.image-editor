@@ -24,9 +24,7 @@ npm run build:image-editor
 npm run build:react
 npm run build:vue
 
-# 当前 Node/OpenSSL 环境如遇 ERR_OSSL_EVP_UNSUPPORTED，先设置
-# PowerShell: $env:NODE_OPTIONS='--openssl-legacy-provider'
-# POSIX: export NODE_OPTIONS=--openssl-legacy-provider
+# 项目已完成构建配置优化，无需设置任何 NODE_OPTIONS 环境变量即可在现代 Node/OpenSSL 环境下直接运行构建。
 
 # 核心包测试
 cd apps/image-editor && npm test

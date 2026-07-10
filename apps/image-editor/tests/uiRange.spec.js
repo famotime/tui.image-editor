@@ -36,4 +36,22 @@ describe('Range', () => {
 
     expect(range.value).toBe(0);
   });
+
+  it('should blur input when ENTER key is pressed', () => {
+    const ev = { target: input, keyCode: 13 };
+    input.blur = jest.fn();
+
+    range.eventHandler.changeInput(ev);
+
+    expect(input.blur).toHaveBeenCalled();
+  });
+
+  it('should update range value on changeInputFinally (blur)', () => {
+    const ev = { target: input };
+    input.value = '15';
+
+    range.eventHandler.changeInputFinally(ev);
+
+    expect(range.value).toBe(15);
+  });
 });

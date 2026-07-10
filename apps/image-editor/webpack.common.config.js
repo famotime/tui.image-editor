@@ -15,6 +15,7 @@ module.exports = ({ minify, WEBPACK_BUILD }) => ({
     path: path.resolve('dist'),
     publicPath: '/dist',
     filename: `tui-image-editor${minify ? '.min' : ''}.js`,
+    hashFunction: 'xxhash64',
   },
   resolve: {
     alias: {

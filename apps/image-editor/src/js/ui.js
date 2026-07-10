@@ -376,12 +376,16 @@ class Ui {
     this._helpMenuBarElement = selector('.tui-image-editor-help-menu');
     this._menuBarElement = selector('.tui-image-editor-menu');
     this._subMenuElement = selector('.tui-image-editor-submenu');
-    this._buttonElements = {
-      download: this._selectedElement.querySelectorAll('.tui-image-editor-download-btn'),
-      load: this._selectedElement.querySelectorAll('.tui-image-editor-load-btn'),
-    };
+    this._buttonElements = {};
 
     this._addHelpMenus();
+
+    this._buttonElements.download = this._selectedElement.querySelectorAll(
+      '.tui-image-editor-download-btn'
+    );
+    this._buttonElements.load = this._selectedElement.querySelectorAll(
+      '.tui-image-editor-load-btn'
+    );
 
     this._historyMenu = new History(this._buttonElements[HISTORY_MENU], {
       locale: this._locale,
@@ -458,6 +462,21 @@ class Ui {
     this._addTooltipAttribute(btnElement, menuName);
     btnElement.className = `tie-btn-${menuName} ${cls('item')} ${menuType}`;
     btnElement.innerHTML = menuItemHtml;
+
+    if (menuName === 'load' || menuName === 'download') {
+      btnElement.classList.add('enabled');
+    }
+
+    if (menuName === 'load') {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.className = 'tui-image-editor-load-btn';
+      btnElement.appendChild(fileInput);
+    }
+
+    if (menuName === 'download') {
+      btnElement.classList.add('tui-image-editor-download-btn');
+    }
 
     if (menuType === 'normal') {
       this._menuBarElement.appendChild(btnElement);

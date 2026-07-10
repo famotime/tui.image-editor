@@ -22,7 +22,8 @@ See `docs/project-structure.md` for current module responsibilities.
 - `cd apps/react-image-editor && npm run storybook`: run React Storybook on port `6006`.
 - `cd apps/vue-image-editor && npm run storybook`: run Vue Storybook on port `6006`.
 
-On newer Node/OpenSSL versions, webpack builds may require `NODE_OPTIONS=--openssl-legacy-provider`.
+The build configurations have been optimized (core package output.hashFunction configured to 'xxhash64', wrapper packages migrated to Rollup) so builds run seamlessly on newer Node/OpenSSL versions without requiring `NODE_OPTIONS=--openssl-legacy-provider`.
+
 
 ## Coding Style & Naming Conventions
 

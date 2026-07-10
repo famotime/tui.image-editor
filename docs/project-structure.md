@@ -38,4 +38,5 @@ This repository is a Lerna and npm workspaces monorepo. Package source is under 
 - React wrapper tests: `cd apps/react-image-editor && npm test`.
 - Vue wrapper tests: `cd apps/vue-image-editor && npm test`.
 
-Webpack builds may require `NODE_OPTIONS=--openssl-legacy-provider` on newer Node/OpenSSL combinations.
+The build configurations have been optimized (core package output.hashFunction configured to 'xxhash64', wrapper packages migrated to Rollup) so builds run seamlessly on newer Node/OpenSSL versions without requiring `NODE_OPTIONS=--openssl-legacy-provider`.
+

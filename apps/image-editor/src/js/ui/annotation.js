@@ -94,10 +94,16 @@ class Annotation extends Submenu {
     );
 
     // 6. 序号微调与重置
-    this._els.stepInput.addEventListener('input', (e) => {
+    this._els.stepInput.addEventListener('change', (e) => {
       const step = Math.max(1, parseInt(e.target.value, 10) || 1);
       this.step = step;
+      this._els.stepInput.value = step;
       this.actions.setStep(step);
+    });
+    this._els.stepInput.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        e.target.blur();
+      }
     });
     this._els.resetBtn.addEventListener('click', () => {
       this.step = 1;
@@ -119,6 +125,11 @@ class Annotation extends Submenu {
       this._els.fontSizeRange.value = val;
       this._els.fontSizeInput.value = val;
       this.actions.setFontSize(val);
+    });
+    this._els.fontSizeInput.addEventListener('keydown', (e) => {
+      if (e.keyCode === 13) {
+        e.target.blur();
+      }
     });
 
     // 8. 监听组件中因画笔添加而触发的自增序号同步事件

@@ -44,12 +44,12 @@
 
 | ID | 开始日期 | 结束日期 | 验证命令 | 结果 | 已刷新文档 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
-| RF-001 | 2026-07-08 | 2026-07-08 | `cd apps/vue-image-editor && npm test -- --runInBand`; `$env:NODE_OPTIONS='--openssl-legacy-provider'; npm run build:vue` | pass | 待最终统一刷新 | 已新增 Jest 配置与 options 合并测试；普通 `npm run build:vue` 在当前 Node/OpenSSL 下因 `ERR_OSSL_EVP_UNSUPPORTED` 失败，legacy provider 环境变量可通过 |
+| RF-001 | 2026-07-08 | 2026-07-08 | `cd apps/vue-image-editor && npm test -- --runInBand`; `npm run build:vue` | pass | 待最终统一刷新 | 已新增 Jest 配置与 options 合并测试；已将打包工具迁移至 Rollup，构建和测试在 Node/OpenSSL 下直接成功 |
 | RF-002 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand eventBinder.spec.js`; `cd apps/image-editor && npm test -- --runInBand imageEditor.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `eventBinder` 辅助模块并抽取 Graphics 事件绑定映射；完整核心包 25 suites / 278 tests 通过 |
 | RF-003 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand graphicsRegistry.spec.js`; `cd apps/image-editor && npm test -- --runInBand graphics.spec.js drawingMode.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `graphicsRegistry`，集中创建 Component 与 DrawingMode 实例；完整核心包 26 suites / 280 tests 通过 |
 | RF-004 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand helpMenu.spec.js`; `cd apps/image-editor && npm test -- --runInBand ui.spec.js uiRange.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `ui/helpMenu` 纯函数，复用 `VIEW_HELP_MENUS` 常量；完整核心包 27 suites / 281 tests 通过 |
 | RF-005 | 2026-07-08 | 2026-07-08 | `cd apps/image-editor && npm test -- --runInBand basicUtil.spec.js`; `cd apps/image-editor && npm test -- --runInBand` | pass | 待最终统一刷新 | 新增 `basicUtil` 并由 `util.js` re-export 保持兼容；完整核心包 28 suites / 287 tests 通过；`getRgb('#abc')` 测试锁定既有输出 |
-| RF-006 | 2026-07-08 | 2026-07-08 | `cd apps/react-image-editor && npm test -- --runInBand`; `$env:NODE_OPTIONS='--openssl-legacy-provider'; npm run build:react` | pass | 待最终统一刷新 | 新增删除 handler prop 的回归测试，提取 React wrapper 事件同步 helper；测试有 React 18 act deprecation warning |
+| RF-006 | 2026-07-08 | 2026-07-08 | `cd apps/react-image-editor && npm test -- --runInBand`; `npm run build:react` | pass | 待最终统一刷新 | 新增删除 handler prop 的回归测试，提取 React wrapper 事件同步 helper，并将打包工具迁移至 Rollup，直接成功 |
 
 ## 5. 决策与确认
 

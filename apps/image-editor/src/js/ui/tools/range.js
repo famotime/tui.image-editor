@@ -263,17 +263,15 @@ class Range {
   }
 
   _changeInput(event) {
-    clearTimeout(this._userInputTimer);
-
-    if (!this._isValidKey(event.keyCode)) {
-      event.preventDefault();
+    if (event.keyCode === keyCodes.ENTER) {
+      event.target.blur();
 
       return;
     }
 
-    this._userInputTimer = setTimeout(() => {
-      this._inputSetValue(event.target.value);
-    }, 350);
+    if (!this._isValidKey(event.keyCode)) {
+      event.preventDefault();
+    }
   }
 
   _inputSetValue(stringValue) {

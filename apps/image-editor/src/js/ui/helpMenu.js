@@ -9,5 +9,8 @@ export function makeHelpMenuWithPartitions() {
     ...DELETE_HELP_MENUS,
     '',
     ...VIEW_HELP_MENUS,
+    '',
+    'load',
+    'download',
   ];
 }
