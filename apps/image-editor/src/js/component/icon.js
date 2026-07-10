@@ -237,7 +237,6 @@ class Icon extends Component {
 
     this._icon = null;
 
-    canvas.off('mouse:down', this._handlers.mousedown);
     canvas.off('mouse:move', this._handlers.mousemove);
     canvas.off('mouse:up', this._handlers.mouseup);
   }
