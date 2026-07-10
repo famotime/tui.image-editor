@@ -142,7 +142,7 @@ class Shape extends Submenu {
     this.options.fill = fillColor;
     this.options.strokeWidth = strokeWidth;
 
-    this.actions.setDrawingShape(this.type, { strokeWidth });
+    this.actions.setDrawingShape(this.type, this.options);
   }
 
   /**

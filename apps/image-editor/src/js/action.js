@@ -650,8 +650,8 @@ export default {
             this.changeShape(this.activeObjectId, changeShapeObject, isSilent);
           }
         },
-        setDrawingShape: (shapeType) => {
-          this.setDrawingShape(shapeType);
+        setDrawingShape: (shapeType, options) => {
+          this.setDrawingShape(shapeType, options);
         },
       },
       this._commonAction()
