@@ -654,6 +654,7 @@ class Zoom extends Component {
    * onChangeZoom handler in fabric canvas
    * @private
    */
+  // eslint-disable-next-line complexity
   _changeScrollState({ viewport, zoomLevel }) {
     const canvas = this.getCanvas();
 
@@ -671,6 +672,14 @@ class Zoom extends Component {
     if (canvasImage) {
       const { width: newCssWidth, height: newCssHeight } =
         this._getZoomedDisplayDimension(zoomLevel);
+
+      const { width, height } = canvasImage.getBoundingRect();
+      const baseDimension = this.graphics._calcMaxDimension(width, height);
+
+      this.graphics.setCanvasBackstoreDimension({
+        width: zoomLevel < DEFAULT_ZOOM_LEVEL ? baseDimension.width : newCssWidth,
+        height: zoomLevel < DEFAULT_ZOOM_LEVEL ? baseDimension.height : newCssHeight,
+      });
 
       if (canvas.wrapperEl) {
         canvas.wrapperEl.style.width = `${newCssWidth}px`;
@@ -778,13 +787,42 @@ class Zoom extends Component {
    * @returns {{width: number, height: number}} zoomed display dimension
    * @private
    */
-  // eslint-disable-next-line no-unused-vars
   _getZoomedDisplayDimension(zoomLevel) {
     const canvasImage = this.getCanvasImage();
     const { width, height } = canvasImage.getBoundingRect();
     const baseDimension = this.graphics._calcMaxDimension(width, height);
 
-    return baseDimension;
+    if (zoomLevel < DEFAULT_ZOOM_LEVEL) {
+      return {
+        width: Math.round(baseDimension.width * zoomLevel),
+        height: Math.round(baseDimension.height * zoomLevel),
+      };
+    }
+
+    const availableDimension = this._getAvailableDisplayDimension();
+    const targetDimension = {
+      width: Math.max(baseDimension.width, availableDimension.width),
+      height: Math.max(baseDimension.height, availableDimension.height),
+    };
+    const progress = clamp(
+      (zoomLevel - DEFAULT_ZOOM_LEVEL) / (MAX_ZOOM_LEVEL - DEFAULT_ZOOM_LEVEL),
+      0,
+      1
+    );
+
+    const displayDimension = {
+      width: Math.round(
+        baseDimension.width + (targetDimension.width - baseDimension.width) * progress
+      ),
+      height: Math.round(
+        baseDimension.height + (targetDimension.height - baseDimension.height) * progress
+      ),
+    };
+
+    return {
+      width: Math.max(displayDimension.width, Math.round(baseDimension.width * zoomLevel)),
+      height: Math.max(displayDimension.height, Math.round(baseDimension.height * zoomLevel)),
+    };
   }
 
   /**

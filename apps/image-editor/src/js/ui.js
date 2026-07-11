@@ -145,12 +145,17 @@ class Ui {
    * // Apply the ui state while preserving the previous attribute (for example, if responsive Ui)
    * imageEditor.ui.resizeEditor();
    */
+  // eslint-disable-next-line complexity
   resizeEditor({ uiSize, imageSize = this.imageSize } = {}) {
     if (imageSize !== this.imageSize) {
       this.imageSize = imageSize;
     }
     if (uiSize) {
       this._setUiSize(uiSize);
+    }
+
+    if (this._actions && this._actions.main && this._actions.main.adjustCanvasDimension) {
+      this._actions.main.adjustCanvasDimension();
     }
 
     const { width, height } = this._getCanvasMaxDimension();

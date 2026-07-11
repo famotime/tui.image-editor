@@ -491,6 +491,16 @@ class Graphics {
   }
 
   /**
+   * Get zoom level
+   * @returns {number}
+   */
+  getZoomLevel() {
+    const zoom = this.getComponent(components.ZOOM);
+
+    return zoom.zoomLevel;
+  }
+
+  /**
    * Start zoom-in mode
    */
   startZoomInMode() {
@@ -1054,9 +1064,20 @@ class Graphics {
    * @returns {{width: number, height: number}} - Max width & Max height
    * @private
    */
+  // eslint-disable-next-line complexity
   _calcMaxDimension(width, height) {
-    const wScaleFactor = this.cssMaxWidth / width;
-    const hScaleFactor = this.cssMaxHeight / height;
+    let { cssMaxWidth, cssMaxHeight } = this;
+
+    if (this._canvas && this._canvas.wrapperEl && this._canvas.wrapperEl.closest) {
+      const editorWrap = this._canvas.wrapperEl.closest('.tui-image-editor-wrap');
+      if (editorWrap) {
+        cssMaxWidth = editorWrap.clientWidth || cssMaxWidth;
+        cssMaxHeight = editorWrap.clientHeight || cssMaxHeight;
+      }
+    }
+
+    const wScaleFactor = cssMaxWidth / width;
+    const hScaleFactor = cssMaxHeight / height;
     const scaleFactor = Math.min(wScaleFactor, hScaleFactor);
 
     return {

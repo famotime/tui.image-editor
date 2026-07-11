@@ -76,6 +76,11 @@ export default {
 
     return extend(
       {
+        adjustCanvasDimension: () => {
+          if (this._graphics.getZoomLevel() === 1.0) {
+            this._graphics.adjustCanvasDimension();
+          }
+        },
         initLoadImage: (imagePath, imageName) =>
           this.loadImageFromURL(imagePath, imageName).then((sizeValue) => {
             exitCropOnAction();
