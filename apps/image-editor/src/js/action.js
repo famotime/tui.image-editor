@@ -1017,43 +1017,32 @@ export default {
   /**
    * Get mosaic pattern canvas
    * @param {number} mosaicSize - mosaic size
-   * @param {function} callback - callback function
+   * @returns {HTMLCanvasElement|null} - mosaic pattern canvas
    * @private
    */
-  _getMosaicPatternCanvas(mosaicSize, callback) {
+  _getMosaicPatternCanvas(mosaicSize) {
     const canvas = this._graphics.getCanvas();
     const canvasImage = this._graphics.canvasImage;
     if (!canvasImage) {
-      callback(null);
-      return;
+      return null;
     }
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
-    const tempStaticCanvas = new fabric.StaticCanvas(tempCanvas);
+    const ctx = tempCanvas.getContext('2d');
 
-    canvasImage.clone((clonedImage) => {
-      clonedImage.set({
-        left: canvasImage.left,
-        top: canvasImage.top,
-        originX: canvasImage.originX,
-        originY: canvasImage.originY,
-      });
-      tempStaticCanvas.add(clonedImage);
-      tempStaticCanvas.renderAll();
+    // 直接在临时 Canvas 绘制背景图（考虑其缩放、位置和旋转等属性）
+    canvasImage.render(ctx);
 
-      const img = new fabric.Image(tempCanvas);
-      const pixelateFilter = new fabric.Image.filters.Pixelate({
-        blocksize: mosaicSize,
-      });
-      img.filters.push(pixelateFilter);
-      img.applyFilters();
-
-      const filteredCanvas = img.toCanvasElement();
-      tempStaticCanvas.clear();
-      callback(filteredCanvas);
+    const img = new fabric.Image(tempCanvas);
+    const pixelateFilter = new fabric.Image.filters.Pixelate({
+      blocksize: mosaicSize,
     });
+    img.filters.push(pixelateFilter);
+    img.applyFilters();
+
+    return img.toCanvasElement();
   },
 
   /**
@@ -1078,15 +1067,14 @@ export default {
             this.startDrawingMode('SHAPE');
           } else if (mode === 'brush') {
             this.startDrawingMode('FREE_DRAWING');
-            this._getMosaicPatternCanvas(settings.size, (filteredCanvas) => {
-              if (filteredCanvas) {
-                const canvas = this._graphics.getCanvas();
-                const brush = new fabric.PatternBrush(canvas);
-                brush.source = filteredCanvas;
-                brush.width = settings.width;
-                canvas.freeDrawingBrush = brush;
-              }
-            });
+            const filteredCanvas = this._getMosaicPatternCanvas(settings.size);
+            if (filteredCanvas) {
+              const canvas = this._graphics.getCanvas();
+              const brush = new fabric.PatternBrush(canvas);
+              brush.source = filteredCanvas;
+              brush.width = settings.width;
+              canvas.freeDrawingBrush = brush;
+            }
           }
         },
         changeMosaicSize: (mode, size) => {
@@ -1109,14 +1097,13 @@ export default {
           }
 
           if (mode === 'brush') {
-            this._getMosaicPatternCanvas(size, (filteredCanvas) => {
-              if (filteredCanvas) {
-                const canvas = this._graphics.getCanvas();
-                if (canvas.freeDrawingBrush) {
-                  canvas.freeDrawingBrush.source = filteredCanvas;
-                }
+            const filteredCanvas = this._getMosaicPatternCanvas(size);
+            if (filteredCanvas) {
+              const canvas = this._graphics.getCanvas();
+              if (canvas.freeDrawingBrush) {
+                canvas.freeDrawingBrush.source = filteredCanvas;
               }
-            });
+            }
           }
         },
         changeMosaicBrushWidth: (width) => {

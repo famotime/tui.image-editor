@@ -354,6 +354,16 @@ describe('UI', () => {
 
       expect(setBrushSpy).toHaveBeenCalledWith({ width: 25 });
     });
+
+    it('should set mosaic mode to brush', () => {
+      const stopDrawingModeSpy = jest.spyOn(imageEditorMock, 'stopDrawingMode');
+      const startDrawingModeSpy = jest.spyOn(imageEditorMock, 'startDrawingMode');
+
+      mosaicAction.setMosaicMode('brush', { size: 10, width: 20 });
+
+      expect(stopDrawingModeSpy).toHaveBeenCalled();
+      expect(startDrawingModeSpy).toHaveBeenCalledWith('FREE_DRAWING');
+    });
   });
 
   describe('commonAction', () => {

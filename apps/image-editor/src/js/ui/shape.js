@@ -156,6 +156,7 @@ class Shape extends Submenu {
     this._els.shapeSelectButton.classList.add('rect');
     this.actions.changeSelectableAll(false);
     this.actions.modeChange('shape');
+    this.actions.setDrawingShape(this.type, this.options);
   }
 
   /**
