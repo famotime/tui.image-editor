@@ -89,7 +89,8 @@ export const componentNames = keyMirror(
   'SHAPE',
   'ZOOM',
   'RESIZE',
-  'ANNOTATION'
+  'ANNOTATION',
+  'ERASER'
 );
 
 /**
@@ -142,6 +143,7 @@ export const commandNames = {
   SET_OBJECT_POSITION: 'setObjectPosition',
   CHANGE_SELECTION: 'changeSelection',
   RESIZE_IMAGE: 'resize',
+  APPLY_ERASER: 'applyEraser',
 };
 
 /**
@@ -229,7 +231,8 @@ export const drawingModes = keyMirror(
   'ICON',
   'ZOOM',
   'RESIZE',
-  'ANNOTATION'
+  'ANNOTATION',
+  'ERASER'
 );
 
 /**
@@ -243,6 +246,7 @@ export const drawingMenuNames = {
   SHAPE: 'shape',
   ZOOM: 'zoom',
   ANNOTATION: 'annotation',
+  ERASER: 'eraser',
 };
 
 /**

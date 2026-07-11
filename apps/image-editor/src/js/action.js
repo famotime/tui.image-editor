@@ -34,6 +34,7 @@ export default {
       history: this._historyAction(),
       mosaic: this._mosaicAction(),
       annotation: this._annotationAction(),
+      eraser: this._eraserAction(),
     };
   },
 
@@ -1176,6 +1177,9 @@ export default {
           case drawingMenuNames.ANNOTATION:
             this._changeActivateMode(ANNOTATION);
             break;
+          case drawingMenuNames.ERASER:
+            this._changeActivateMode(drawingModes.ERASER);
+            break;
           default:
             break;
         }
@@ -1187,6 +1191,24 @@ export default {
     };
   },
 
+  /**
+   * Eraser Action
+   * @returns {Object} actions for ui eraser
+   * @private
+   */
+  _eraserAction() {
+    return extend(
+      {
+        setEraserMode: (width) => {
+          this.startDrawingMode('ERASER', { width });
+        },
+        changeEraserWidth: (width) => {
+          this.setBrush({ width });
+        },
+      },
+      this._commonAction()
+    );
+  },
   /**
    * Mixin
    * @param {ImageEditor} ImageEditor instance

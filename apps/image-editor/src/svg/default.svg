@@ -352,5 +352,10 @@
     <path fill="none" stroke="none" d="M0 0h24v24H0z"/>
     <path stroke="none" fill="inherit" d="M3 3h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5zM3 10h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5zM3 17h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5z"/>
 </symbol>
+<symbol id="ic-eraser" viewBox="0 0 24 24">
+    <path d="M0 0h24v24H0z" stroke="none" fill="none"/>
+    <path fill="none" stroke="inherit" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 20H7L3 16C2 15 2 13 3 12L13 2C14 1 16 1 17 2L21 6C22 7 22 9 21 10L12 19"/>
+    <path fill="none" stroke="inherit" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 14L10 7"/>
+</symbol>
 </defs>
 </svg>

@@ -8,6 +8,7 @@ import '@/command/addImageObject';
 import '@/command/addObject';
 import '@/command/addShape';
 import '@/command/addText';
+import '@/command/applyEraser';
 import '@/command/applyFilter';
 import '@/command/changeIconColor';
 import '@/command/changeShape';

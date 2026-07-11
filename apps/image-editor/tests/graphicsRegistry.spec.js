@@ -20,6 +20,7 @@ describe('graphicsRegistry', () => {
       drawingModes.ZOOM,
       drawingModes.RESIZE,
       drawingModes.ANNOTATION,
+      drawingModes.ERASER,
     ]);
   });
 
@@ -44,6 +45,7 @@ describe('graphicsRegistry', () => {
       components.ZOOM,
       components.RESIZE,
       components.ANNOTATION,
+      components.ERASER,
     ]);
 
     graphics.destroy();

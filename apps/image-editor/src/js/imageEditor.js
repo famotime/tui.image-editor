@@ -220,6 +220,7 @@ class ImageEditor {
       cssMaxWidth: options.cssMaxWidth,
       cssMaxHeight: options.cssMaxHeight,
     });
+    this._graphics.getEditor = () => this;
 
     /**
      * Event handler list

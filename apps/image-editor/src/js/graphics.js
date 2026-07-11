@@ -1310,6 +1310,10 @@ class Graphics {
    * @private
    */
   _onPathCreated(obj) {
+    if (obj.path._isEraserPath) {
+      return;
+    }
+
     const { x: left, y: top } = obj.path.getCenterPoint();
     obj.path.set(
       extend(

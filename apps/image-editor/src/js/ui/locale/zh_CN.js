@@ -132,6 +132,7 @@ const zhCN = {
   NoArrow: '无箭头',
   SingleArrow: '单箭头',
   DoubleArrow: '双箭头',
+  Eraser: '橡皮',
 };
 
 export default zhCN;

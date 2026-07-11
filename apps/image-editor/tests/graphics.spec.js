@@ -40,6 +40,17 @@ describe('Graphics', () => {
     expect(pathObj.top).toBe(y);
   });
 
+  it('should ignore eraser paths when path has been drawn', () => {
+    const pathObj = new fabric.Path('M 0 0 L 100 0 L 100 100 L 0 100 z');
+    pathObj._isEraserPath = true;
+    const addObjectSpy = jest.fn();
+
+    graphics.on('addObject', addObjectSpy);
+    graphics._onPathCreated({ path: pathObj });
+
+    expect(addObjectSpy).not.toHaveBeenCalled();
+  });
+
   it('should attach canvas events', () => {
     const onMousedown = jest.fn();
     const onObjectAdded = jest.fn();
@@ -133,6 +144,13 @@ describe('Graphics', () => {
     expect(brush).toMatchObject({ width: 12, color: 'rgba(255,255,0,1)' });
   });
 
+  it('should use fabric eraser brush in ERASER drawing mode', () => {
+    graphics.startDrawingMode(drawingModes.ERASER, { width: 18 });
+
+    expect(canvas.freeDrawingBrush).toEqual(expect.any(fabric.EraserBrush));
+    expect(canvas.freeDrawingBrush.width).toBe(18);
+  });
+
   it('should change a drawing shape', () => {
     const shapeComp = graphics.getComponent(components.SHAPE);
     graphics.setDrawingShape('circle', {
@@ -208,11 +226,11 @@ describe('Graphics', () => {
       const obj1 = new fabric.Object({ type: 'rect', visible: true });
       const obj2 = new fabric.Object({ type: 'text', visible: true });
       const cropzone = new fabric.Object({ type: 'cropzone', visible: true });
-      
+
       canvas.add(obj1, obj2, cropzone);
-      
+
       graphics.changeVisibilityAll(false);
-      
+
       expect(obj1.visible).toBe(false);
       expect(obj2.visible).toBe(false);
       expect(cropzone.visible).toBe(true);
@@ -222,7 +240,7 @@ describe('Graphics', () => {
       const canvas = graphics.getCanvas();
       const obj1 = new fabric.Object({ type: 'rect', visible: true });
       canvas.add(obj1);
-      
+
       let newState = graphics.toggleVisibilityAll();
       expect(newState).toBe(false);
       expect(obj1.visible).toBe(false);

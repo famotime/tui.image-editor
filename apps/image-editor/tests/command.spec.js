@@ -17,6 +17,7 @@ import changeShapeCommand from '@/command/changeShape';
 import clearObjectsCommand from '@/command/clearObjects';
 import removeObjectCommand from '@/command/removeObject';
 import resizeCommand from '@/command/resize';
+import applyEraserCommand from '@/command/applyEraser';
 
 import img1 from 'fixtures/sampleImage.jpg';
 import img2 from 'fixtures/TOAST UI Component.png';
@@ -37,6 +38,7 @@ describe('commandFactory', () => {
     commandFactory.register(clearObjectsCommand);
     commandFactory.register(removeObjectCommand);
     commandFactory.register(resizeCommand);
+    commandFactory.register(applyEraserCommand);
   });
 
   beforeEach(() => {
@@ -528,6 +530,32 @@ describe('commandFactory', () => {
       const { width, height, scaleX, scaleY } = mockImage;
 
       expect({ width: width * scaleX, height: height * scaleY }).toEqual(dimensions);
+    });
+  });
+
+  describe('applyEraserCommand', () => {
+    it('should apply and restore object eraser data', async () => {
+      const object = new fabric.Path('M 0 0 L 100 0');
+      const eraserPath = new fabric.Path('M 50 -10 L 50 10');
+      const newEraser = new fabric.Eraser([eraserPath]);
+
+      graphics.add(object);
+      const objectId = graphics.getObjectId(object);
+
+      await invoker.execute(commands.APPLY_ERASER, graphics, [
+        {
+          id: objectId,
+          oldEraser: null,
+          newEraser,
+        },
+      ]);
+
+      expect(object.eraser).toBe(newEraser);
+      expect(object.clipPath).toBeUndefined();
+
+      await invoker.undo();
+
+      expect(object.eraser).toBeNull();
     });
   });
 });

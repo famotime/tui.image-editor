@@ -11,6 +11,7 @@ import Shape from '@/component/shape';
 import Zoom from '@/component/zoom';
 import Resize from '@/component/resize';
 import Annotation from '@/component/annotation';
+import Eraser from '@/component/eraser';
 import CropperDrawingMode from '@/drawingMode/cropper';
 import FreeDrawingMode from '@/drawingMode/freeDrawing';
 import LineDrawingMode from '@/drawingMode/lineDrawing';
@@ -20,6 +21,7 @@ import IconDrawingMode from '@/drawingMode/icon';
 import ZoomDrawingMode from '@/drawingMode/zoom';
 import ResizeDrawingMode from '@/drawingMode/resize';
 import AnnotationDrawingMode from '@/drawingMode/annotation';
+import EraserDrawingMode from '@/drawingMode/eraser';
 
 const DRAWING_MODE_TYPES = [
   CropperDrawingMode,
@@ -31,6 +33,7 @@ const DRAWING_MODE_TYPES = [
   ZoomDrawingMode,
   ResizeDrawingMode,
   AnnotationDrawingMode,
+  EraserDrawingMode,
 ];
 
 const COMPONENT_TYPES = [
@@ -47,6 +50,7 @@ const COMPONENT_TYPES = [
   Zoom,
   Resize,
   Annotation,
+  Eraser,
 ];
 
 export function createDrawingModeInstances() {
