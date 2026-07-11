@@ -132,6 +132,9 @@ const zhCN = {
   NoArrow: '无箭头',
   SingleArrow: '单箭头',
   DoubleArrow: '双箭头',
+  Lasso: '套索',
+  Rectangular: '矩形选择',
+  Freehand: '自由选择',
   Eraser: '橡皮',
 };
 

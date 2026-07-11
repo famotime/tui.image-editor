@@ -47,6 +47,7 @@ export default ({
     .tie-text-align-button.tie-text-align-center .tui-image-editor-button.center label,
     .tie-text-align-button.tie-text-align-right .tui-image-editor-button.right label,
     .tie-mask-apply.apply.active .tui-image-editor-button.apply label,
+    .tie-lasso-select-button .tui-image-editor-button.active label,
     .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button:hover > label,
     .tui-image-editor-container .tui-image-editor-checkbox label > span {
         ${subMenuLabelActive}

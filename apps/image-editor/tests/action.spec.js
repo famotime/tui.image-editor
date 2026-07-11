@@ -366,6 +366,23 @@ describe('UI', () => {
     });
   });
 
+  describe('lassoAction', () => {
+    let lassoAction;
+
+    beforeEach(() => {
+      lassoAction = actions.lasso;
+    });
+
+    it('should update lasso mode options when the drawing mode is already lasso', () => {
+      const lasso = imageEditorMock._graphics.getComponent('LASSO');
+
+      lassoAction.setLassoMode('rectangular');
+      lassoAction.setLassoMode('freehand');
+
+      expect(lasso.getSelectType()).toBe('freehand');
+    });
+  });
+
   describe('commonAction', () => {
     it('should return to the getActions method must contain commonAction.', () => {
       [
@@ -379,6 +396,7 @@ describe('UI', () => {
         'icon',
         'filter',
         'mosaic',
+        'lasso',
       ].forEach((submenu) => {
         expect(actions[submenu].modeChange).toBeDefined();
         expect(actions[submenu].deactivateAll).toBeDefined();
@@ -603,6 +621,15 @@ describe('UI', () => {
         imageEditorMock.fire('selectionCleared');
 
         expect(changeCursorSpy).toHaveBeenCalledWith('text');
+      });
+
+      it('should keep lasso drawing mode when selectionCleared occurs in the lasso menu state', () => {
+        imageEditorMock.ui.submenu = 'lasso';
+        const stopDrawingModeSpy = jest.spyOn(imageEditorMock, 'stopDrawingMode');
+
+        imageEditorMock.fire('selectionCleared');
+
+        expect(stopDrawingModeSpy).not.toHaveBeenCalled();
       });
     });
   });

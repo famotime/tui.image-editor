@@ -34,6 +34,7 @@ export default {
       history: this._historyAction(),
       mosaic: this._mosaicAction(),
       annotation: this._annotationAction(),
+      lasso: this._lassoAction(),
       eraser: this._eraserAction(),
     };
   },
@@ -883,7 +884,7 @@ export default {
             if (this.ui.submenu !== 'mosaic') {
               this.ui.changeMenu('mosaic', false, false);
             }
-          } else {
+          } else if (this.ui.submenu !== 'lasso') {
             if (this.getDrawingMode() !== 'SHAPE') {
               this.stopDrawingMode();
             }
@@ -907,24 +908,30 @@ export default {
             if (this.ui.submenu !== 'mosaic') {
               this.ui.changeMenu('mosaic', false, false);
             }
-          } else if (this.ui.submenu !== 'mosaic' && this.ui.submenu !== 'draw') {
+          } else if (
+            this.ui.submenu !== 'mosaic' &&
+            this.ui.submenu !== 'draw' &&
+            this.ui.submenu !== 'lasso'
+          ) {
             this.ui.changeMenu('draw', false, false);
             this.ui.draw.changeStandbyMode();
           }
         } else if (['i-text', 'text'].indexOf(obj.type) > -1) {
-          if (this.ui.submenu !== 'text') {
+          if (this.ui.submenu !== 'text' && this.ui.submenu !== 'lasso') {
             this.ui.changeMenu('text', false, false);
           }
 
           this.ui.text.setTextStyleStateOnAction(obj);
         } else if (obj.type === 'icon') {
-          if (this.getDrawingMode() !== 'ICON') {
-            this.stopDrawingMode();
+          if (this.ui.submenu !== 'lasso') {
+            if (this.getDrawingMode() !== 'ICON') {
+              this.stopDrawingMode();
+            }
+            if (this.ui.submenu !== 'icon') {
+              this.ui.changeMenu('icon', false, false);
+            }
+            this.ui.icon.setIconPickerColor(obj.fill);
           }
-          if (this.ui.submenu !== 'icon') {
-            this.ui.changeMenu('icon', false, false);
-          }
-          this.ui.icon.setIconPickerColor(obj.fill);
         }
       },
       /* eslint-enable complexity */
@@ -973,7 +980,7 @@ export default {
         if (this.ui.submenu === 'text') {
           this.changeCursor('text');
         } else if (
-          !includes(['draw', 'crop', 'resize', 'shape', 'icon', 'mosaic'], this.ui.submenu)
+          !includes(['draw', 'crop', 'resize', 'shape', 'icon', 'mosaic', 'lasso'], this.ui.submenu)
         ) {
           this.stopDrawingMode();
         }
@@ -1177,6 +1184,9 @@ export default {
           case drawingMenuNames.ANNOTATION:
             this._changeActivateMode(ANNOTATION);
             break;
+          case drawingMenuNames.LASSO:
+            this._changeActivateMode(drawingModes.LASSO);
+            break;
           case drawingMenuNames.ERASER:
             this._changeActivateMode(drawingModes.ERASER);
             break;
@@ -1189,6 +1199,33 @@ export default {
       discardSelection: this.discardSelection.bind(this),
       stopDrawingMode: this.stopDrawingMode.bind(this),
     };
+  },
+
+  /**
+   * Lasso Action
+   * @returns {Object} actions for ui lasso
+   * @private
+   */
+  _lassoAction() {
+    return extend(
+      {
+        setLassoMode: (mode) => {
+          const lasso = this._graphics.getComponent('LASSO');
+
+          if (lasso) {
+            lasso.setSelectType(mode);
+          }
+
+          this.startDrawingMode('LASSO', { selectType: mode });
+        },
+        getLassoMode: () => {
+          const lasso = this._graphics.getComponent('LASSO');
+
+          return lasso ? lasso.getSelectType() : 'rectangular';
+        },
+      },
+      this._commonAction()
+    );
   },
 
   /**
@@ -1209,6 +1246,7 @@ export default {
       this._commonAction()
     );
   },
+
   /**
    * Mixin
    * @param {ImageEditor} ImageEditor instance

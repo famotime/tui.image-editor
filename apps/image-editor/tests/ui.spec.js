@@ -1,4 +1,5 @@
 import UI from '@/ui';
+import Lasso from '@/ui/lasso';
 import { HELP_MENUS } from '@/consts';
 
 describe('UI', () => {
@@ -156,5 +157,42 @@ describe('UI', () => {
 
       expect(ui._editorElement.style).toMatchObject({ top: '0px', left: '150px' });
     });
+  });
+});
+
+describe('Lasso UI', () => {
+  let lasso, actions, subMenuElement;
+
+  beforeEach(() => {
+    subMenuElement = document.createElement('div');
+    actions = {
+      setLassoMode: jest.fn(),
+      getLassoMode: jest.fn(() => null),
+      stopDrawingMode: jest.fn(),
+      discardSelection: jest.fn(),
+    };
+    lasso = new Lasso(subMenuElement, {
+      locale: { localize: (message) => message },
+      makeSvgIcon: () => '',
+      menuBarPosition: 'bottom',
+      usageStatistics: false,
+    });
+    lasso.addEvent(actions);
+  });
+
+  afterEach(() => {
+    lasso.destroy();
+  });
+
+  it('should keep freehand selected after standby and start until the user changes it', () => {
+    const freehandButton = subMenuElement.querySelector('.freehand .tui-image-editor-button');
+
+    freehandButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    lasso.changeStandbyMode();
+    lasso.changeStartMode();
+
+    expect(lasso.type).toBe('freehand');
+    expect(freehandButton.classList.contains('active')).toBe(true);
+    expect(actions.setLassoMode).toHaveBeenLastCalledWith('freehand');
   });
 });

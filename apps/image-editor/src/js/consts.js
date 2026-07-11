@@ -90,6 +90,7 @@ export const componentNames = keyMirror(
   'ZOOM',
   'RESIZE',
   'ANNOTATION',
+  'LASSO',
   'ERASER'
 );
 
@@ -232,6 +233,7 @@ export const drawingModes = keyMirror(
   'ZOOM',
   'RESIZE',
   'ANNOTATION',
+  'LASSO',
   'ERASER'
 );
 
@@ -246,6 +248,7 @@ export const drawingMenuNames = {
   SHAPE: 'shape',
   ZOOM: 'zoom',
   ANNOTATION: 'annotation',
+  LASSO: 'lasso',
   ERASER: 'eraser',
 };
 

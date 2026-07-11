@@ -11,6 +11,7 @@ import Shape from '@/component/shape';
 import Zoom from '@/component/zoom';
 import Resize from '@/component/resize';
 import Annotation from '@/component/annotation';
+import Lasso from '@/component/lasso';
 import Eraser from '@/component/eraser';
 import CropperDrawingMode from '@/drawingMode/cropper';
 import FreeDrawingMode from '@/drawingMode/freeDrawing';
@@ -21,6 +22,7 @@ import IconDrawingMode from '@/drawingMode/icon';
 import ZoomDrawingMode from '@/drawingMode/zoom';
 import ResizeDrawingMode from '@/drawingMode/resize';
 import AnnotationDrawingMode from '@/drawingMode/annotation';
+import LassoDrawingMode from '@/drawingMode/lasso';
 import EraserDrawingMode from '@/drawingMode/eraser';
 
 const DRAWING_MODE_TYPES = [
@@ -33,6 +35,7 @@ const DRAWING_MODE_TYPES = [
   ZoomDrawingMode,
   ResizeDrawingMode,
   AnnotationDrawingMode,
+  LassoDrawingMode,
   EraserDrawingMode,
 ];
 
@@ -50,6 +53,7 @@ const COMPONENT_TYPES = [
   Zoom,
   Resize,
   Annotation,
+  Lasso,
   Eraser,
 ];
 
