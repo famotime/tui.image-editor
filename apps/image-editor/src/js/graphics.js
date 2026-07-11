@@ -1325,6 +1325,8 @@ class Graphics {
       )
     );
 
+    this._addFabricObject(obj.path);
+
     const params = this.createObjectProperties(obj.path);
 
     this.fire(events.ADD_OBJECT, params);

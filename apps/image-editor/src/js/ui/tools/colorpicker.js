@@ -98,6 +98,9 @@ class Colorpicker {
    * @param {string} color color value
    */
   set color(color) {
+    if (color && typeof color === 'object' && typeof color.color !== 'undefined') {
+      color = color.color;
+    }
     this._color = color;
     this._changeColorElement(color);
   }
@@ -108,11 +111,11 @@ class Colorpicker {
    * #private
    */
   _changeColorElement(color) {
-    if (color) {
+    if (color && color !== 'transparent') {
       this.colorElement.classList.remove('transparent');
       this.colorElement.style.backgroundColor = color;
     } else {
-      this.colorElement.style.backgroundColor = '#fff';
+      this.colorElement.style.backgroundColor = '';
       this.colorElement.classList.add('transparent');
     }
   }
@@ -127,7 +130,7 @@ class Colorpicker {
 
     this.colorElement = document.createElement('div');
     this.colorElement.className = 'color-picker-value';
-    if (defaultColor) {
+    if (defaultColor && defaultColor !== 'transparent') {
       this.colorElement.style.backgroundColor = defaultColor;
     } else {
       this.colorElement.classList.add('transparent');

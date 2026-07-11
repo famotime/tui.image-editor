@@ -366,14 +366,12 @@ class Range {
 
   _changeSlideFinally(event) {
     event.stopPropagation();
-    if (event.target.className !== 'tui-image-editor-range') {
-      return;
-    }
-    const touchPx = event.offsetX;
-    const ratio = touchPx / this.rangeWidth;
+
+    const rect = this.rangeElement.getBoundingClientRect();
+    let ratio = (event.clientX - rect.left) / rect.width;
+    ratio = clamp(ratio, 0, 1);
+
     const value = this._absMax * ratio + this._min;
-    this.pointer.style.left = `${ratio * this.rangeWidth}px`;
-    this.subbar.style.right = `${(1 - ratio) * this.rangeWidth}px`;
     this.value = value;
 
     this.fire('change', value, true);

@@ -54,4 +54,21 @@ describe('Range', () => {
 
     expect(range.value).toBe(15);
   });
+
+  it('should update range value on changeSlideFinally (click anywhere on slider)', () => {
+    slider.getBoundingClientRect = () => ({
+      left: 100,
+      width: 200,
+    });
+
+    const ev = {
+      stopPropagation: jest.fn(),
+      clientX: 150,
+    };
+
+    range.eventHandler.changeSlideFinally(ev);
+
+    expect(range.value).toBe(-180);
+    expect(ev.stopPropagation).toHaveBeenCalled();
+  });
 });

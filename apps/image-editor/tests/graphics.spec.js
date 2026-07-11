@@ -51,6 +51,18 @@ describe('Graphics', () => {
     expect(addObjectSpy).not.toHaveBeenCalled();
   });
 
+  it('should register path object in _objects when path is created', () => {
+    const pathObj = new fabric.Path('M 0 0 L 100 0 L 100 100 L 0 100 z');
+    const addObjectSpy = jest.fn();
+
+    graphics.on('addObject', addObjectSpy);
+    graphics._onPathCreated({ path: pathObj });
+
+    const pathId = graphics.getObjectId(pathObj);
+    expect(graphics.getObject(pathId)).toBe(pathObj);
+    expect(addObjectSpy).toHaveBeenCalled();
+  });
+
   it('should attach canvas events', () => {
     const onMousedown = jest.fn();
     const onObjectAdded = jest.fn();
