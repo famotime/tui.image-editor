@@ -18,6 +18,7 @@ import Icon from '@/ui/icon';
 import Draw from '@/ui/draw';
 import Filter from '@/ui/filter';
 import Annotation from '@/ui/annotation';
+import Mosaic from '@/ui/mosaic';
 import History from '@/ui/history';
 import Locale from '@/ui/locale/locale';
 import { makeHelpMenuWithPartitions } from '@/ui/helpMenu';
@@ -34,6 +35,7 @@ const SUB_UI_COMPONENT = {
   Draw,
   Filter,
   Annotation,
+  Mosaic,
 };
 
 const BI_EXPRESSION_MINSIZE_WHEN_TOP_POSITION = '1300';
@@ -262,6 +264,7 @@ class Ui {
           'text',
           'mask',
           'filter',
+          'mosaic',
           'annotation',
         ],
         initMenu: '',

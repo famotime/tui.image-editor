@@ -306,17 +306,76 @@ describe('UI', () => {
     });
   });
 
+  describe('mosaicAction', () => {
+    let mosaicAction;
+
+    beforeEach(() => {
+      mosaicAction = actions.mosaic;
+    });
+
+    it('should set mosaic mode to rect', () => {
+      const stopDrawingModeSpy = jest.spyOn(imageEditorMock, 'stopDrawingMode');
+      const setDrawingShapeSpy = jest.spyOn(imageEditorMock, 'setDrawingShape');
+      const startDrawingModeSpy = jest.spyOn(imageEditorMock, 'startDrawingMode');
+
+      mosaicAction.setMosaicMode('rect', { size: 10, width: 20 });
+
+      expect(stopDrawingModeSpy).toHaveBeenCalled();
+      expect(setDrawingShapeSpy).toHaveBeenCalledWith('rect', {
+        fill: {
+          type: 'filter',
+          filter: [{ pixelate: 10 }],
+        },
+        strokeWidth: 0,
+        stroke: 'transparent',
+      });
+      expect(startDrawingModeSpy).toHaveBeenCalledWith('SHAPE');
+    });
+
+    it('should set mosaic size', () => {
+      const setDrawingShapeSpy = jest.spyOn(imageEditorMock, 'setDrawingShape');
+
+      mosaicAction.changeMosaicSize('rect', 15);
+
+      expect(setDrawingShapeSpy).toHaveBeenCalledWith('rect', {
+        fill: {
+          type: 'filter',
+          filter: [{ pixelate: 15 }],
+        },
+        strokeWidth: 0,
+        stroke: 'transparent',
+      });
+    });
+
+    it('should set brush width', () => {
+      const setBrushSpy = jest.spyOn(imageEditorMock, 'setBrush');
+
+      mosaicAction.changeMosaicBrushWidth(25);
+
+      expect(setBrushSpy).toHaveBeenCalledWith({ width: 25 });
+    });
+  });
+
   describe('commonAction', () => {
     it('should return to the getActions method must contain commonAction.', () => {
-      ['shape', 'crop', 'flip', 'rotate', 'text', 'mask', 'draw', 'icon', 'filter'].forEach(
-        (submenu) => {
-          expect(actions[submenu].modeChange).toBeDefined();
-          expect(actions[submenu].deactivateAll).toBeDefined();
-          expect(actions[submenu].changeSelectableAll).toBeDefined();
-          expect(actions[submenu].discardSelection).toBeDefined();
-          expect(actions[submenu].stopDrawingMode).toBeDefined();
-        }
-      );
+      [
+        'shape',
+        'crop',
+        'flip',
+        'rotate',
+        'text',
+        'mask',
+        'draw',
+        'icon',
+        'filter',
+        'mosaic',
+      ].forEach((submenu) => {
+        expect(actions[submenu].modeChange).toBeDefined();
+        expect(actions[submenu].deactivateAll).toBeDefined();
+        expect(actions[submenu].changeSelectableAll).toBeDefined();
+        expect(actions[submenu].discardSelection).toBeDefined();
+        expect(actions[submenu].stopDrawingMode).toBeDefined();
+      });
     });
 
     describe('modeChange()', () => {
@@ -422,6 +481,46 @@ describe('UI', () => {
         expect(setMaxStrokeValueSpy).toHaveBeenCalled();
       });
 
+      it('should stay in mosaic if the target of objectActivated is a mosaic shape', () => {
+        imageEditorMock.ui.submenu = 'mosaic';
+        imageEditorMock.ui.changeMenu = jest.fn();
+        imageEditorMock.ui.shape.setShapeStatus = jest.fn();
+        jest.spyOn(imageEditorMock.ui.shape, 'setMaxStrokeValue');
+        jest.spyOn(imageEditorMock._graphics, 'getActiveObject').mockReturnValue({
+          type: 'rect',
+          _isMosaicShape: true,
+        });
+
+        imageEditorMock.fire('objectActivated', { id: 1, type: 'rect' });
+
+        expect(imageEditorMock.ui.changeMenu).not.toHaveBeenCalledWith('shape', false, false);
+        expect(imageEditorMock.ui.shape.setShapeStatus).not.toHaveBeenCalled();
+        expect(imageEditorMock.ui.shape.setMaxStrokeValue).not.toHaveBeenCalled();
+      });
+
+      it('should stay in mosaic if the activated shape has a filter fill before it is marked', () => {
+        imageEditorMock.ui.submenu = 'mosaic';
+        imageEditorMock.ui.changeMenu = jest.fn();
+        imageEditorMock.ui.shape.setShapeStatus = jest.fn();
+        jest.spyOn(imageEditorMock.ui.shape, 'setMaxStrokeValue');
+        jest.spyOn(imageEditorMock._graphics, 'getActiveObject').mockReturnValue({
+          type: 'rect',
+        });
+
+        imageEditorMock.fire('objectActivated', {
+          id: 1,
+          type: 'rect',
+          fill: {
+            type: 'filter',
+            filter: [{ pixelate: 10 }],
+          },
+        });
+
+        expect(imageEditorMock.ui.changeMenu).not.toHaveBeenCalledWith('shape', false, false);
+        expect(imageEditorMock.ui.shape.setShapeStatus).not.toHaveBeenCalled();
+        expect(imageEditorMock.ui.shape.setMaxStrokeValue).not.toHaveBeenCalled();
+      });
+
       it('should be changed to text if the target of objectActivated is text and the existing menu is not text', () => {
         imageEditorMock.ui.submenu = 'crop';
         imageEditorMock.ui.changeMenu = jest.fn();
@@ -452,6 +551,18 @@ describe('UI', () => {
 
         expect(setMaxStrokeValueSpy).toHaveBeenCalledWith(100);
         expect(imageEditorMock.ui.shape.changeStandbyMode).toHaveBeenCalled();
+      });
+
+      it('should mark the real fabric object when a mosaic shape is added', () => {
+        const fabricObject = { type: 'rect' };
+        imageEditorMock.ui.submenu = 'mosaic';
+        jest.spyOn(imageEditorMock._graphics, 'getObject').mockReturnValue(fabricObject);
+        jest.spyOn(imageEditorMock.ui.shape, 'setMaxStrokeValue');
+
+        imageEditorMock.fire('addObjectAfter', { id: 1, type: 'rect', width: 100, height: 200 });
+
+        expect(fabricObject._isMosaicShape).toBe(true);
+        expect(imageEditorMock.ui.shape.setMaxStrokeValue).not.toHaveBeenCalled();
       });
     });
 

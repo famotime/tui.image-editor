@@ -429,3 +429,15 @@ export const defaultResizePixelValues = {
   realTimeEvent: true,
   min: 32,
 };
+
+export const defaultMosaicSizeRangeValues = {
+  min: 2,
+  max: 100,
+  value: 15,
+};
+
+export const defaultMosaicBrushRangeValues = {
+  min: 5,
+  max: 150,
+  value: 30,
+};

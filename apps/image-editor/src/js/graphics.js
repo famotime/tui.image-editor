@@ -1014,6 +1014,46 @@ class Graphics {
       containerClass: 'tui-image-editor-canvas-container',
       enableRetinaScaling: false,
     });
+
+    // 对 Fabric 的 2D 滤镜后端打补丁，在 getContext 时启用 willReadFrequently:true
+    // 避免 getImageData 多次读取时产生浏览器性能警告
+    if (fabric.Canvas2dFilterBackend) {
+      fabric.Canvas2dFilterBackend.prototype.applyFilters = function (
+        filters,
+        sourceElement,
+        sourceWidth,
+        sourceHeight,
+        targetCanvas
+      ) {
+        const ctx = targetCanvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(sourceElement, 0, 0, sourceWidth, sourceHeight);
+        const imageData = ctx.getImageData(0, 0, sourceWidth, sourceHeight);
+        const originalImageData = ctx.getImageData(0, 0, sourceWidth, sourceHeight);
+        const pipelineState = {
+          sourceWidth,
+          sourceHeight,
+          imageData,
+          originalEl: sourceElement,
+          originalImageData,
+          canvasEl: targetCanvas,
+          ctx,
+          filterBackend: this,
+        };
+        filters.forEach((filter) => {
+          filter.applyTo(pipelineState);
+        });
+        if (
+          pipelineState.imageData.width !== sourceWidth ||
+          pipelineState.imageData.height !== sourceHeight
+        ) {
+          targetCanvas.width = pipelineState.imageData.width;
+          targetCanvas.height = pipelineState.imageData.height;
+        }
+        ctx.putImageData(pipelineState.imageData, 0, 0);
+
+        return pipelineState;
+      };
+    }
   }
 
   /**

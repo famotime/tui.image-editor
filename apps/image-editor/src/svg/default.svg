@@ -348,5 +348,9 @@
     <path d="M0 0h24v24H0z" stroke="none" fill="none"/>
     <path fill="none" stroke="inherit" stroke-linecap="round" stroke-linejoin="round" d="M12 16V3M8 12l4 4 4-4M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>
 </symbol>
+<symbol id="ic-mosaic" viewBox="0 0 24 24">
+    <path fill="none" stroke="none" d="M0 0h24v24H0z"/>
+    <path stroke="none" fill="inherit" d="M3 3h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5zM3 10h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5zM3 17h5v5H3zm7 0h5v5h-5zm7 0h5v5h-5z"/>
+</symbol>
 </defs>
 </svg>

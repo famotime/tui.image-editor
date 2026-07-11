@@ -101,6 +101,13 @@ const zhCN = {
   Multiply: '正片叠底',
   Blend: '混合',
 
+  // 马赛克
+  Mosaic: '马赛克',
+  'Mosaic size': '颗粒大小',
+  'Brush size': '画笔粗细',
+  'Box Selection': '框选',
+  'Brush Stroke': '画笔',
+
   // 缩放
   'Zoom In': '放大',
   'Zoom Out': '缩小',

@@ -1,7 +1,15 @@
 import { fabric } from 'fabric';
 import extend from 'tui-code-snippet/object/extend';
 import Imagetracer from '@/helper/imagetracer';
-import { isSupportFileApi, base64ToBlob, toInteger, isEmptyCropzone, includes } from '@/util';
+import {
+  isSupportFileApi,
+  base64ToBlob,
+  toInteger,
+  isEmptyCropzone,
+  includes,
+  getFillTypeFromOption,
+} from '@/util';
+
 import { eventNames, historyNames, drawingModes, drawingMenuNames, zoomModes } from '@/consts';
 
 export default {
@@ -24,6 +32,7 @@ export default {
       icon: this._iconAction(),
       filter: this._filterAction(),
       history: this._historyAction(),
+      mosaic: this._mosaicAction(),
       annotation: this._annotationAction(),
     };
   },
@@ -864,21 +873,40 @@ export default {
         if (obj.type === 'cropzone') {
           this.ui.crop.changeApplyButtonStatus(true);
         } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
-          if (this.getDrawingMode() !== 'SHAPE') {
-            this.stopDrawingMode();
-          }
-          if (this.ui.submenu !== 'shape') {
-            this.ui.changeMenu('shape', false, false);
-          }
-          this.ui.shape.setShapeStatus({
-            strokeColor: obj.stroke,
-            strokeWidth: obj.strokeWidth,
-            fillColor: obj.fill,
-          });
+          // obj 是序列化的 props，需要获取真实 fabric 对象才能检查运行时标记
+          const fabricObj = this._graphics.getActiveObject();
+          const isMosaicShape =
+            (fabricObj && fabricObj._isMosaicShape) || getFillTypeFromOption(obj.fill) === 'filter';
+          if (isMosaicShape) {
+            // 保持在马赛克菜单，不切换到形状工具
+            if (this.ui.submenu !== 'mosaic') {
+              this.ui.changeMenu('mosaic', false, false);
+            }
+          } else {
+            if (this.getDrawingMode() !== 'SHAPE') {
+              this.stopDrawingMode();
+            }
+            if (this.ui.submenu !== 'shape') {
+              this.ui.changeMenu('shape', false, false);
+            }
+            this.ui.shape.setShapeStatus({
+              strokeColor: obj.stroke,
+              strokeWidth: obj.strokeWidth,
+              fillColor: obj.fill,
+            });
 
-          this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
+            this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
+          }
         } else if (obj.type === 'path' || obj.type === 'line') {
-          if (this.ui.submenu !== 'draw') {
+          // 检查是否为马赛克画笔路径
+          const fabricObj = this._graphics.getActiveObject();
+          const isMosaicPath =
+            (fabricObj && fabricObj._isMosaicPath) || (obj.stroke && obj.stroke.source);
+          if (isMosaicPath) {
+            if (this.ui.submenu !== 'mosaic') {
+              this.ui.changeMenu('mosaic', false, false);
+            }
+          } else if (this.ui.submenu !== 'mosaic' && this.ui.submenu !== 'draw') {
             this.ui.changeMenu('draw', false, false);
             this.ui.draw.changeStandbyMode();
           }
@@ -915,11 +943,13 @@ export default {
           if (this.getDrawingMode() !== 'ICON') {
             this.ui.icon.changeStandbyMode();
           }
-        } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
-          this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
-          if (this.getDrawingMode() !== 'SHAPE') {
-            this.ui.shape.changeStandbyMode();
+        } else if (obj.type === 'path') {
+          if (this.ui.submenu === 'mosaic') {
+            // 标记为马赛克画笔路径，防止 objectActivated 切换到画笔工具栏
+            obj._isMosaicPath = true;
           }
+        } else if (['rect', 'circle', 'triangle'].indexOf(obj.type) > -1) {
+          this._handleShapeObjectAfter(obj);
         }
       },
       objectScaled: (obj) => {
@@ -941,7 +971,9 @@ export default {
         this.activeObjectId = null;
         if (this.ui.submenu === 'text') {
           this.changeCursor('text');
-        } else if (!includes(['draw', 'crop', 'resize', 'shape', 'icon'], this.ui.submenu)) {
+        } else if (
+          !includes(['draw', 'crop', 'resize', 'shape', 'icon', 'mosaic'], this.ui.submenu)
+        ) {
           this.stopDrawingMode();
         }
       },
@@ -958,6 +990,141 @@ export default {
       undo: (count) => this.undo(count),
       redo: (count) => this.redo(count),
     };
+  },
+
+  /**
+   * Handle shape object after it's been added to the canvas.
+   * Marks mosaic shapes and updates shape UI state for regular shapes.
+   * @param {fabric.Object} obj - The shape object added
+   * @private
+   */
+  _handleShapeObjectAfter(obj) {
+    if (this.ui.submenu === 'mosaic') {
+      const fabricObj = this._graphics.getObject(obj.id);
+
+      // 标记真实 fabric 对象，防止后续 objectActivated 切换到形状工具栏
+      if (fabricObj) {
+        fabricObj._isMosaicShape = true;
+      }
+    } else {
+      this.ui.shape.setMaxStrokeValue(Math.min(obj.width, obj.height));
+      if (this.getDrawingMode() !== 'SHAPE') {
+        this.ui.shape.changeStandbyMode();
+      }
+    }
+  },
+
+  /**
+   * Get mosaic pattern canvas
+   * @param {number} mosaicSize - mosaic size
+   * @param {function} callback - callback function
+   * @private
+   */
+  _getMosaicPatternCanvas(mosaicSize, callback) {
+    const canvas = this._graphics.getCanvas();
+    const canvasImage = this._graphics.canvasImage;
+    if (!canvasImage) {
+      callback(null);
+      return;
+    }
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempStaticCanvas = new fabric.StaticCanvas(tempCanvas);
+
+    canvasImage.clone((clonedImage) => {
+      clonedImage.set({
+        left: canvasImage.left,
+        top: canvasImage.top,
+        originX: canvasImage.originX,
+        originY: canvasImage.originY,
+      });
+      tempStaticCanvas.add(clonedImage);
+      tempStaticCanvas.renderAll();
+
+      const img = new fabric.Image(tempCanvas);
+      const pixelateFilter = new fabric.Image.filters.Pixelate({
+        blocksize: mosaicSize,
+      });
+      img.filters.push(pixelateFilter);
+      img.applyFilters();
+
+      const filteredCanvas = img.toCanvasElement();
+      tempStaticCanvas.clear();
+      callback(filteredCanvas);
+    });
+  },
+
+  /**
+   * Mosaic Action
+   * @returns {Object} actions for ui mosaic
+   * @private
+   */
+  _mosaicAction() {
+    return extend(
+      {
+        setMosaicMode: (mode, settings) => {
+          this.stopDrawingMode();
+          if (mode === 'rect') {
+            this.setDrawingShape('rect', {
+              fill: {
+                type: 'filter',
+                filter: [{ pixelate: settings.size }],
+              },
+              strokeWidth: 0,
+              stroke: 'transparent',
+            });
+            this.startDrawingMode('SHAPE');
+          } else if (mode === 'brush') {
+            this.startDrawingMode('FREE_DRAWING');
+            this._getMosaicPatternCanvas(settings.size, (filteredCanvas) => {
+              if (filteredCanvas) {
+                const canvas = this._graphics.getCanvas();
+                const brush = new fabric.PatternBrush(canvas);
+                brush.source = filteredCanvas;
+                brush.width = settings.width;
+                canvas.freeDrawingBrush = brush;
+              }
+            });
+          }
+        },
+        changeMosaicSize: (mode, size) => {
+          this.setDrawingShape('rect', {
+            fill: {
+              type: 'filter',
+              filter: [{ pixelate: size }],
+            },
+            strokeWidth: 0,
+            stroke: 'transparent',
+          });
+
+          if (this.activeObjectId) {
+            this.changeShape(this.activeObjectId, {
+              fill: {
+                type: 'filter',
+                filter: [{ pixelate: size }],
+              },
+            });
+          }
+
+          if (mode === 'brush') {
+            this._getMosaicPatternCanvas(size, (filteredCanvas) => {
+              if (filteredCanvas) {
+                const canvas = this._graphics.getCanvas();
+                if (canvas.freeDrawingBrush) {
+                  canvas.freeDrawingBrush.source = filteredCanvas;
+                }
+              }
+            });
+          }
+        },
+        changeMosaicBrushWidth: (width) => {
+          this.setBrush({ width });
+        },
+      },
+      this._commonAction()
+    );
   },
 
   /**
@@ -990,7 +1157,7 @@ export default {
         },
         onStepChanged: (callback) => {
           this._graphics.on('annotationStepChanged', callback);
-        }
+        },
       },
       this._commonAction()
     );
