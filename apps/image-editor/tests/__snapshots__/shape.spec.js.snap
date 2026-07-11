@@ -7,6 +7,7 @@ Object {
   "cropX": -44.01372654341047,
   "cropY": -32.78115820908609,
   "crossOrigin": null,
+  "erasable": true,
   "fill": "rgb(0,0,0)",
   "fillRule": "nonzero",
   "filters": Array [
@@ -53,6 +54,7 @@ Object {
   "cropX": -50,
   "cropY": -5,
   "crossOrigin": null,
+  "erasable": true,
   "fill": "rgb(0,0,0)",
   "fillRule": "nonzero",
   "filters": Array [
