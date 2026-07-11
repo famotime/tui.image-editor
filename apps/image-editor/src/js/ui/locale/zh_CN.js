@@ -59,7 +59,7 @@ const zhCN = {
   Stroke: '描边',
 
   // 图标
-  'Arrow-1': '箭头1',
+  Arrow: '箭头1',
   'Arrow-2': '箭头2',
   'Arrow-3': '箭头3',
   'Star-1': '星形1',
