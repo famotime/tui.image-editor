@@ -488,6 +488,10 @@ export default {
 
         originalPath.path = newPathData;
         updatePositionDimensions(originalPath);
+        originalPath.set({
+          stroke: canvas.freeDrawingBrush.color,
+          dirty: true,
+        });
         originalPath.setCoords();
         canvas.renderAll();
       });

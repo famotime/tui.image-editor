@@ -35,6 +35,12 @@ export function toCamelCase(targetString) {
 }
 
 export function getRgb(color, alpha) {
+  if (!color || typeof color !== 'string') {
+    return color;
+  }
+  if (!/^#[0-9a-fA-F]{3,6}$/.test(color)) {
+    return color;
+  }
   if (color.length === 4) {
     color = `${color}${color.slice(1, 4)}`;
   }

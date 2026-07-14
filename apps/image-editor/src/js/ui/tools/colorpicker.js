@@ -166,10 +166,11 @@ class Colorpicker {
 
   _addEvent() {
     this.picker.on('selectColor', (value) => {
-      if (this._color !== value.color) {
-        this._changeColorElement(value.color);
-        this._color = value.color;
-        this.fire('change', value.color);
+      const color = value && typeof value === 'object' ? value.color : value;
+      if (color && this._color !== color) {
+        this._changeColorElement(color);
+        this._color = color;
+        this.fire('change', color);
       }
     });
 
