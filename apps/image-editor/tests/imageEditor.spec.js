@@ -83,4 +83,105 @@ describe('ImageEditor', () => {
       expect(spy).toHaveBeenCalled();
     });
   });
+
+  describe('_onKeyDown arrow keys movement', () => {
+    let imageEditor, el, rectObj;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+      imageEditor = new ImageEditor(el, { usageStatistics: false });
+
+      rectObj = new fabric.Rect({
+        left: 100,
+        top: 100,
+        width: 50,
+        height: 50,
+      });
+      imageEditor._graphics.getCanvas().add(rectObj);
+      imageEditor._graphics.getCanvas().setActiveObject(rectObj);
+    });
+
+    afterEach(() => {
+      imageEditor.destroy();
+    });
+
+    it('should move active object by 1px on ArrowLeft keydown', () => {
+      const preventDefaultSpy = jest.fn();
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_LEFT,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(rectObj.left).toBe(99);
+      expect(rectObj.top).toBe(100);
+    });
+
+    it('should move active object by 1px on ArrowRight keydown', () => {
+      const preventDefaultSpy = jest.fn();
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_RIGHT,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(rectObj.left).toBe(101);
+      expect(rectObj.top).toBe(100);
+    });
+
+    it('should move active object by 1px on ArrowUp keydown', () => {
+      const preventDefaultSpy = jest.fn();
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_UP,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(rectObj.left).toBe(100);
+      expect(rectObj.top).toBe(99);
+    });
+
+    it('should move active object by 1px on ArrowDown keydown', () => {
+      const preventDefaultSpy = jest.fn();
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_DOWN,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(rectObj.left).toBe(100);
+      expect(rectObj.top).toBe(101);
+    });
+
+    it('should not move object when focused inside an input element', () => {
+      const preventDefaultSpy = jest.fn();
+      const inputEl = document.createElement('input');
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_LEFT,
+        target: inputEl,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
+      expect(rectObj.left).toBe(100);
+    });
+
+    it('should not move object when active object is editing', () => {
+      const preventDefaultSpy = jest.fn();
+      rectObj.isEditing = true;
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_LEFT,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
+      expect(rectObj.left).toBe(100);
+    });
+  });
 });

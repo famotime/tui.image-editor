@@ -160,13 +160,66 @@ const ArrowLine = fabric.util.createClass(
      * @returns {Array}
      * @private
      */
+    /**
+     * return position from change angle.
+     * @param {number} distance - change distance
+     * @param {number} angle - change angle
+     * @param {Object} referencePosition - reference position
+     * @returns {Array}
+     * @private
+     */
     getRotatePosition(distance, angle, referencePosition) {
       const radian = (angle * Math.PI) / RADIAN_CONVERSION_VALUE;
       const { x, y } = referencePosition;
 
       return [distance * Math.cos(radian) + x, distance * Math.sin(radian) + y];
     },
+
+    /**
+     * Returns an object representation of an instance
+     * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
+     * @returns {Object} Object representation of an instance
+     * @override
+     */
+    toObject(propertiesToInclude) {
+      return this.callSuper('toObject', ['arrowType'].concat(propertiesToInclude));
+    },
   }
 );
+
+/**
+ * List of class methods to be attached to fabric.ArrowLine / fabric.Line
+ * @static
+ * @memberOf ArrowLine
+ * @param {Object} object to create an instance from
+ * @param {Function} [callback]
+ * @returns {ArrowLine} Instance of ArrowLine
+ */
+ArrowLine.fromObject = function (object, callback) {
+  function _enlivenPoints() {
+    const points = [object.x1, object.y1, object.x2, object.y2];
+
+    return new ArrowLine(points, object);
+  }
+
+  return fabric.Object._fromObject('ArrowLine', object, callback, _enlivenPoints);
+};
+
+fabric.ArrowLine = ArrowLine;
+
+// 增强 fabric.Line.fromObject，若包含 arrowType 则委托给 ArrowLine.fromObject
+if (fabric.Line) {
+  const origLineFromObject = fabric.Line.fromObject;
+  fabric.Line.fromObject = function (object, callback) {
+    if (object && object.arrowType && (object.arrowType.head || object.arrowType.tail)) {
+      return ArrowLine.fromObject(object, callback);
+    }
+    if (origLineFromObject) {
+      return origLineFromObject.call(fabric.Line, object, callback);
+    }
+
+    return new fabric.Line([object.x1, object.y1, object.x2, object.y2], object);
+  };
+}
 
 export default ArrowLine;

@@ -242,4 +242,21 @@ class Icon extends Component {
   }
 }
 
+const IconObject = fabric.util.createClass(fabric.Path, {
+  type: 'icon',
+});
+
+IconObject.fromObject = function (object, callback) {
+  return fabric.Path.fromObject(object, (pathObj, isError) => {
+    if (pathObj) {
+      pathObj.set({ type: 'icon' });
+    }
+    if (typeof callback === 'function') {
+      callback(pathObj, isError);
+    }
+  });
+};
+
+fabric.Icon = IconObject;
+
 export default Icon;

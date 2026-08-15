@@ -390,7 +390,7 @@ class ImageEditor {
    */
   /* eslint-disable complexity */
   _onKeyDown(e) {
-    const { ctrlKey, keyCode, metaKey } = e;
+    const { ctrlKey, keyCode, metaKey, target } = e;
     const isModifierKey = ctrlKey || metaKey;
 
     if (isModifierKey) {
@@ -408,12 +408,81 @@ class ImageEditor {
       }
     }
 
+    const targetNodeName = target && target.nodeName ? target.nodeName.toUpperCase() : '';
+    const isInputTarget =
+      targetNodeName === 'INPUT' ||
+      targetNodeName === 'TEXTAREA' ||
+      Boolean(target && target.isContentEditable);
+
     const isDeleteKey = keyCode === keyCodes.BACKSPACE || keyCode === keyCodes.DEL;
+    const isArrowKey =
+      keyCode === keyCodes.ARROW_LEFT ||
+      keyCode === keyCodes.ARROW_UP ||
+      keyCode === keyCodes.ARROW_RIGHT ||
+      keyCode === keyCodes.ARROW_DOWN;
     const isRemoveReady = this._graphics.isReadyRemoveObject();
 
-    if (!this.isColorPickerInputBoxEditing && isRemoveReady && isDeleteKey) {
-      e.preventDefault();
-      this.removeActiveObject();
+    if (!this.isColorPickerInputBoxEditing && !isInputTarget && isRemoveReady) {
+      if (isDeleteKey) {
+        e.preventDefault();
+        this.removeActiveObject();
+      } else if (isArrowKey) {
+        e.preventDefault();
+        this._moveActiveObject(keyCode);
+      }
+    }
+  }
+
+  /**
+   * Move Active Object by arrow keys
+   * @param {number} keyCode - Key code
+   * @private
+   */
+  _moveActiveObject(keyCode) {
+    const activeObject = this._graphics.getActiveObject();
+    if (!activeObject) {
+      return;
+    }
+
+    let dx = 0;
+    let dy = 0;
+
+    switch (keyCode) {
+      case keyCodes.ARROW_LEFT:
+        dx = -1;
+        break;
+      case keyCodes.ARROW_UP:
+        dy = -1;
+        break;
+      case keyCodes.ARROW_RIGHT:
+        dx = 1;
+        break;
+      case keyCodes.ARROW_DOWN:
+        dy = 1;
+        break;
+      default:
+        break;
+    }
+
+    if (dx !== 0 || dy !== 0) {
+      activeObject.set({
+        left: activeObject.left + dx,
+        top: activeObject.top + dy,
+      });
+      activeObject.setCoords();
+      this._graphics.renderAll();
+
+      if (activeObject.type === 'activeSelection') {
+        const items = activeObject.getObjects();
+        items.forEach((item) => item.fire('modifiedInGroup', activeObject));
+      }
+
+      this._onObjectMoved(this._graphics.createObjectProperties(activeObject));
+      this._graphics.fire(
+        events.OBJECT_MODIFIED,
+        activeObject,
+        this._graphics.getObjectId(activeObject)
+      );
     }
   }
 
@@ -479,9 +548,10 @@ class ImageEditor {
       makeSelectionUndoDatum(this._graphics.getObjectId(item), item, type === 'activeSelection')
     );
     const command = commandFactory.create(commands.CHANGE_SELECTION, this._graphics, props);
-    command.execute(this._graphics, props);
-
-    this._invoker.pushUndoStack(command);
+    if (command) {
+      command.execute(this._graphics, props);
+      this._invoker.pushUndoStack(command);
+    }
   }
 
   /**
