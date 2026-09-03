@@ -518,7 +518,7 @@ class Ui {
     btnElement.className = `tie-btn-${menuName} ${cls('item')} ${menuType}`;
     btnElement.innerHTML = menuItemHtml;
 
-    if (menuName === 'load' || menuName === 'download') {
+    if (menuName === 'load' || menuName === 'download' || menuName === 'viewOriginal') {
       btnElement.classList.add('enabled');
     }
 
