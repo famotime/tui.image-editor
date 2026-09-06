@@ -136,68 +136,78 @@ body > textarea
         flex-direction: row;
         overflow: hidden;
 
-    /* LEFT PALETTE (分类工具栏) */
+    /* FLOATING TOOLBAR PALETTE (浮动工具栏) */
     .-controls.-left-palette,
     .-controls.left-palette,
     .-workspace .-controls
-        position: relative !important;
-        top: auto !important;
+        position: absolute !important;
+        top: 16px;
+        left: 16px;
         bottom: auto !important;
-        left: auto !important;
         right: auto !important;
-        width: 42px !important;
-        min-width: 42px !important;
-        max-width: 42px !important;
-        height: 100% !important;
+        width: 58px !important;
+        min-width: 58px !important;
+        max-width: 58px !important;
+        height: auto !important;
+        max-height: calc(100% - 32px) !important;
         background-color: #222222 !important;
-        border-right: 1px solid #303030 !important;
+        border: 1px solid #3c3c3c !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        z-index: 8 !important;
-        transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease !important;
+        z-index: 15 !important;
+        transition: height 0.2s ease, max-height 0.2s ease !important;
         flex-shrink: 0 !important;
         overflow: hidden !important;
 
     .-palette-header
         width: 100% !important;
-        height: 24px !important;
-        min-height: 24px !important;
-        max-height: 24px !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-height: 28px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        padding: 0 4px !important;
+        padding: 0 6px !important;
         border-bottom: 1px solid #2d2d2d !important;
         background-color: #1a1a1a !important;
         box-sizing: border-box !important;
         flex-shrink: 0 !important;
+        cursor: grab !important;
+        user-select: none !important;
+        &:active
+            cursor: grabbing !important;
 
     .-palette-title
-        font-size: 10px;
-        color: #888;
-        text-transform: uppercase;
+        font-size: 11px;
+        color: #bbb;
         letter-spacing: 0.5px;
         font-weight: bold;
         padding-left: 2px;
         white-space: nowrap;
         overflow: hidden;
+        user-select: none;
+        pointer-events: none;
 
     .-palette-toggle-btn
-        width: 16px;
-        height: 16px;
-        line-height: 16px;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
         padding: 0;
         border: none;
         background: transparent;
         color: #888;
         font-size: 10px;
         cursor: pointer;
-        border-radius: 2px;
+        border-radius: 3px;
         display: flex;
         align-items: center;
         justify-content: center;
         outline: none;
+        flex-shrink: 0;
+        pointer-events: auto;
         &:hover
             color: #fff;
             background-color: #333;
@@ -221,30 +231,24 @@ body > textarea
         justify-content: center !important;
 
     .-palette-icpartition
-        width: 24px !important;
+        width: 32px !important;
         height: 1px !important;
         background-color: #353535 !important;
 
-    /* PALETTE COLLAPSED STATE */
+    /* PALETTE COLLAPSED STATE (向上缩回，仅显示标题) */
     &.-palette-collapsed,
     &.palette-collapsed
         .-controls.-left-palette,
         .-controls.left-palette,
         .-workspace .-controls
-            width: 16px !important;
-            min-width: 16px !important;
-            max-width: 16px !important;
+            height: 28px !important;
+            min-height: 28px !important;
+            max-height: 28px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
         .-palette-title
-            display: none !important;
+            display: inline-block !important;
         .-palette-header
-            justify-content: center !important;
-            padding: 0 !important;
             border-bottom: none !important;
-        .-palette-toggle-btn
-            width: 100% !important;
-            height: 24px !important;
-            border-radius: 0 !important;
-            background: #262626 !important;
         .-palette-body
             display: none !important;
 
@@ -406,7 +410,7 @@ body > textarea
                 border-bottom: 5px solid transparent;
                 border-right: 5px solid #2f2f2f;
                 border-left: none;
-                left: 32px;
+                left: 38px;
                 top: 50%;
                 transform: translateY(-50%);
                 z-index: 1002;
@@ -422,7 +426,7 @@ body > textarea
                 border-radius: 3px;
                 line-height: 14px;
                 top: 50%;
-                left: 37px;
+                left: 43px;
                 transform: translateY(-50%);
                 white-space: nowrap;
                 z-index: 1002;

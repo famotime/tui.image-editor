@@ -100,6 +100,25 @@ function getActiveToolDisplayInfo(menuName, locale, buttonElements) {
 }
 
 /**
+ * 从鼠标或触摸事件中提取坐标
+ * @param {MouseEvent|TouchEvent} event - 交互事件
+ * @returns {{x: number, y: number}} 坐标对象
+ */
+function getPointerPos(event) {
+  if (event.touches && event.touches[0]) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  return {
+    x: event.clientX,
+    y: event.clientY,
+  };
+}
+
+/**
  * Ui class
  * @class
  * @param {string|HTMLElement} element - Wrapper's element or selector
@@ -531,25 +550,145 @@ class Ui {
 
     this._activateZoomMenus();
     this._attachPaletteToggleEvent();
+    this._attachPaletteDragEvent();
     this._attachHistoryOutsideClick();
   }
 
   /**
-   * Attach palette toggle event for folding/expanding left toolbar
+   * Attach palette toggle event for folding/expanding floating toolbar (upward retract)
    * @private
    */
   _attachPaletteToggleEvent() {
     const toggleBtn = this._selectedElement.querySelector('.tui-image-editor-palette-toggle-btn');
-    if (toggleBtn) {
-      this._onTogglePalette = () => {
-        this._selectedElement.classList.toggle('palette-collapsed');
-        this._selectedElement.classList.toggle('tui-image-editor-palette-collapsed');
-        const isCollapsed = this._selectedElement.classList.contains('palette-collapsed');
-        toggleBtn.textContent = isCollapsed ? '▶' : '◀';
-        this.resizeEditor();
-      };
-      toggleBtn.addEventListener('click', this._onTogglePalette);
+    if (!toggleBtn) {
+      return;
     }
+
+    // eslint-disable-next-line complexity
+    this._onTogglePalette = (event) => {
+      if (event) {
+        event.stopPropagation();
+      }
+      this._selectedElement.classList.toggle('palette-collapsed');
+      this._selectedElement.classList.toggle('tui-image-editor-palette-collapsed');
+      const isCollapsed = this._selectedElement.classList.contains('palette-collapsed');
+      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠工具栏';
+      const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具栏';
+
+      toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+      toggleBtn.title = isCollapsed ? expandText : collapseText;
+      this.resizeEditor();
+    };
+    toggleBtn.addEventListener('click', this._onTogglePalette);
+  }
+
+  /**
+   * Attach drag event to floating toolbar palette
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _attachPaletteDragEvent() {
+    const palette = this._selectedElement.querySelector('.tui-image-editor-left-palette');
+    if (!palette) {
+      return;
+    }
+    const header = palette.querySelector('.tui-image-editor-palette-header');
+    if (!header) {
+      return;
+    }
+
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let isDragging = false;
+
+    // eslint-disable-next-line complexity
+    const onPointerMove = (e) => {
+      if (!isDragging) {
+        return;
+      }
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      const pos = getPointerPos(e);
+      if (typeof pos.x !== 'number' || typeof pos.y !== 'number') {
+        return;
+      }
+
+      const dx = pos.x - startX;
+      const dy = pos.y - startY;
+
+      const workspace = palette.closest('.tui-image-editor-workspace') || this._selectedElement;
+      const maxLeft =
+        workspace && workspace.clientWidth
+          ? Math.max(0, workspace.clientWidth - palette.offsetWidth)
+          : 99999;
+      const maxTop =
+        workspace && workspace.clientHeight
+          ? Math.max(0, workspace.clientHeight - palette.offsetHeight)
+          : 99999;
+
+      const newLeft = Math.max(0, Math.min(maxLeft, startLeft + dx));
+      const newTop = Math.max(0, Math.min(maxTop, startTop + dy));
+
+      palette.style.setProperty('left', `${newLeft}px`, 'important');
+      palette.style.setProperty('top', `${newTop}px`, 'important');
+      palette.style.setProperty('right', 'auto', 'important');
+      palette.style.setProperty('bottom', 'auto', 'important');
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) {
+        return;
+      }
+      isDragging = false;
+      header.style.cursor = 'grab';
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+    };
+
+    const onPointerDown = (e) => {
+      // 点击折叠按钮或其它按钮时不触发拖拽
+      if (
+        (e.target.closest && e.target.closest('.tui-image-editor-palette-toggle-btn')) ||
+        e.target.tagName === 'BUTTON'
+      ) {
+        return;
+      }
+
+      const pos = getPointerPos(e);
+      if (typeof pos.x !== 'number' || typeof pos.y !== 'number') {
+        return;
+      }
+
+      isDragging = true;
+      header.style.cursor = 'grabbing';
+      startX = pos.x;
+      startY = pos.y;
+
+      startLeft = palette.offsetLeft;
+      startTop = palette.offsetTop;
+
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('mouseup', onPointerUp);
+      document.addEventListener('touchmove', onPointerMove, { passive: false });
+      document.addEventListener('touchend', onPointerUp);
+    };
+
+    header.addEventListener('mousedown', onPointerDown);
+    header.addEventListener('touchstart', onPointerDown, { passive: true });
+
+    this._paletteDragCleanup = () => {
+      header.removeEventListener('mousedown', onPointerDown);
+      header.removeEventListener('touchstart', onPointerDown);
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+    };
   }
 
   /**
@@ -923,6 +1062,10 @@ class Ui {
       this._selectedElement.querySelector('.tui-image-editor-palette-toggle-btn');
     if (toggleBtn && this._onTogglePalette) {
       toggleBtn.removeEventListener('click', this._onTogglePalette);
+    }
+    if (this._paletteDragCleanup) {
+      this._paletteDragCleanup();
+      this._paletteDragCleanup = null;
     }
   }
 
