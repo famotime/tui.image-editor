@@ -12,6 +12,7 @@
         position: relative !important;
         z-index: 2 !important;
         background: transparent !important;
+        color: var(--tie-text-secondary, #98989f) !important;
         scrollbar-width: thin !important;
         > div
             display: none;
@@ -30,11 +31,11 @@
         .{prefix}-partition
             display: inline-flex !important;
             align-items: center !important;
-            height: 100% !important;
+            height: 26px !important;
             margin: 0 4px !important;
             > div
                 width: 1px !important;
-                height: 18px !important;
+                height: 16px !important;
                 border-left: 1px solid #3c3c3c !important;
                 margin: 0 4px !important;
 
@@ -48,16 +49,71 @@
             margin: 0;
             padding: 0 4px;
             list-style: none;
+            color: var(--tie-text-secondary, #98989f);
             li
-                display: inline-flex;
-                align-items: center;
+                display: inline-flex !important;
+                align-items: center !important;
                 margin: 0 3px;
                 height: 100%;
                 vertical-align: middle;
             .{prefix}-newline
-                display: inline-flex;
-                margin-top: 0;
+                display: inline-flex !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+                align-items: center !important;
+            .{prefix}-checkbox-wrap,
+            .{prefix}-checkbox
+                display: inline-flex !important;
+                align-items: center !important;
+                vertical-align: middle !important;
+
+            /* 现代化紧凑分段控制器 (Segmented Control) */
+            .tui-segmented-control
+                display: inline-flex !important;
                 align-items: center;
+                background-color: #1e1e20;
+                border: 1px solid #38383a;
+                border-radius: 4px;
+                padding: 1px 2px;
+                margin: 0 3px;
+                height: 26px;
+                box-sizing: border-box;
+                .{prefix}-button
+                    margin: 0 1px;
+                    height: 22px;
+                    min-width: 24px;
+                    padding: 0 5px;
+                    border: none;
+                    border-radius: 3px;
+                    background-color: transparent;
+                    color: #98989f;
+                    transition: all 0.15s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    div
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    svg
+                        width: 16px !important;
+                        height: 16px !important;
+                        display: block;
+                        stroke: currentColor;
+                    &:hover
+                        background-color: rgba(255, 255, 255, 0.08);
+                        color: #fff;
+                    &.active
+                        background-color: #2c2c2e;
+                        color: #fff;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+                        svg
+                            stroke: #fff;
+                    label
+                        margin-left: 0;
+                        color: inherit;
+
+            /* 通用按钮基础样式 */
             .{prefix}-button
                 position: relative;
                 cursor: pointer;
@@ -67,19 +123,25 @@
                 height: 24px;
                 padding: 0 6px;
                 margin: 0 2px;
-                border-radius: 3px;
+                border-radius: 4px;
                 font-weight: normal;
                 font-size: 11px;
-                border: 1px solid #3c3c3c;
-                background-color: #2a2a2a;
-                color: #bbb;
+                border: 1px solid #3a3a3c;
+                background-color: #262628;
+                color: #98989f;
                 transition: all 0.15s;
+                div
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                svg
+                    display: block;
                 &:hover
-                    background-color: #383838;
+                    background-color: #333336;
                     color: #fff;
                 &.active
-                    background-color: #007aff;
-                    border-color: #007aff;
+                    background-color: #2563eb;
+                    border-color: #2563eb;
                     color: #fff;
                     label
                         color: #fff;
@@ -93,11 +155,11 @@
                 font-size: 11px;
                 line-height: 20px;
                 vertical-align: middle;
-                color: inherit;
+                color: var(--tie-text-secondary, #98989f);
             label > span
                 display: inline-block;
                 cursor: pointer;
-                font-family: "Noto Sans", sans-serif;
+                font-family: inherit;
                 font-size: 11px;
                 color: inherit;
             .{prefix}-button.apply,
@@ -105,58 +167,155 @@
                 height: 24px;
                 padding: 0 10px;
                 font-size: 11px;
-                border-radius: 3px;
+                border-radius: 4px;
             .{prefix}-button.apply
-                background-color: #007aff;
-                border-color: #007aff;
+                background-color: #2563eb;
+                border-color: #2563eb;
                 color: #fff;
-                font-weight: bold;
+                font-weight: 500;
+                box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
                 label
                     color: #fff;
             .{prefix}-button.cancel
-                background-color: #383838;
-                border-color: #484848;
+                background-color: #2c2c2e;
+                border-color: #3e3e42;
                 color: #ddd;
+
+            /* 二级属性栏 Tooltip 气泡效果 */
+            [tooltip-content]
+                position: relative;
+                &:hover:after
+                    content: attr(tooltip-content);
+                    position: absolute;
+                    display: inline-block;
+                    background-color: rgba(24, 24, 27, 0.94);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
+                    color: #f2f2f7;
+                    padding: 4px 8px;
+                    font-size: 11px;
+                    font-weight: 400;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    line-height: 14px;
+                    top: 32px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    white-space: nowrap;
+                    z-index: 1005;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    pointer-events: none;
+                    animation: tie-tooltip-fade 0.18s ease forwards;
 
     /* RANGE CONTROLS */
     .{prefix}-range-wrap
-        display: inline-flex;
-        align-items: center;
-        margin: 0 4px;
+        display: inline-flex !important;
+        align-items: center !important;
+        height: 26px !important;
+        margin: 0 4px !important;
+        label,
         label.range
+            display: inline-flex !important;
+            align-items: center !important;
+            height: 26px !important;
+            line-height: 26px !important;
             font-size: 11px;
-            margin-right: 6px;
-            color: #aaa;
+            margin: 0 6px 0 0 !important;
+            color: var(--tie-text-secondary, #98989f) !important;
             white-space: nowrap;
+            vertical-align: middle !important;
+        input + label
+            margin: 0 0 0 4px !important;
         .{prefix}-range
             width: 75px;
-            display: inline-block;
+            height: 14px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            position: relative !important;
+            top: 0 !important;
+            margin: 0 !important;
             vertical-align: middle;
+            .{prefix}-virtual-range-bar
+                position: absolute !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                width: 100% !important;
+                height: 2px !important;
+                border-radius: 1px;
+                background-color: #444446;
+            .{prefix}-virtual-range-subbar
+                position: absolute !important;
+                top: 0 !important;
+                height: 100% !important;
+                background-color: var(--tie-surface-active, #2563eb);
+                border-radius: 1px;
+            .{prefix}-virtual-range-pointer
+                position: absolute !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                width: 10px !important;
+                height: 10px !important;
+                border-radius: 50% !important;
+                background-color: #ffffff;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         .{prefix}-range-value
-            width: 36px;
-            height: 22px;
-            line-height: 20px;
-            font-size: 11px;
+            width: 36px !important;
+            height: 22px !important;
+            line-height: 20px !important;
+            font-size: 11px !important;
             text-align: center;
-            margin-left: 6px;
-            border-radius: 2px;
-            border: 1px solid #3c3c3c;
-            background: #181818;
-            color: #ddd;
+            margin: 0 0 0 6px !important;
+            margin-top: 0 !important;
+            border-radius: 4px;
+            border: 1px solid var(--tie-border-strong, #444446);
+            background: var(--tie-surface-control, #2c2c2e);
+            color: var(--tie-text-primary, #f2f2f7);
             outline: none;
+            box-sizing: border-box;
+            vertical-align: middle !important;
+            transition: border-color 0.15s;
+            &:focus
+                border-color: var(--tie-surface-active, #2563eb);
 
     /* COLORPICKER */
+    .{prefix}-submenu
+        .{prefix}-button.tie-draw-color,
+        .{prefix}-button.tie-color-fill,
+        .{prefix}-button.tie-color-stroke,
+        .{prefix}-button.tie-text-color,
+        .{prefix}-button.tie-icon-color
+            height: 26px !important;
+            min-width: 26px !important;
+            padding: 0 3px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 4px !important;
+            background-color: #262628;
+            border: 1px solid #3a3a3c;
+            box-sizing: border-box;
+        .{prefix}-button .color-picker-value,
+        .color-picker-value
+            width: 20px !important;
+            height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            border-radius: 4px !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            cursor: pointer;
+            margin: 0 !important;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.15s, border-color 0.15s;
+            &:hover
+                transform: scale(1.08);
+                border-color: #fff !important;
     .color-picker-control
         position: relative;
         display: inline-flex;
         align-items: center;
-        .color-picker-value
-            width: 18px;
-            height: 18px;
-            border-radius: 3px;
-            border: 1px solid #555;
-            cursor: pointer;
-            margin: 0 4px;
         .triangle
             display: none;
         .tui-colorpicker-container
@@ -164,10 +323,10 @@
             top: 32px;
             left: 0;
             z-index: 1005;
-            background: #252525;
-            border: 1px solid #3c3c3c;
-            border-radius: 4px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            background: #242426;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 
 /* Help menu bar history popover */
 .{prefix}-container
@@ -448,21 +607,31 @@
             }
         }
         .custom-label {
-            display: none;
+            display: inline-flex !important;
+            align-items: center;
+            font-size: 11px;
+            color: var(--tie-text-secondary, #98989f) !important;
+            margin-left: 6px;
+            margin-right: 2px;
+            cursor: default;
+            user-select: none;
+            white-space: nowrap;
+            line-height: 24px;
+            vertical-align: middle;
         }
-        /* 箭头 SVG 图标 */
+        /* 箭头 SVG 图标色彩规范 */
         .tui-image-editor-button svg {
-            stroke: #8c8c8c;
+            stroke: #98989f;
             fill: none;
             width: 16px;
             height: 16px;
-            transition: stroke 0.2s;
+            transition: stroke 0.15s ease;
         }
         .tui-image-editor-button.active svg {
-            stroke: #fff;
+            stroke: #ffffff;
         }
         .tui-image-editor-button:hover svg {
-            stroke: #fff;
+            stroke: #ffffff;
         }
     }
 }
