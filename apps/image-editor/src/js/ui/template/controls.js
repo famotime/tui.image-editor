@@ -1,6 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { getHelpMenuBarPosition } from '@/util';
 
+function getBrandTitle(locale) {
+  if (locale) {
+    const text = locale.localize('Image Editor');
+
+    if (text !== 'Image Editor') {
+      return text;
+    }
+  }
+
+  return '资源管家';
+}
+
 export default ({ biImage, menuBarPosition, locale, submenuStyle }) => `
     <div class="tui-image-editor-top-bar">
         <div class="tui-image-editor-top-left">
@@ -9,7 +21,7 @@ export default ({ biImage, menuBarPosition, locale, submenuStyle }) => `
                 <img src="${biImage}" />
             </div>
             ` : `
-            <div class="tui-image-editor-brand-text">${locale ? locale.localize('Image Editor') : '资源管家'}</div>
+            <div class="tui-image-editor-brand-text">${getBrandTitle(locale)}</div>
             `}
         </div>
         <div class="tui-image-editor-top-center">
