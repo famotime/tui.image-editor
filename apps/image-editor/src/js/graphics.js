@@ -611,12 +611,19 @@ class Graphics {
    * Adjust canvas dimension with scaling image
    */
   adjustCanvasDimension() {
+    if (!this.canvasImage) {
+      return;
+    }
     this.adjustCanvasDimensionBase(this.canvasImage.scale(1));
   }
 
   adjustCanvasDimensionBase(canvasImage = null) {
     if (!canvasImage) {
       canvasImage = this.canvasImage;
+    }
+
+    if (!canvasImage) {
+      return;
     }
 
     const { width, height } = canvasImage.getBoundingRect();

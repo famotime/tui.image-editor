@@ -52,6 +52,53 @@ const ZOOM_BUTTON_TYPE = {
   HAND: 'hand',
 };
 
+// 工具分组定义：构图与选区、绘制与修饰、矢量与标注、效果与蒙版
+const TOOL_GROUPS = [
+  ['crop', 'resize', 'rotate', 'flip', 'lasso'],
+  ['draw', 'eraser', 'mosaic'],
+  ['text', 'shape', 'icon', 'annotation'],
+  ['mask', 'filter'],
+];
+
+/**
+ * 获取工具所属分类索引
+ * @param {string} toolName - 工具名称
+ * @returns {number} 分组索引，未找到返回 -1
+ */
+function getToolGroupIndex(toolName) {
+  for (let i = 0; i < TOOL_GROUPS.length; i += 1) {
+    if (TOOL_GROUPS[i].indexOf(toolName) > -1) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * 获取当前激活工具的展示信息（标题和图标HTML）
+ * @param {string} [menuName] - 工具菜单名称
+ * @param {Object} locale - 本地化语言包实例
+ * @param {Object} buttonElements - 工具按钮元素映射
+ * @returns {Object} 包含 title 与 iconHtml 的展示对象
+ */
+function getActiveToolDisplayInfo(menuName, locale, buttonElements) {
+  if (!menuName) {
+    return {
+      title: locale.localize('Tool'),
+      iconHtml: '',
+    };
+  }
+
+  const capitalized = menuName.charAt(0).toUpperCase() + menuName.slice(1);
+  const btn = buttonElements[menuName];
+
+  return {
+    title: locale.localize(capitalized),
+    iconHtml: btn ? btn.innerHTML : '',
+  };
+}
+
 /**
  * Ui class
  * @class
@@ -302,9 +349,22 @@ class Ui {
    * @private
    */
   _makeSubMenu() {
+    let lastGroupIndex = -1;
     forEach(this.options.menu, (menuName) => {
       const SubComponentClass =
         SUB_UI_COMPONENT[menuName.replace(/^[a-z]/, ($0) => $0.toUpperCase())];
+
+      const currentGroupIndex = getToolGroupIndex(menuName);
+      if (
+        lastGroupIndex !== -1 &&
+        currentGroupIndex !== -1 &&
+        currentGroupIndex !== lastGroupIndex
+      ) {
+        this._makePalettePartitionElement();
+      }
+      if (currentGroupIndex !== -1) {
+        lastGroupIndex = currentGroupIndex;
+      }
 
       // make menu element
       this._makeMenuElement(menuName);
@@ -320,6 +380,20 @@ class Ui {
         usageStatistics: this.options.usageStatistics,
       });
     });
+  }
+
+  /**
+   * Make palette partition element between tool categories
+   * @private
+   */
+  _makePalettePartitionElement() {
+    const partitionElement = document.createElement('li');
+    const partitionInnerElement = document.createElement('div');
+    partitionElement.className = 'tui-image-editor-palette-partition';
+    partitionInnerElement.className = 'tui-image-editor-palette-icpartition';
+    partitionElement.appendChild(partitionInnerElement);
+
+    this._menuBarElement.appendChild(partitionElement);
   }
 
   /**
@@ -356,6 +430,13 @@ class Ui {
    * @private
    */
   _showZoomRatio(zoomLevel) {
+    const zoomInfoEl =
+      this._selectedElement &&
+      this._selectedElement.querySelector('.tui-image-editor-options-info .canvas-zoom-info');
+    if (zoomInfoEl) {
+      zoomInfoEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
     if (!this._zoomRatioElement) {
       this._zoomRatioElement = document.createElement('div');
       this._zoomRatioElement.className = 'tui-image-editor-zoom-ratio';
@@ -377,7 +458,7 @@ class Ui {
       this._editorElementWrap.appendChild(this._zoomRatioElement);
     }
 
-    this._zoomRatioElement.innerText = `${Math.round(zoomLevel * 100)}%`;
+    this._zoomRatioElement.textContent = `${Math.round(zoomLevel * 100)}%`;
     this._zoomRatioElement.style.opacity = '1';
 
     if (this._zoomRatioTimer) {
@@ -411,6 +492,7 @@ class Ui {
         loadButtonStyle: this.theme.getStyle('loadButton'),
         downloadButtonStyle: this.theme.getStyle('downloadButton'),
         menuBarPosition: this.options.menuBarPosition,
+        submenuStyle: this.theme.getStyle('submenu'),
       }) +
       mainContainer({
         locale: this._locale,
@@ -448,6 +530,72 @@ class Ui {
     });
 
     this._activateZoomMenus();
+    this._attachPaletteToggleEvent();
+    this._attachHistoryOutsideClick();
+  }
+
+  /**
+   * Attach palette toggle event for folding/expanding left toolbar
+   * @private
+   */
+  _attachPaletteToggleEvent() {
+    const toggleBtn = this._selectedElement.querySelector('.tui-image-editor-palette-toggle-btn');
+    if (toggleBtn) {
+      this._onTogglePalette = () => {
+        this._selectedElement.classList.toggle('palette-collapsed');
+        this._selectedElement.classList.toggle('tui-image-editor-palette-collapsed');
+        const isCollapsed = this._selectedElement.classList.contains('palette-collapsed');
+        toggleBtn.textContent = isCollapsed ? '▶' : '◀';
+        this.resizeEditor();
+      };
+      toggleBtn.addEventListener('click', this._onTogglePalette);
+    }
+  }
+
+  /**
+   * Attach history popover outside click event
+   * @private
+   */
+  _attachHistoryOutsideClick() {
+    this._onDocumentClickForHistory = (event) => {
+      const historyBtn = this._buttonElements[HISTORY_MENU];
+      if (!historyBtn || !historyBtn.classList.contains('opened')) {
+        return;
+      }
+      if (!historyBtn.contains(event.target)) {
+        historyBtn.classList.remove('opened');
+      }
+    };
+    document.addEventListener('click', this._onDocumentClickForHistory);
+  }
+
+  /**
+   * 更新顶部第二层工具栏的激活工具徽章
+   * @param {string} [menuName] - 激活的工具菜单名
+   * @private
+   */
+  _updateActiveToolBadge(menuName) {
+    if (!this._selectedElement) {
+      return;
+    }
+    const { title, iconHtml } = getActiveToolDisplayInfo(
+      menuName,
+      this._locale,
+      this._buttonElements
+    );
+    const badgeTitleEl = this._selectedElement.querySelector(
+      '.tui-image-editor-active-tool-badge .active-tool-title, .tui-image-editor-active-tool-badge .tui-image-editor-active-tool-title'
+    );
+    const badgeIconEl = this._selectedElement.querySelector(
+      '.tui-image-editor-active-tool-badge .active-tool-icon, .tui-image-editor-active-tool-badge .tui-image-editor-active-tool-icon'
+    );
+
+    if (badgeTitleEl) {
+      badgeTitleEl.textContent = title;
+    }
+    if (badgeIconEl) {
+      badgeIconEl.innerHTML = iconHtml;
+    }
   }
 
   /**
@@ -504,6 +652,28 @@ class Ui {
   }
 
   /**
+  /**
+   * Enhance special menu button (load, download, viewOriginal)
+   * @param {HTMLElement} btnElement - button element
+   * @param {string} menuName - menu name
+   * @private
+   */
+  _enhanceSpecialMenuButton(btnElement, menuName) {
+    if (['load', 'download', 'viewOriginal'].indexOf(menuName) > -1) {
+      btnElement.classList.add('enabled');
+    }
+    if (menuName === 'load') {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.className = 'tui-image-editor-load-btn';
+      btnElement.appendChild(fileInput);
+    }
+    if (menuName === 'download') {
+      btnElement.classList.add('tui-image-editor-download-btn');
+    }
+  }
+
+  /**
    * Make menu button element
    * @param {string} menuName - menu name
    * @param {Array} useIconTypes - Possible values are  \['normal', 'active', 'hover', 'disabled'\]
@@ -518,26 +688,10 @@ class Ui {
     btnElement.className = `tie-btn-${menuName} ${cls('item')} ${menuType}`;
     btnElement.innerHTML = menuItemHtml;
 
-    if (menuName === 'load' || menuName === 'download' || menuName === 'viewOriginal') {
-      btnElement.classList.add('enabled');
-    }
+    this._enhanceSpecialMenuButton(btnElement, menuName);
 
-    if (menuName === 'load') {
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.className = 'tui-image-editor-load-btn';
-      btnElement.appendChild(fileInput);
-    }
-
-    if (menuName === 'download') {
-      btnElement.classList.add('tui-image-editor-download-btn');
-    }
-
-    if (menuType === 'normal') {
-      this._menuBarElement.appendChild(btnElement);
-    } else {
-      this._helpMenuBarElement.appendChild(btnElement);
-    }
+    const targetContainer = menuType === 'normal' ? this._menuBarElement : this._helpMenuBarElement;
+    targetContainer.appendChild(btnElement);
   }
 
   /**
@@ -761,6 +915,15 @@ class Ui {
     this._removeLoadEvent();
     this._removeMainMenuEvent();
     this._historyMenu.removeEvent();
+    if (this._onDocumentClickForHistory) {
+      document.removeEventListener('click', this._onDocumentClickForHistory);
+    }
+    const toggleBtn =
+      this._selectedElement &&
+      this._selectedElement.querySelector('.tui-image-editor-palette-toggle-btn');
+    if (toggleBtn && this._onTogglePalette) {
+      toggleBtn.removeEventListener('click', this._onTogglePalette);
+    }
   }
 
   /**
@@ -829,6 +992,29 @@ class Ui {
   }
 
   /**
+  /**
+   * Deactivate current submenu
+   * @param {boolean} discardSelection - discard selection
+   * @private
+   */
+  _deactivateSubmenu(discardSelection) {
+    if (!this.submenu) {
+      return;
+    }
+    const currentMenu = this.submenu;
+    this._buttonElements[currentMenu].classList.remove('active');
+    this._mainElement.classList.remove(`tui-image-editor-menu-${currentMenu}`);
+    if (this._selectedElement) {
+      this._selectedElement.classList.remove(`tui-image-editor-menu-${currentMenu}`);
+    }
+    if (discardSelection) {
+      this._actions.main.discardSelection();
+    }
+    this._actions.main.changeSelectableAll(true);
+    this[currentMenu].changeStandbyMode();
+  }
+
+  /**
    * change menu
    * @param {string} menuName - menu name
    * @param {boolean} toggle - whether toggle or not
@@ -836,22 +1022,20 @@ class Ui {
    * @private
    */
   _changeMenu(menuName, toggle, discardSelection) {
-    if (this.submenu) {
-      this._buttonElements[this.submenu].classList.remove('active');
-      this._mainElement.classList.remove(`tui-image-editor-menu-${this.submenu}`);
-      if (discardSelection) {
-        this._actions.main.discardSelection();
-      }
-      this._actions.main.changeSelectableAll(true);
-      this[this.submenu].changeStandbyMode();
-    }
+    const isSameMenu = this.submenu === menuName;
+    this._deactivateSubmenu(discardSelection);
 
-    if (this.submenu === menuName && toggle) {
+    if (isSameMenu && toggle) {
       this.submenu = null;
+      this._updateActiveToolBadge(null);
     } else {
       this._buttonElements[menuName].classList.add('active');
       this._mainElement.classList.add(`tui-image-editor-menu-${menuName}`);
+      if (this._selectedElement) {
+        this._selectedElement.classList.add(`tui-image-editor-menu-${menuName}`);
+      }
       this.submenu = menuName;
+      this._updateActiveToolBadge(menuName);
       this[this.submenu].changeStartMode();
     }
 

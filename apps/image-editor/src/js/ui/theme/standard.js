@@ -99,10 +99,10 @@
     'submenu.normalIcon.color': '#8a8a8a',
     'submenu.activeIcon.color': '#e9e9e9',
 
-    'menu.iconSize.width': '24px',
-    'menu.iconSize.height': '24px',
-    'submenu.iconSize.width': '32px',
-    'submenu.iconSize.height': '32px',
+    'menu.iconSize.width': '20px',
+    'menu.iconSize.height': '20px',
+    'submenu.iconSize.width': '18px',
+    'submenu.iconSize.height': '18px',
 
     // submenu primary color
     'submenu.backgroundColor': '#1e1e1e',

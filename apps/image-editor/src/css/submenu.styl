@@ -1,206 +1,275 @@
-/* SUBMENU */
+/* SUBMENU - COMPACT HORIZONTAL BAR */
 .{prefix}-container
     .{prefix}-submenu
-        display: none;
-        position: absolute;
-        bottom: 0;
-        width:100%;
-        height: 150px;
-        white-space: nowrap;
-        z-index: 2;
+        display: flex !important;
+        align-items: center !important;
+        flex: 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        white-space: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        position: relative !important;
+        z-index: 2 !important;
+        background: transparent !important;
+        scrollbar-width: thin !important;
+        > div
+            display: none;
+            align-items: center;
+            height: 100%;
+        .{prefix}-submenu-style
+            display: none !important;
+
+    for tool in crop resize flip rotate shape text mask icon draw filter zoom annotation mosaic lasso eraser
+        &.{prefix}-menu-{tool} .{prefix}-submenu > div.{prefix}-menu-{tool},
+        .{prefix}-menu-{tool} .{prefix}-submenu > div.{prefix}-menu-{tool},
+        & .{prefix}-menu-{tool} .{prefix}-submenu > div.{prefix}-menu-{tool}
+            display: inline-flex !important;
+
+    .{prefix}-submenu
+        .{prefix}-partition
+            display: inline-flex !important;
+            align-items: center !important;
+            height: 100% !important;
+            margin: 0 4px !important;
+            > div
+                width: 1px !important;
+                height: 18px !important;
+                border-left: 1px solid #3c3c3c !important;
+                margin: 0 4px !important;
+
         .{prefix}-button:hover svg > use.active
             display: block;
+
         .{prefix}-submenu-item
+            display: inline-flex;
+            align-items: center;
+            height: 100%;
+            margin: 0;
+            padding: 0 4px;
+            list-style: none;
             li
-                display: inline-block;
-                vertical-align: top;
+                display: inline-flex;
+                align-items: center;
+                margin: 0 3px;
+                height: 100%;
+                vertical-align: middle;
             .{prefix}-newline
-                display: block;
+                display: inline-flex;
                 margin-top: 0;
+                align-items: center;
             .{prefix}-button
                 position: relative;
                 cursor: pointer;
-                display: inline-block;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                height: 24px;
+                padding: 0 6px;
+                margin: 0 2px;
+                border-radius: 3px;
                 font-weight: normal;
                 font-size: 11px;
-                margin: 0 9px 0 9px;
+                border: 1px solid #3c3c3c;
+                background-color: #2a2a2a;
+                color: #bbb;
+                transition: all 0.15s;
+                &:hover
+                    background-color: #383838;
+                    color: #fff;
+                &.active
+                    background-color: #007aff;
+                    border-color: #007aff;
+                    color: #fff;
+                    label
+                        color: #fff;
             .{prefix}-button.preset
-                margin: 0 9px 20px 5px;
+                margin: 0 2px;
+            label
+                display: inline-flex;
+                align-items: center;
+                cursor: pointer;
+                margin-left: 3px;
+                font-size: 11px;
+                line-height: 20px;
+                vertical-align: middle;
+                color: inherit;
             label > span
                 display: inline-block;
                 cursor: pointer;
-                padding-top: 5px;
                 font-family: "Noto Sans", sans-serif;
                 font-size: 11px;
-            .{prefix}-button.apply label,
-            .{prefix}-button.cancel label
-                vertical-align: 7px;
-        > div
-            display: none;
-            vertical-align: bottom;
-        .{prefix}-submenu-style
-            opacity: 0.95;
-            z-index: -1;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: block;
+                color: inherit;
+            .{prefix}-button.apply,
+            .{prefix}-button.cancel
+                height: 24px;
+                padding: 0 10px;
+                font-size: 11px;
+                border-radius: 3px;
+            .{prefix}-button.apply
+                background-color: #007aff;
+                border-color: #007aff;
+                color: #fff;
+                font-weight: bold;
+                label
+                    color: #fff;
+            .{prefix}-button.cancel
+                background-color: #383838;
+                border-color: #484848;
+                color: #ddd;
 
-    .{prefix}-partition > div
-        width: 1px;
-        height: 52px;
-        border-left: 1px solid #3c3c3c;
-        margin: 0 8px 0 8px;
-    .{prefix}-main.{prefix}-menu-filter .{prefix}-partition > div
-        height: 108px;
-        margin: 0 29px 0 0px;
-    .{prefix}-submenu-align
-        text-align: left;
-        margin-right: 30px;
-        label > span
-            width: 55px;
+    /* RANGE CONTROLS */
+    .{prefix}-range-wrap
+        display: inline-flex;
+        align-items: center;
+        margin: 0 4px;
+        label.range
+            font-size: 11px;
+            margin-right: 6px;
+            color: #aaa;
             white-space: nowrap;
-    .{prefix}-submenu-align:first-child
-        margin-right: 0;
-        label > span
-            width: 70px;
-    .{prefix}-main.{prefix}-menu-crop .{prefix}-submenu > div.{prefix}-menu-crop,
-    .{prefix}-main.{prefix}-menu-resize .{prefix}-submenu > div.{prefix}-menu-resize,
-    .{prefix}-main.{prefix}-menu-flip .{prefix}-submenu > div.{prefix}-menu-flip,
-    .{prefix}-main.{prefix}-menu-rotate .{prefix}-submenu > div.{prefix}-menu-rotate,
-    .{prefix}-main.{prefix}-menu-shape .{prefix}-submenu > div.{prefix}-menu-shape,
-    .{prefix}-main.{prefix}-menu-text .{prefix}-submenu > div.{prefix}-menu-text,
-    .{prefix}-main.{prefix}-menu-mask .{prefix}-submenu > div.{prefix}-menu-mask,
-    .{prefix}-main.{prefix}-menu-icon .{prefix}-submenu > div.{prefix}-menu-icon,
-    .{prefix}-main.{prefix}-menu-draw .{prefix}-submenu > div.{prefix}-menu-draw,
-    .{prefix}-main.{prefix}-menu-filter .{prefix}-submenu > div.{prefix}-menu-filter,
-    .{prefix}-main.{prefix}-menu-zoom .{prefix}-submenu > div.{prefix}-menu-zoom,
-    .{prefix}-main.{prefix}-menu-annotation .{prefix}-submenu > div.{prefix}-menu-annotation,
-    .{prefix}-main.{prefix}-menu-mosaic .{prefix}-submenu > div.{prefix}-menu-mosaic,
-    .{prefix}-main.{prefix}-menu-lasso .{prefix}-submenu > div.{prefix}-menu-lasso,
-    .{prefix}-main.{prefix}-menu-eraser .{prefix}-submenu > div.{prefix}-menu-eraser
-        display: table-cell;
-    .{prefix}-main.{prefix}-menu-crop,
-    .{prefix}-main.{prefix}-menu-resize,
-    .{prefix}-main.{prefix}-menu-flip,
-    .{prefix}-main.{prefix}-menu-rotate,
-    .{prefix}-main.{prefix}-menu-shape,
-    .{prefix}-main.{prefix}-menu-text,
-    .{prefix}-main.{prefix}-menu-mask,
-    .{prefix}-main.{prefix}-menu-icon,
-    .{prefix}-main.{prefix}-menu-draw,
-    .{prefix}-main.{prefix}-menu-filter,
-    .{prefix}-main.{prefix}-menu-zoom,
-    .{prefix}-main.{prefix}-menu-annotation,
-    .{prefix}-main.{prefix}-menu-mosaic,
-    .{prefix}-main.{prefix}-menu-lasso,
-    .{prefix}-main.{prefix}-menu-eraser
-      .{prefix}-submenu
-        display: table;
+        .{prefix}-range
+            width: 75px;
+            display: inline-block;
+            vertical-align: middle;
+        .{prefix}-range-value
+            width: 36px;
+            height: 22px;
+            line-height: 20px;
+            font-size: 11px;
+            text-align: center;
+            margin-left: 6px;
+            border-radius: 2px;
+            border: 1px solid #3c3c3c;
+            background: #181818;
+            color: #ddd;
+            outline: none;
 
-/* Help menu bar */
+    /* COLORPICKER */
+    .color-picker-control
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        .color-picker-value
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            border: 1px solid #555;
+            cursor: pointer;
+            margin: 0 4px;
+        .triangle
+            display: none;
+        .tui-colorpicker-container
+            position: absolute;
+            top: 32px;
+            left: 0;
+            z-index: 1005;
+            background: #252525;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+/* Help menu bar history popover */
 .{prefix}-container
     .{prefix}-help-menu
-        list-style: none;
-        padding: 0;
-        margin: 0 auto;
-        text-align: center;
-        vertical-align: middle;
-        border-radius: 20px;
-        background-color: rgba(255, 255, 255, 0.06);
-        z-index: 2;
-        position: absolute;
         .tie-panel-history
             display: none;
-            background-color: #fff;
-            color: #444;
+            background-color: #222;
+            color: #ddd;
             position: absolute;
-            width: 196px;
-            height: 276px;
-            padding: 4px 2px;
-            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.15);
+            width: 200px;
+            max-height: 280px;
+            padding: 6px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            border: 1px solid #383838;
+            border-radius: 4px;
             cursor: auto;
-            transform: translateX(calc(-50% + 12px));
+            top: 34px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1005;
             .history-list
-                height: 268px;
+                max-height: 260px;
                 padding: 0;
-                overflow: hidden scroll;
+                margin: 0;
+                overflow-y: auto;
                 list-style: none;
                 .history-item
                     height: 24px;
                     font-size: 11px;
                     line-height: 24px;
+                    border-radius: 2px;
+                    padding: 0 6px;
+                    color: #bbb;
+                    cursor: pointer;
+                    &:hover
+                        background-color: #333;
+                        color: #fff;
+                    &.selected-item
+                        background-color: #007aff;
+                        color: #fff;
+                    &.disabled-item
+                        opacity: 0.35;
+                        cursor: not-allowed;
                     .{prefix}-history-item
                         position: relative;
                         height: 24px;
-                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
                         svg
-                            width: 24px;
-                            height: 24px;
+                            width: 14px;
+                            height: 14px;
                         span
                             display: inline-block;
-                            width: 128px;
-                            height: 24px;
-                            text-align: left;
-                        .history-item-icon
-                            display: inline-block;
-                            width: 24px;
-                            height: 24px;
-                            position: absolute;
-                            top: 6px;
-                            left: 6px;
+                            margin-left: 6px;
+                            font-size: 11px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
                         .history-item-checkbox
                             display: none;
-                            width: 24px;
-                            height: 24px;
-                            position: absolute;
-                            top: 5px;
-                            right: -6px;
-                    &.selected-item
-                        background-color: rgba(119, 119, 119, 0.12);
-                        .history-item-checkbox
-                            display: inline-block;
-                    &.disabled-item
-                        color: #333;
-                        opacity: 0.3;
         .opened .tie-panel-history
             display: block;
             &:before
                 content: '';
                 position: absolute;
-                display: inline-block;
-                margin: 0 auto;
+                top: -6px;
+                left: 50%;
+                transform: translateX(-50%);
                 width: 0;
                 height: 0;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-bottom: 6px solid #222;
 
-/* 序号标注自定义样式，继承 TUI 原生子菜单视觉风格 */
+/* 序号标注 & 自定义组件紧凑单行适配 */
 .tui-image-editor-container {
     .tui-image-editor-submenu {
         .custom-annotation-shape-button,
-        .custom-annotation-color-button {
+        .custom-annotation-color-button,
+        .custom-arrow-select-button,
+        .custom-annotation-step-wrap {
             display: inline-flex !important;
             align-items: center;
-            height: 48px;
-            vertical-align: top;
+            height: 24px;
+            vertical-align: middle;
+            margin: 0 3px;
         }
         .color-item-wrapper {
             position: relative;
-            display: flex;
-            flex-direction: column;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
         }
         .color-preview-container {
             height: 24px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
         }
         .color-preview-circle {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.4);
             cursor: pointer;
@@ -208,42 +277,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, border-color 0.2s;
+            transition: transform 0.15s, border-color 0.15s;
             &:hover {
                 transform: scale(1.15);
                 border-color: #fff;
             }
         }
         .color-preview-inner {
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
             border: 1px solid rgba(0, 0, 0, 0.2);
             background-color: transparent;
         }
         .preset-colors-popup {
             position: absolute;
-            bottom: 56px;
+            top: 32px;
+            bottom: auto;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e1e1e;
+            background: #252525;
             border: 1px solid #3c3c3c;
             border-radius: 4px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            width: 110px;
+            padding: 6px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            z-index: 1005;
+            width: 100px;
         }
         .preset-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 4px;
             justify-items: center;
             align-items: center;
         }
         .preset-color-dot {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             cursor: pointer;
             border: 1px solid #555;
@@ -254,23 +324,24 @@
             }
         }
         .preset-color-custom {
-            font-size: 13px;
+            font-size: 11px;
             cursor: pointer;
             user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.15s;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             &:hover {
                 transform: scale(1.2);
             }
         }
         .custom-slider-container {
-            display: inline-block;
-            width: 100px;
-            margin: 0 10px;
+            display: inline-flex;
+            align-items: center;
+            width: 75px;
+            margin: 0 6px;
             vertical-align: middle;
         }
         .custom-tui-slider {
@@ -288,86 +359,83 @@
         .custom-tui-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #151515;
             border: 2px solid #007aff;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-            transition: border-color 0.15s;
-            &:hover {
-                border-color: #0099ff;
-            }
         }
         .custom-tui-slider::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #151515;
             border: 2px solid #007aff;
             cursor: pointer;
             box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-            transition: border-color 0.15s;
-            &:hover {
-                border-color: #0099ff;
-            }
-        }
-        .custom-annotation-step-wrap {
-            display: inline-flex !important;
-            align-items: center;
-            height: 48px;
-            vertical-align: top;
         }
         .step-control-wrapper {
-            display: flex;
-            flex-direction: column;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
+            margin: 0 4px;
         }
         .step-control-row {
             height: 24px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
         }
         .step-value-input {
-            width: 40px !important;
+            width: 36px !important;
+            height: 22px !important;
+            line-height: 20px;
             text-align: center;
-            margin-top: 0 !important;
-            margin-left: 0 !important;
+            font-size: 11px;
+            border: 1px solid #3c3c3c;
+            background: #181818;
+            color: #ddd;
+            border-radius: 2px;
+            margin: 0 4px !important;
+            outline: none;
         }
         .custom-annotation-range-wrap {
-            display: flex !important;
+            display: inline-flex !important;
             align-items: center;
-            justify-content: center;
-            margin-top: 16px !important;
+            margin: 0 4px !important;
         }
         .custom-annotation-range-wrap label.range {
-            margin: 0 7px 0 0 !important;
-            line-height: 24px;
+            margin: 0 4px 0 0 !important;
             height: 24px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            font-size: 11px;
         }
         .custom-annotation-range-wrap .custom-slider-container {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             height: 24px;
-            margin: 0 10px;
+            margin: 0 4px;
         }
         .custom-annotation-range-wrap .tie-annotation-fontsize-input {
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            margin-left: 10px !important;
+            width: 36px !important;
+            height: 22px !important;
+            line-height: 20px;
+            font-size: 11px;
+            margin: 0 4px !important;
+            border: 1px solid #3c3c3c;
+            background: #181818;
+            color: #ddd;
+            border-radius: 2px;
+            outline: none;
         }
         .custom-reset-btn {
-            margin-left: 8px;
+            margin-left: 4px;
             color: #007aff;
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border: 1px solid #3c3c3c;
             border-radius: 3px;
             background: #252525;
@@ -380,26 +448,14 @@
             }
         }
         .custom-label {
-            display: block;
-            font-size: 11px;
-            color: #8c8c8c;
-            margin-top: 6px;
-            cursor: default;
-            user-select: none;
-            font-family: "Noto Sans", sans-serif;
-            text-align: center;
+            display: none;
         }
-        /* 画笔子菜单：箭头类型选择按钮容器 */
-        .custom-arrow-select-button {
-            display: inline-flex !important;
-            align-items: center;
-            height: 48px;
-            vertical-align: top;
-        }
-        /* 箭头 SVG 图标颜色继承 TUI 原生风格 */
+        /* 箭头 SVG 图标 */
         .tui-image-editor-button svg {
             stroke: #8c8c8c;
             fill: none;
+            width: 16px;
+            height: 16px;
             transition: stroke 0.2s;
         }
         .tui-image-editor-button.active svg {
