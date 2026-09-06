@@ -149,12 +149,16 @@ export default {
               this.clearUndoStack();
               this.ui.activeMenuEvent();
               this.ui.resizeEditor({ imageSize: sizeValue });
+              this.ui.changeViewOriginalStatus(false);
               this._clearHistory();
               this._invoker.fire(eventNames.EXECUTE_COMMAND, historyNames.LOAD_IMAGE);
             })
             ['catch']((message) => Promise.reject(message));
         },
-        viewOriginal: () => this.toggleAllObjectsVisibility(),
+        viewOriginal: () => {
+          const isVisible = this.toggleAllObjectsVisibility();
+          this.ui.changeViewOriginalStatus(!isVisible);
+        },
         download: () => {
           const dataURL = this.toDataURL();
           let imageName = this.getImageName();

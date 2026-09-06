@@ -10,7 +10,7 @@ export const ZOOM_HELP_MENUS = ['zoomIn', 'zoomOut', 'hand'];
  * Help features for command
  * @type {Array.<string>}
  */
-export const COMMAND_HELP_MENUS = ['history', 'undo', 'redo', 'reset'];
+export const COMMAND_HELP_MENUS = ['undo', 'redo', 'history', 'reset'];
 
 /**
  * Help features for delete

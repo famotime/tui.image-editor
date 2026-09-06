@@ -304,6 +304,18 @@ class Ui {
   }
 
   /**
+   * Change view original button active status
+   * @param {boolean} active - active status
+   */
+  changeViewOriginalStatus(active) {
+    const buttonElement = this._buttonElements.viewOriginal;
+
+    if (buttonElement) {
+      buttonElement.classList[active ? 'add' : 'remove']('active');
+    }
+  }
+
+  /**
    * Change delete button status
    * @param {Object} [options] - Ui setting options
    *   @param {object} [options.loadImage] - Init default load image
@@ -767,7 +779,11 @@ class Ui {
       if (!menuName) {
         this._makeMenuPartitionElement();
       } else {
-        this._makeMenuElement(menuName, ['normal', 'disabled', 'hover'], 'help');
+        const useIconTypes =
+          menuName === 'viewOriginal'
+            ? ['normal', 'active', 'hover', 'disabled']
+            : ['normal', 'disabled', 'hover'];
+        this._makeMenuElement(menuName, useIconTypes, 'help');
 
         this._buttonElements[menuName] = this._helpMenuBarElement.querySelector(
           `.tie-btn-${menuName}`
@@ -783,7 +799,7 @@ class Ui {
   _makeMenuPartitionElement() {
     const partitionElement = document.createElement('li');
     const partitionInnerElement = document.createElement('div');
-    partitionElement.className = cls('item');
+    partitionElement.className = `${cls('item')} ${cls('help-partition')}`;
     partitionInnerElement.className = cls('icpartition');
     partitionElement.appendChild(partitionInnerElement);
 
