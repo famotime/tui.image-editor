@@ -28,10 +28,10 @@ describe('Theme', () => {
     it('should return default icon color information', () => {
       const { normal, active, disabled, hover } = theme.getStyle('menu.icon');
 
-      expect(normal.color).toBe('#8a8a8a');
-      expect(active.color).toBe('#555555');
-      expect(disabled.color).toBe('#434343');
-      expect(hover.color).toBe('#e9e9e9');
+      expect(normal.color).toBe('#98989f');
+      expect(active.color).toBe('#ffffff');
+      expect(disabled.color).toBe('#636366');
+      expect(hover.color).toBe('#f2f2f7');
     });
 
     it('should return cssText in normal types', () => {

@@ -25,52 +25,52 @@ var blackTheme = {
   'downloadButton.fontFamily': "'Noto Sans', sans-serif",
   'downloadButton.fontSize': '12px',
 
-  // main icons
-  'menu.normalIcon.color': '#8a8a8a',
-  'menu.activeIcon.color': '#555555',
-  'menu.disabledIcon.color': '#434343',
-  'menu.hoverIcon.color': '#e9e9e9',
+  // 主工具栏图标色彩（WCAG AA 标准优化）
+  'menu.normalIcon.color': '#98989f',
+  'menu.activeIcon.color': '#ffffff',
+  'menu.disabledIcon.color': '#636366',
+  'menu.hoverIcon.color': '#f2f2f7',
   'menu.iconSize.width': '24px',
   'menu.iconSize.height': '24px',
 
-  // submenu icons
-  'submenu.normalIcon.color': '#8a8a8a',
-  'submenu.activeIcon.color': '#e9e9e9',
-  'submenu.iconSize.width': '32px',
-  'submenu.iconSize.height': '32px',
+  // 二级属性栏图标色彩
+  'submenu.normalIcon.color': '#98989f',
+  'submenu.activeIcon.color': '#ffffff',
+  'submenu.iconSize.width': '20px',
+  'submenu.iconSize.height': '20px',
 
-  // submenu primary color
-  'submenu.backgroundColor': '#1e1e1e',
-  'submenu.partition.color': '#3c3c3c',
+  // 二级属性栏基底色彩 (Surface 2)
+  'submenu.backgroundColor': '#242426',
+  'submenu.partition.color': '#3a3a3c',
 
-  // submenu labels
-  'submenu.normalLabel.color': '#8a8a8a',
-  'submenu.normalLabel.fontWeight': 'lighter',
-  'submenu.activeLabel.color': '#fff',
-  'submenu.activeLabel.fontWeight': 'lighter',
+  // 二级标签文字颜色与字重（废除 lighter）
+  'submenu.normalLabel.color': '#98989f',
+  'submenu.normalLabel.fontWeight': 'normal',
+  'submenu.activeLabel.color': '#f2f2f7',
+  'submenu.activeLabel.fontWeight': '500',
 
-  // checkbox style
-  'checkbox.border': '0px',
-  'checkbox.backgroundColor': '#fff',
+  // 复选框样式
+  'checkbox.border': '1px solid #444446',
+  'checkbox.backgroundColor': '#2c2c2e',
 
-  // range style
-  'range.pointer.color': '#fff',
-  'range.bar.color': '#666',
-  'range.subbar.color': '#d1d1d1',
+  // 滑块 (Range) 样式
+  'range.pointer.color': '#ffffff',
+  'range.bar.color': '#444446',
+  'range.subbar.color': '#2563eb',
 
-  'range.disabledPointer.color': '#414141',
-  'range.disabledBar.color': '#282828',
-  'range.disabledSubbar.color': '#414141',
+  'range.disabledPointer.color': '#48484a',
+  'range.disabledBar.color': '#2c2c2e',
+  'range.disabledSubbar.color': '#48484a',
 
-  'range.value.color': '#fff',
-  'range.value.fontWeight': 'lighter',
+  'range.value.color': '#f2f2f7',
+  'range.value.fontWeight': 'normal',
   'range.value.fontSize': '11px',
-  'range.value.border': '1px solid #353535',
-  'range.value.backgroundColor': '#151515',
-  'range.title.color': '#fff',
-  'range.title.fontWeight': 'lighter',
+  'range.value.border': '1px solid #3a3a3c',
+  'range.value.backgroundColor': '#1c1c1e',
+  'range.title.color': '#98989f',
+  'range.title.fontWeight': 'normal',
 
-  // colorpicker style
-  'colorpicker.button.border': '1px solid #1e1e1e',
-  'colorpicker.title.color': '#fff',
+  // 拾色器 (Colorpicker) 样式
+  'colorpicker.button.border': '1px solid #3a3a3c',
+  'colorpicker.title.color': '#f2f2f7',
 };

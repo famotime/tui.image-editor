@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * @param {Object} submenuInfo - submenu info for make template
  *   @param {Locale} locale - Translate text
@@ -7,30 +8,27 @@
 export default ({ locale }) => `
     <ul class="tui-image-editor-submenu-item">
         <!-- 形状选择 -->
-        <li class="custom-annotation-shape-button">
-            <div class="tui-image-editor-button circle active" title="${locale.localize('Circle')}">
+        <li class="custom-annotation-shape-button tui-segmented-control">
+            <div class="tui-image-editor-button circle active" tooltip-content="${locale.localize('Circle')}">
                 <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
                         <circle cx="12" cy="12" r="8" />
                     </svg>
                 </div>
-                <label>${locale.localize('Circle')}</label>
             </div>
-            <div class="tui-image-editor-button rect" title="${locale.localize('Rectangle')}">
+            <div class="tui-image-editor-button rect" tooltip-content="${locale.localize('Rectangle')}">
                 <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
                         <rect x="5" y="5" width="14" height="14" rx="2" />
                     </svg>
                 </div>
-                <label>${locale.localize('Rectangle')}</label>
             </div>
-            <div class="tui-image-editor-button triangle" title="${locale.localize('Triangle')}">
+            <div class="tui-image-editor-button triangle" tooltip-content="${locale.localize('Triangle')}">
                 <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
                         <polygon points="12 5 5 19 19 19" />
                     </svg>
                 </div>
-                <label>${locale.localize('Triangle')}</label>
             </div>
         </li>
         

@@ -53,10 +53,13 @@ export default ({
         ${subMenuLabelActive}
     }
     .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button > label,
+    .tui-image-editor-container .tui-image-editor-submenu .custom-label,
+    .tui-image-editor-container .tui-image-editor-range-wrap label,
     .tui-image-editor-container .tui-image-editor-range-wrap.tui-image-editor-newline.short label,
     .tui-image-editor-container .tui-image-editor-range-wrap.tui-image-editor-newline.short label > span {
         ${subMenuLabelNormal}
     }
+    .tui-image-editor-container .tui-image-editor-range-wrap label,
     .tui-image-editor-container .tui-image-editor-range-wrap label > span {
         ${subMenuRangeTitle}
     }

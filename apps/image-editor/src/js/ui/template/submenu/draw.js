@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * @param {Object} submenuInfo - submenu info for make template
  *   @param {Locale} locale - Translate text
@@ -6,83 +7,72 @@
  */
 export default ({ locale, makeSvgIcon }) => `
     <ul class="tui-image-editor-submenu-item">
-        <li class="tie-draw-line-select-button">
-            <div class="tui-image-editor-button free">
+        <!-- 绘图模式分段控制器：自由手绘 / 直线绘制 -->
+        <li class="tie-draw-line-select-button tui-segmented-control">
+            <div class="tui-image-editor-button free" tooltip-content="${locale.localize('Free')}">
                 <div>
                     ${makeSvgIcon(['normal', 'active'], 'draw-free', true)}
                 </div>
-                <label>
-                    ${locale.localize('Free')}
-                </label>
             </div>
-            <div class="tui-image-editor-button line">
+            <div class="tui-image-editor-button line" tooltip-content="${locale.localize('Straight')}">
                 <div>
                     ${makeSvgIcon(['normal', 'active'], 'draw-line', true)}
                 </div>
-                <label>
-                    ${locale.localize('Straight')}
-                </label>
             </div>
         </li>
         <li class="tui-image-editor-partition">
             <div></div>
         </li>
+        <!-- 颜色选择 -->
         <li>
-            <div class="tie-draw-color" title="${locale.localize('Color')}"></div>
+            <div class="tie-draw-color" tooltip-content="${locale.localize('Color')}"></div>
         </li>
-        <li class="tui-image-editor-partition only-left-right">
+        <li class="tui-image-editor-partition">
             <div></div>
         </li>
-        <li class="tui-image-editor-newline tui-image-editor-range-wrap">
+        <!-- 画笔粗细 -->
+        <li class="tui-image-editor-newline tui-image-editor-range-wrap" tooltip-content="${locale.localize('Range')} (px)">
             <label class="range">${locale.localize('Range')}</label>
             <div class="tie-draw-range"></div>
             <input class="tie-draw-range-value tui-image-editor-range-value" value="0" />
         </li>
-        <li class="tui-image-editor-partition only-left-right">
+        <li class="tui-image-editor-partition">
             <div></div>
         </li>
-        <li class="tui-image-editor-newline tui-image-editor-range-wrap">
+        <!-- 不透明度 -->
+        <li class="tui-image-editor-newline tui-image-editor-range-wrap" tooltip-content="${locale.localize('Opacity')} (%)">
             <label class="range">${locale.localize('Opacity')}</label>
             <div class="tie-draw-opacity-range"></div>
             <input class="tie-draw-opacity-range-value tui-image-editor-range-value" value="1" />
         </li>
-        <!-- 箭头类型选择：无箭头 / 单向箭头 / 双向箭头 -->
-        <li class="tui-image-editor-partition only-left-right">
+        <!-- 箭头端点分段控制器：无箭头 / 单向箭头 / 双向箭头 -->
+        <li class="tui-image-editor-partition">
             <div></div>
         </li>
-        <li class="custom-arrow-select-button tie-draw-arrow-select-button">
-            <div class="tui-image-editor-button arrow-none active" title="${locale.localize(
-              'NoArrow'
-            )}">
+        <li class="custom-arrow-select-button tie-draw-arrow-select-button tui-segmented-control">
+            <div class="tui-image-editor-button arrow-none active" tooltip-content="${locale.localize('NoArrow')}">
                 <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                </div>
-                <label>${locale.localize('NoArrow')}</label>
-            </div>
-            <div class="tui-image-editor-button arrow-single" title="${locale.localize(
-              'SingleArrow'
-            )}">
-                <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                    </svg>
-                </div>
-                <label>${locale.localize('SingleArrow')}</label>
-            </div>
-            <div class="tui-image-editor-button arrow-double" title="${locale.localize(
-              'DoubleArrow'
-            )}">
-                <div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12" />
-                        <polyline points="15 6 21 12 15 18" />
-                        <polyline points="9 6 3 12 9 18" />
                     </svg>
                 </div>
-                <label>${locale.localize('DoubleArrow')}</label>
+            </div>
+            <div class="tui-image-editor-button arrow-single" tooltip-content="${locale.localize('SingleArrow')}">
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="19" y2="12" />
+                        <polyline points="13 6 19 12 13 18" />
+                    </svg>
+                </div>
+            </div>
+            <div class="tui-image-editor-button arrow-double" tooltip-content="${locale.localize('DoubleArrow')}">
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="14 7 19 12 14 17" />
+                        <polyline points="10 7 5 12 10 17" />
+                    </svg>
+                </div>
             </div>
         </li>
     </ul>
