@@ -4,6 +4,9 @@
  * 使用方式：在 includeUI 配置中传入 locale: zhCN
  */
 const zhCN = {
+  // 品牌与标题
+  'Image Editor': '资源管家',
+
   // 主菜单
   Crop: '裁剪',
   Draw: '画笔',

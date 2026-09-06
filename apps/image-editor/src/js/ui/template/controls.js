@@ -9,7 +9,7 @@ export default ({ biImage, menuBarPosition, locale, submenuStyle }) => `
                 <img src="${biImage}" />
             </div>
             ` : `
-            <div class="tui-image-editor-brand-text">Image Editor</div>
+            <div class="tui-image-editor-brand-text">${locale ? locale.localize('Image Editor') : '资源管家'}</div>
             `}
         </div>
         <div class="tui-image-editor-top-center">
