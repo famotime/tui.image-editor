@@ -23,7 +23,7 @@ import Lasso from '@/ui/lasso';
 import Eraser from '@/ui/eraser';
 import History from '@/ui/history';
 import Locale from '@/ui/locale/locale';
-import { makeHelpMenuWithPartitions } from '@/ui/helpMenu';
+import { makeHelpMenuWithPartitions, HELP_MENU_TITLE_KEYS } from '@/ui/helpMenu';
 
 const SUB_UI_COMPONENT = {
   Shape,
@@ -254,6 +254,8 @@ class Ui {
     } else {
       selectElementClassList.remove('tui-image-editor-top-optimization');
     }
+
+    this._updateToolbarOverflow();
   }
 
   /**
@@ -301,6 +303,7 @@ class Ui {
     const buttonClassList = this._buttonElements[buttonType].classList;
 
     buttonClassList[enableStatus ? 'add' : 'remove']('enabled');
+    this._syncDropdownItemStatus(buttonType);
   }
 
   /**
@@ -312,6 +315,7 @@ class Ui {
 
     if (buttonElement) {
       buttonElement.classList[active ? 'add' : 'remove']('active');
+      this._syncDropdownItemStatus('viewOriginal');
     }
   }
 
@@ -564,6 +568,9 @@ class Ui {
     this._attachPaletteToggleEvent();
     this._attachPaletteDragEvent();
     this._attachHistoryOutsideClick();
+    this._attachSubmenuWheelEvent();
+    this._makeSubmenuMoreElement();
+    this._initToolbarOverflow();
   }
 
   /**
@@ -721,6 +728,543 @@ class Ui {
   }
 
   /**
+   * Attach submenu mouse wheel horizontal scroll
+   * @private
+   */
+  _attachSubmenuWheelEvent() {
+    if (!this._subMenuElement) {
+      return;
+    }
+    this._onSubmenuWheel = (e) => {
+      if (e.deltaY) {
+        e.preventDefault();
+        this._subMenuElement.scrollLeft += e.deltaY;
+      }
+    };
+    this._subMenuElement.addEventListener('wheel', this._onSubmenuWheel, { passive: false });
+  }
+
+  /**
+   * 初始化顶部工具栏溢出监听与折叠交互
+   * @private
+   */
+  _initToolbarOverflow() {
+    if (!this._helpMenuBarElement || !this._moreMenuElement) {
+      return;
+    }
+
+    this._onMoreBtnClick = (event) => {
+      if (
+        (event.target.closest && event.target.closest('.tie-more-dropdown-item')) ||
+        (event.target.closest && event.target.closest('.tie-more-dropdown-panel'))
+      ) {
+        return;
+      }
+      event.stopPropagation();
+      const isOpened = this._moreMenuElement.classList.toggle('opened');
+      if (isOpened) {
+        this._syncAllDropdownItemsStatus();
+      }
+    };
+    this._moreMenuElement.addEventListener('click', this._onMoreBtnClick);
+
+    this._onMoreDropdownClick = (event) => {
+      const dropdownItem = event.target.closest && event.target.closest('.tie-more-dropdown-item');
+      if (!dropdownItem || dropdownItem.classList.contains('disabled')) {
+        return;
+      }
+      const menuName = dropdownItem.getAttribute('data-menu-name');
+      this._moreMenuElement.classList.remove('opened');
+      this._triggerOriginalMenuAction(menuName, event);
+    };
+    this._moreDropdownList.addEventListener('click', this._onMoreDropdownClick);
+
+    this._onDocumentClickForMoreMenu = (event) => {
+      if (this._moreMenuElement && this._moreMenuElement.classList.contains('opened')) {
+        if (!this._moreMenuElement.contains(event.target)) {
+          this._moreMenuElement.classList.remove('opened');
+        }
+      }
+    };
+    document.addEventListener('click', this._onDocumentClickForMoreMenu);
+
+    this._updateToolbarOverflowBound = () => this._updateToolbarOverflow();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this._toolbarResizeObserver = new ResizeObserver(this._updateToolbarOverflowBound);
+      const parent = this._helpMenuBarElement.parentElement || this._helpMenuBarElement;
+      this._toolbarResizeObserver.observe(parent);
+      if (this._subMenuElement) {
+        this._toolbarResizeObserver.observe(this._subMenuElement);
+      }
+    } else {
+      window.addEventListener('resize', this._updateToolbarOverflowBound);
+    }
+
+    this._updateToolbarOverflow();
+  }
+
+  /**
+   * 触发原工具栏按钮的对应交互动作
+   * @param {string} menuName - 菜单名称
+   * @param {Event} [event] - 交互事件
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _triggerOriginalMenuAction(menuName, event) {
+    if (!menuName) {
+      return;
+    }
+    if (menuName === 'load') {
+      const fileInput =
+        this._buttonElements.load && this._buttonElements.load[0]
+          ? this._buttonElements.load[0]
+          : this._helpMenuBarElement.querySelector('input.tui-image-editor-load-btn');
+      if (fileInput) {
+        fileInput.click();
+      }
+
+      return;
+    }
+    if (menuName === 'download') {
+      if (this._actions && this._actions.main && this._actions.main.download) {
+        this._actions.main.download();
+      } else {
+        const downloadBtn = this._helpMenuBarElement.querySelector(
+          '.tui-image-editor-download-btn'
+        );
+        if (downloadBtn) {
+          downloadBtn.click();
+        }
+      }
+
+      return;
+    }
+    if (menuName === 'history') {
+      this.toggleHistoryMenu(event || {});
+
+      return;
+    }
+    const origBtn = this._buttonElements[menuName];
+    if (origBtn) {
+      origBtn.click();
+    }
+  }
+
+  /**
+   * 响应式计算工具栏按钮宽度与溢出折叠
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _updateToolbarOverflow() {
+    if (!this._helpMenuBarElement || !this._moreMenuElement) {
+      return;
+    }
+
+    const parent = this._helpMenuBarElement.parentElement;
+    const containerWidth = parent ? parent.offsetWidth : this._helpMenuBarElement.offsetWidth;
+    if (!containerWidth || containerWidth <= 0) {
+      return;
+    }
+
+    const items = Array.prototype.filter.call(
+      this._helpMenuBarElement.children,
+      (el) => el !== this._moreMenuElement
+    );
+
+    // eslint-disable-next-line complexity
+    const getItemWidth = (el) => {
+      const isPartition =
+        el.classList.contains('tie-help-partition') ||
+        el.classList.contains('tui-image-editor-help-partition');
+      if (isPartition) {
+        return 13;
+      }
+      const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      if (rect && rect.width > 0) {
+        return rect.width + 4;
+      }
+
+      return el.offsetWidth > 0 ? el.offsetWidth + 4 : 34;
+    };
+
+    let totalWidth = 0;
+    const widths = items.map((el) => {
+      const w = getItemWidth(el);
+      totalWidth += w;
+
+      return w;
+    });
+
+    if (totalWidth <= containerWidth) {
+      forEach(items, (el) => el.classList.remove('tie-overflow-hidden'));
+      this._moreMenuElement.style.display = 'none';
+      this._moreMenuElement.classList.remove('opened');
+      this._moreDropdownList.innerHTML = '';
+      this._updateSubmenuOverflow();
+
+      return;
+    }
+
+    const moreBtnWidth = 34;
+    const availableWidth = containerWidth - moreBtnWidth;
+
+    let currentWidth = 0;
+    let splitIndex = items.length;
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (currentWidth + widths[i] <= availableWidth) {
+        currentWidth += widths[i];
+      } else {
+        splitIndex = i;
+        break;
+      }
+    }
+
+    if (splitIndex > 0) {
+      const lastVisible = items[splitIndex - 1];
+      if (
+        lastVisible.classList.contains('tie-help-partition') ||
+        lastVisible.classList.contains('tui-image-editor-help-partition')
+      ) {
+        splitIndex -= 1;
+      }
+    }
+
+    for (let i = 0; i < items.length; i += 1) {
+      if (i < splitIndex) {
+        items[i].classList.remove('tie-overflow-hidden');
+      } else {
+        items[i].classList.add('tie-overflow-hidden');
+      }
+    }
+
+    this._moreMenuElement.style.display = 'inline-flex';
+    this._renderMoreDropdown(items.slice(splitIndex));
+    this._updateSubmenuOverflow();
+  }
+
+  /**
+   * 渲染下拉菜单中的折叠项
+   * @param {Array.<HTMLElement>} overflowItems - 被折叠隐藏的元素列表
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _renderMoreDropdown(overflowItems) {
+    if (!this._moreDropdownList) {
+      return;
+    }
+    this._moreDropdownList.innerHTML = '';
+
+    let prevWasPartition = true;
+
+    // eslint-disable-next-line complexity
+    forEach(overflowItems, (item) => {
+      const isPartition =
+        item.classList.contains('tie-help-partition') ||
+        item.classList.contains('tui-image-editor-help-partition');
+
+      if (isPartition) {
+        if (!prevWasPartition) {
+          const partLi = document.createElement('li');
+          partLi.className = 'tie-more-dropdown-partition';
+          this._moreDropdownList.appendChild(partLi);
+          prevWasPartition = true;
+        }
+
+        return;
+      }
+
+      const match = item.className.match(/tie-btn-([a-zA-Z0-9]+)/);
+      const menuName = match ? match[1] : '';
+      if (!menuName) {
+        return;
+      }
+
+      prevWasPartition = false;
+
+      const titleKey = HELP_MENU_TITLE_KEYS[menuName] || menuName;
+      const title =
+        this._locale.localize(titleKey) || item.getAttribute('tooltip-content') || menuName;
+
+      const svg = item.querySelector('svg');
+      const iconHtml = svg ? svg.outerHTML : '';
+
+      const isEnabled = item.classList.contains('enabled');
+      const isActive = item.classList.contains('active') || item.classList.contains(CLASS_NAME_ON);
+
+      const dropdownItem = document.createElement('li');
+      dropdownItem.className = `tie-more-dropdown-item help ${isActive ? 'active' : ''} ${
+        isEnabled ? 'enabled' : 'disabled'
+      }`;
+      dropdownItem.setAttribute('data-menu-name', menuName);
+      dropdownItem.innerHTML = `${iconHtml}<span>${title}</span>`;
+
+      this._moreDropdownList.appendChild(dropdownItem);
+    });
+
+    const lastChild = this._moreDropdownList.lastElementChild;
+    if (lastChild && lastChild.classList.contains('tie-more-dropdown-partition')) {
+      this._moreDropdownList.removeChild(lastChild);
+    }
+  }
+
+  /**
+   * 同步下拉菜单中指定项的激活与禁用状态
+   * @param {string} menuName - 菜单名称
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _syncDropdownItemStatus(menuName) {
+    if (!this._moreDropdownList) {
+      return;
+    }
+    const origBtn = this._buttonElements[menuName];
+    const dropdownItem = this._moreDropdownList.querySelector(`[data-menu-name="${menuName}"]`);
+    if (!origBtn || !dropdownItem) {
+      return;
+    }
+    const isEnabled = origBtn.classList.contains('enabled');
+    const isActive =
+      origBtn.classList.contains('active') || origBtn.classList.contains(CLASS_NAME_ON);
+
+    dropdownItem.classList[isEnabled ? 'remove' : 'add']('disabled');
+    dropdownItem.classList[isEnabled ? 'add' : 'remove']('enabled');
+    dropdownItem.classList[isActive ? 'add' : 'remove']('active');
+  }
+
+  /**
+   * 全量同步下拉菜单中所有项的激活与禁用状态
+   * @private
+   */
+  _syncAllDropdownItemsStatus() {
+    if (!this._moreDropdownList) {
+      return;
+    }
+    const items = this._moreDropdownList.querySelectorAll('.tie-more-dropdown-item');
+    forEach(items, (dropdownItem) => {
+      const menuName = dropdownItem.getAttribute('data-menu-name');
+      if (menuName && this._buttonElements[menuName]) {
+        this._syncDropdownItemStatus(menuName);
+      }
+    });
+  }
+
+  /**
+   * 创建子菜单栏的“更多”按钮与下拉面板
+   * @private
+   */
+  _makeSubmenuMoreElement() {
+    if (!this._subMenuElement || !this._selectedElement) {
+      return;
+    }
+    const moreWrap = document.createElement('div');
+    moreWrap.className = 'tie-submenu-more-wrap';
+    moreWrap.title = this._locale.localize('More');
+    moreWrap.innerHTML = `
+      <button type="button" class="tie-submenu-more-btn" aria-label="${this._locale.localize(
+        'More'
+      )}">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <circle cx="6" cy="12" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="18" cy="12" r="2" />
+        </svg>
+      </button>
+      <div class="tie-submenu-more-panel">
+        <div class="tie-submenu-more-content"></div>
+      </div>
+    `;
+
+    const optionsInfo = this._selectedElement.querySelector('.tui-image-editor-options-info');
+    if (optionsInfo && optionsInfo.parentElement) {
+      optionsInfo.parentElement.insertBefore(moreWrap, optionsInfo);
+    } else if (this._subMenuElement.parentElement) {
+      this._subMenuElement.parentElement.appendChild(moreWrap);
+    }
+
+    this._submenuMoreElement = moreWrap;
+    this._submenuMorePanel = moreWrap.querySelector('.tie-submenu-more-panel');
+    this._submenuMoreContent = moreWrap.querySelector('.tie-submenu-more-content');
+
+    this._onSubmenuMoreBtnClick = (event) => {
+      // 避免下拉项本身的点击冒泡触发 toggle
+      if (event.target.closest && event.target.closest('.tie-submenu-more-panel')) {
+        return;
+      }
+      event.stopPropagation();
+      this._submenuMoreElement.classList.toggle('opened');
+    };
+    this._submenuMoreElement.addEventListener('click', this._onSubmenuMoreBtnClick);
+
+    this._onDocumentClickForSubmenuMore = (event) => {
+      if (this._submenuMoreElement && this._submenuMoreElement.classList.contains('opened')) {
+        if (!this._submenuMoreElement.contains(event.target)) {
+          this._submenuMoreElement.classList.remove('opened');
+        }
+      }
+    };
+    document.addEventListener('click', this._onDocumentClickForSubmenuMore);
+
+    // 当子菜单内部点击（例如切换分类分段控制器）时，延迟重新计算溢出
+    this._onSubMenuContentClick = () => {
+      setTimeout(() => {
+        this._updateSubmenuOverflow();
+      }, 50);
+    };
+    this._subMenuElement.addEventListener('click', this._onSubMenuContentClick);
+  }
+
+  /**
+   * 收集当前子菜单中真正被容器右边界截断的可见操作项
+   * @param {HTMLElement} currentSubmenuEl - 当前激活的子菜单 DOM 元素
+   * @returns {Array.<HTMLElement>} 截断/溢出的元素数组
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _collectSubmenuOverflowItems(currentSubmenuEl) {
+    if (!this._subMenuElement || !currentSubmenuEl) {
+      return [];
+    }
+    const subRect = this._subMenuElement.getBoundingClientRect();
+    const rightBoundary = subRect.right - 28;
+    const overflowItems = [];
+
+    // 选择器：对于 filter，优先查找具体的 chip；对于其他菜单，查找按钮。杜绝查找父容器 .tui-filter-item
+    const candidates = currentSubmenuEl.querySelectorAll(
+      '.tui-filter-chip, .tui-image-editor-button'
+    );
+
+    // eslint-disable-next-line complexity
+    forEach(candidates, (el) => {
+      // 排除滤镜分类切换的分段控制器按钮
+      if (el.closest && el.closest('.tie-filter-category-segment')) {
+        return;
+      }
+
+      // 必须是当前在页面上可见的元素（过滤 display: none 的未激活分类）
+      if (!el.offsetParent && el.offsetWidth === 0 && el.offsetHeight === 0) {
+        return;
+      }
+
+      const itemRect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      if (!itemRect || itemRect.width === 0) {
+        return;
+      }
+
+      // 只有物理右边界超出可视区域右边缘的项才算溢出截断
+      if (itemRect.right > rightBoundary) {
+        overflowItems.push(el);
+      }
+    });
+
+    return overflowItems;
+  }
+
+  /**
+   * 响应式计算子菜单栏（options-bar）的溢出并更新“更多”按钮
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _updateSubmenuOverflow() {
+    if (!this._subMenuElement || !this._submenuMoreElement) {
+      return;
+    }
+    if (!this.submenu) {
+      this._submenuMoreElement.style.display = 'none';
+      this._submenuMoreElement.classList.remove('opened');
+      if (this._submenuMoreContent) {
+        this._submenuMoreContent.innerHTML = '';
+      }
+
+      return;
+    }
+
+    const currentSubmenuEl = this._subMenuElement.querySelector(
+      `.tui-image-editor-menu-${this.submenu}`
+    );
+    if (!currentSubmenuEl) {
+      this._submenuMoreElement.style.display = 'none';
+      this._submenuMoreElement.classList.remove('opened');
+
+      return;
+    }
+
+    const overflowItems = this._collectSubmenuOverflowItems(currentSubmenuEl);
+
+    // 如果没有任何项被截断，完全隐藏“更多”按钮并收起面板
+    if (!overflowItems || overflowItems.length === 0) {
+      this._submenuMoreElement.style.display = 'none';
+      this._submenuMoreElement.classList.remove('opened');
+      if (this._submenuMoreContent) {
+        this._submenuMoreContent.innerHTML = '';
+      }
+
+      return;
+    }
+
+    // 存在真正被截断项时展示“更多”按钮
+    this._submenuMoreElement.style.display = 'inline-flex';
+    this._renderSubmenuMoreDropdown(overflowItems);
+  }
+
+  /**
+   * 渲染子菜单溢出下拉列表
+   * @param {Array.<HTMLElement>} overflowItems - 被截断的元素数组
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _renderSubmenuMoreDropdown(overflowItems) {
+    if (!this._submenuMoreContent) {
+      return;
+    }
+    this._submenuMoreContent.innerHTML = '';
+
+    // eslint-disable-next-line complexity
+    forEach(overflowItems, (el) => {
+      let labelText = '';
+      const textEl = el.querySelector && el.querySelector('.tui-filter-chip-text, label, span');
+      if (textEl && textEl.textContent) {
+        labelText = textEl.textContent.trim();
+      } else if (el.textContent) {
+        labelText = el.textContent.trim();
+      }
+      if (!labelText) {
+        labelText = el.getAttribute('tooltip-content') || el.getAttribute('title') || '';
+      }
+      if (!labelText) {
+        return;
+      }
+
+      const dropItem = document.createElement('div');
+      const isInputChecked = el.querySelector && el.querySelector('input:checked');
+      const isElActive = el.classList.contains('active');
+      const isActive = Boolean(isInputChecked || isElActive);
+
+      dropItem.className = `tie-submenu-more-item ${isActive ? 'active' : ''}`;
+      dropItem.textContent = labelText;
+
+      dropItem.addEventListener('click', (event) => {
+        event.stopPropagation();
+        this._submenuMoreElement.classList.remove('opened');
+
+        const input = el.querySelector && el.querySelector('input[type="checkbox"], button');
+        if (input) {
+          input.click();
+        } else {
+          el.click();
+        }
+
+        if (el.scrollIntoView) {
+          el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      });
+
+      this._submenuMoreContent.appendChild(dropItem);
+    });
+  }
+
+  /**
    * 更新顶部第二层工具栏的激活工具徽章
    * @param {string} [menuName] - 激活的工具菜单名
    * @private
@@ -790,6 +1334,32 @@ class Ui {
         );
       }
     });
+
+    this._makeMoreMenuElement();
+  }
+
+  /**
+   * 创建“更多”按钮及下拉面板元素
+   * @private
+   */
+  _makeMoreMenuElement() {
+    const moreLi = document.createElement('li');
+    moreLi.className = `${cls('item')} tie-btn-more-menu`;
+    moreLi.setAttribute('tooltip-content', this._locale.localize('More'));
+    moreLi.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <circle cx="6" cy="12" r="2" />
+        <circle cx="12" cy="12" r="2" />
+        <circle cx="18" cy="12" r="2" />
+      </svg>
+      <div class="tie-more-dropdown-panel">
+        <ul class="tie-more-dropdown-list"></ul>
+      </div>
+    `;
+    this._helpMenuBarElement.appendChild(moreLi);
+    this._moreMenuElement = moreLi;
+    this._moreDropdownPanel = moreLi.querySelector('.tie-more-dropdown-panel');
+    this._moreDropdownList = moreLi.querySelector('.tie-more-dropdown-list');
   }
 
   /**
@@ -1064,6 +1634,7 @@ class Ui {
    * Remove ui event
    * @private
    */
+  // eslint-disable-next-line complexity
   _removeUiEvent() {
     this._removeHelpActionEvent();
     this._removeDownloadEvent();
@@ -1082,6 +1653,42 @@ class Ui {
     if (this._paletteDragCleanup) {
       this._paletteDragCleanup();
       this._paletteDragCleanup = null;
+    }
+    if (this._subMenuElement && this._onSubmenuWheel) {
+      this._subMenuElement.removeEventListener('wheel', this._onSubmenuWheel);
+      this._onSubmenuWheel = null;
+    }
+    if (this._toolbarResizeObserver) {
+      this._toolbarResizeObserver.disconnect();
+      this._toolbarResizeObserver = null;
+    }
+    if (this._updateToolbarOverflowBound) {
+      window.removeEventListener('resize', this._updateToolbarOverflowBound);
+      this._updateToolbarOverflowBound = null;
+    }
+    if (this._onDocumentClickForMoreMenu) {
+      document.removeEventListener('click', this._onDocumentClickForMoreMenu);
+      this._onDocumentClickForMoreMenu = null;
+    }
+    if (this._moreMenuElement && this._onMoreBtnClick) {
+      this._moreMenuElement.removeEventListener('click', this._onMoreBtnClick);
+      this._onMoreBtnClick = null;
+    }
+    if (this._moreDropdownList && this._onMoreDropdownClick) {
+      this._moreDropdownList.removeEventListener('click', this._onMoreDropdownClick);
+      this._onMoreDropdownClick = null;
+    }
+    if (this._onDocumentClickForSubmenuMore) {
+      document.removeEventListener('click', this._onDocumentClickForSubmenuMore);
+      this._onDocumentClickForSubmenuMore = null;
+    }
+    if (this._submenuMoreElement && this._onSubmenuMoreBtnClick) {
+      this._submenuMoreElement.removeEventListener('click', this._onSubmenuMoreBtnClick);
+      this._onSubmenuMoreBtnClick = null;
+    }
+    if (this._subMenuElement && this._onSubMenuContentClick) {
+      this._subMenuElement.removeEventListener('click', this._onSubMenuContentClick);
+      this._onSubMenuContentClick = null;
     }
   }
 
@@ -1156,9 +1763,17 @@ class Ui {
    * @param {boolean} discardSelection - discard selection
    * @private
    */
+  // eslint-disable-next-line complexity
   _deactivateSubmenu(discardSelection) {
     if (!this.submenu) {
       return;
+    }
+    if (this._submenuMoreElement) {
+      this._submenuMoreElement.classList.remove('opened');
+      this._submenuMoreElement.style.display = 'none';
+      if (this._submenuMoreContent) {
+        this._submenuMoreContent.innerHTML = '';
+      }
     }
     const currentMenu = this.submenu;
     this._buttonElements[currentMenu].classList.remove('active');
@@ -1166,11 +1781,17 @@ class Ui {
     if (this._selectedElement) {
       this._selectedElement.classList.remove(`tui-image-editor-menu-${currentMenu}`);
     }
-    if (discardSelection) {
-      this._actions.main.discardSelection();
+    if (this._actions && this._actions.main) {
+      if (discardSelection && this._actions.main.discardSelection) {
+        this._actions.main.discardSelection();
+      }
+      if (this._actions.main.changeSelectableAll) {
+        this._actions.main.changeSelectableAll(true);
+      }
     }
-    this._actions.main.changeSelectableAll(true);
-    this[currentMenu].changeStandbyMode();
+    if (this[currentMenu] && this[currentMenu].changeStandbyMode) {
+      this[currentMenu].changeStandbyMode();
+    }
   }
 
   /**

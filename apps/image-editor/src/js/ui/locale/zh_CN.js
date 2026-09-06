@@ -34,6 +34,7 @@ const zhCN = {
   ViewOriginal: '查看原图',
   viewOriginal: '查看原图',
   History: '历史记录',
+  More: '更多',
   Toolbar: '工具栏',
   Collapse: '折叠工具栏',
   Expand: '展开工具栏',
@@ -89,6 +90,9 @@ const zhCN = {
   'Load Mask Image': '加载蒙版图片',
 
   // 滤镜
+  Presets: '基础滤镜',
+  Adjustments: '画面调节',
+  'Color Blend': '色彩混合',
   Grayscale: '灰度',
   Invert: '反色',
   Sepia: '深褐色',

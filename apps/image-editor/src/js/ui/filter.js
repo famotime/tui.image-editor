@@ -27,6 +27,11 @@ const FILTER_OPTIONS = [
   'multiply',
   'blend',
 ];
+const CATEGORY_FILTER_MAP = {
+  presets: ['grayscale', 'invert', 'sepia', 'vintage', 'blur', 'sharpen', 'emboss'],
+  adjustments: ['removeWhite', 'brightness', 'noise', 'pixelate', 'colorFilter'],
+  blends: ['tint', 'multiply', 'blend'],
+};
 const filterNameMap = {
   grayscale: 'grayscale',
   invert: 'invert',
@@ -75,9 +80,12 @@ class Filter extends Submenu {
     });
 
     this.selectBoxShow = false;
-
+    this._activeCategory = 'presets';
+    this._categoryBtnElements = {};
+    this._categoryGroupElements = {};
     this.checkedMap = {};
     this._makeControlElement();
+    this._initCategoryEvents();
   }
 
   /**
@@ -94,6 +102,12 @@ class Filter extends Submenu {
    * Remove event for filter
    */
   _removeEvent() {
+    forEach(this._categoryBtnElements, (btn) => {
+      if (btn && this._onCategoryClick) {
+        btn.removeEventListener('click', this._onCategoryClick);
+      }
+    });
+
     forEach(FILTER_OPTIONS, (filter) => {
       const filterCheckElement = this.selector(`.tie-${filter}`);
       const filterNameCamelCase = toCamelCase(filter);
@@ -174,6 +188,15 @@ class Filter extends Submenu {
       },
       this
     );
+
+    this._updateCategoryBadgeDots();
+    forEach(FILTER_OPTIONS, (filter) => {
+      const filterNameCamelCase = toCamelCase(filter);
+      const checkbox = this.checkedMap[filterNameCamelCase];
+      if (checkbox) {
+        this._updateChipActiveState(filterNameCamelCase, checkbox.checked);
+      }
+    });
   }
 
   /**
@@ -193,6 +216,16 @@ class Filter extends Submenu {
     }
 
     this.checkedMap[filterName].checked = !isRemove;
+    const checkboxGroup = this.checkedMap[filterName].closest('.tui-image-editor-checkbox-group');
+    if (checkboxGroup) {
+      if (!isRemove) {
+        checkboxGroup.classList.remove('tui-image-editor-disabled');
+      } else {
+        checkboxGroup.classList.add('tui-image-editor-disabled');
+      }
+    }
+    this._updateChipActiveState(filterName, !isRemove);
+    this._updateCategoryBadgeDots();
   }
 
   /**
@@ -201,11 +234,17 @@ class Filter extends Submenu {
   initFilterCheckBoxState() {
     forEach(
       this.checkedMap,
-      (filter) => {
+      (filter, filterName) => {
         filter.checked = false;
+        const checkboxGroup = filter.closest('.tui-image-editor-checkbox-group');
+        if (checkboxGroup) {
+          checkboxGroup.classList.add('tui-image-editor-disabled');
+        }
+        this._updateChipActiveState(filterName, false);
       },
       this
     );
+    this._updateCategoryBadgeDots();
   }
 
   /**
@@ -277,6 +316,8 @@ class Filter extends Submenu {
         checkboxGroup.classList.add('tui-image-editor-disabled');
       }
     }
+    this._updateChipActiveState(filterName, apply);
+    this._updateCategoryBadgeDots();
     applyFilter(apply, type, this._getFilterOption(filterName), !isLast);
   }
 
@@ -504,6 +545,95 @@ class Filter extends Submenu {
       selectOption.innerHTML = option.replace(/^[a-z]/, ($0) => $0.toUpperCase());
       selectlist.appendChild(selectOption);
     });
+  }
+
+  /**
+   * Initialize filter category tab switching events
+   * @private
+   */
+  _initCategoryEvents() {
+    const categoryButtons = this.subMenuElement.querySelectorAll(
+      '.tie-filter-category-segment .tui-image-editor-button'
+    );
+    this._categoryGroupElements = {
+      presets: this.selector('.tie-filter-group-presets'),
+      adjustments: this.selector('.tie-filter-group-adjustments'),
+      blends: this.selector('.tie-filter-group-blends'),
+    };
+
+    this._onCategoryClick = (event) => {
+      const btn = event.currentTarget;
+      const category = btn.getAttribute('data-category');
+      if (category) {
+        this._switchCategory(category);
+      }
+    };
+
+    forEach(categoryButtons, (btn) => {
+      const category = btn.getAttribute('data-category');
+      this._categoryBtnElements[category] = btn;
+      btn.addEventListener('click', this._onCategoryClick);
+    });
+  }
+
+  /**
+   * Switch active filter category tab
+   * @param {string} category - target category ('presets' | 'adjustments' | 'blends')
+   * @private
+   */
+  _switchCategory(category) {
+    if (this._activeCategory === category) {
+      return;
+    }
+    this._activeCategory = category;
+
+    forEach(this._categoryBtnElements, (btn, cat) => {
+      if (btn) {
+        btn.classList.toggle('active', cat === category);
+      }
+    });
+
+    forEach(this._categoryGroupElements, (group, cat) => {
+      if (group) {
+        group.classList.toggle('active', cat === category);
+        group.style.display = cat === category ? 'inline-flex' : 'none';
+      }
+    });
+  }
+
+  /**
+   * Update category badge dot status indicating whether any filter is active
+   * @private
+   */
+  _updateCategoryBadgeDots() {
+    forEach(CATEGORY_FILTER_MAP, (filters, category) => {
+      const hasActive = filters.some((name) => {
+        const checkbox = this.checkedMap[name];
+
+        return checkbox && checkbox.checked;
+      });
+      const dot = this.selector(`.tie-filter-category-dot.${category}-dot`);
+      if (dot) {
+        dot.classList.toggle('has-active', hasActive);
+      }
+    });
+  }
+
+  /**
+   * Update chip active class on the parent label
+   * @param {string} filterName - filter name
+   * @param {boolean} isChecked - is checked
+   * @private
+   */
+  _updateChipActiveState(filterName, isChecked) {
+    const input = this.checkedMap[filterName];
+    if (!input) {
+      return;
+    }
+    const chip = input.closest('.tui-filter-chip');
+    if (chip) {
+      chip.classList.toggle('active', isChecked);
+    }
   }
 }
 

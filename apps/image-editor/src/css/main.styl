@@ -93,6 +93,7 @@ body > textarea
         align-items: center;
         flex: 1;
         margin-left: 16px;
+        min-width: 0;
 
     /* TOP BAR 2 (选定工具属性选项栏) */
     .-options-bar
@@ -152,6 +153,7 @@ body > textarea
         border-radius: 4px;
         margin-left: 8px;
         flex-shrink: 0;
+
 
     /* WORKSPACE AREA */
     .-main-container
@@ -398,6 +400,83 @@ body > textarea
                 box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                 pointer-events: none;
                 animation: tie-tooltip-fade 0.18s ease forwards;
+
+        > .{prefix}-item.tie-overflow-hidden
+            display: none !important;
+
+        > .{prefix}-item.tie-btn-more-menu
+            display: none;
+            position: relative;
+            color: var(--tie-text-secondary, #98989f);
+            svg
+                width: 18px;
+                height: 18px;
+                fill: currentColor;
+            &:hover
+                color: #fff;
+            &.opened
+                background-color: var(--tie-surface-hover, #3a3a3c);
+                color: #fff;
+                &:after
+                    content: none !important;
+                .tie-more-dropdown-panel
+                    display: block;
+
+        .tie-more-dropdown-panel
+            display: none;
+            position: absolute;
+            top: 36px;
+            right: 0;
+            min-width: 130px;
+            background-color: var(--tie-surface-panel, #1c1c1e);
+            border: 1px solid var(--tie-border-subtle, #38383a);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            padding: 4px;
+            z-index: 1010;
+            box-sizing: border-box;
+
+        .tie-more-dropdown-list
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+
+        .tie-more-dropdown-item
+            display: flex;
+            align-items: center;
+            height: 32px;
+            padding: 0 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--tie-text-primary, #f2f2f7);
+            font-size: 12px;
+            user-select: none;
+            transition: background-color 0.15s, color 0.15s;
+            white-space: nowrap;
+            svg
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+                fill: currentColor;
+                stroke: currentColor;
+                flex-shrink: 0;
+            &:hover
+                background-color: var(--tie-surface-hover, #3a3a3c);
+                color: #fff;
+            &.active
+                color: var(--tie-surface-active, #2563eb);
+            &.disabled
+                opacity: 0.35;
+                cursor: not-allowed;
+                pointer-events: none;
+
+        .tie-more-dropdown-partition
+            height: 1px;
+            background-color: var(--tie-border-subtle, #2e2e30);
+            margin: 4px 6px;
+            list-style: none;
 
     .{prefix}-menu
         list-style: none;
