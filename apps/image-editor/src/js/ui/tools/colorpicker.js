@@ -29,7 +29,7 @@ const PICKER_COLOR = [
 class Colorpicker {
   constructor(
     colorpickerElement,
-    { defaultColor = '#7e7e7e', toggleDirection = 'up', usageStatistics }
+    { defaultColor = '#7e7e7e', toggleDirection = 'down', usageStatistics } = {}
   ) {
     this.colorpickerElement = colorpickerElement;
     this.usageStatistics = usageStatistics;
@@ -285,15 +285,31 @@ class Colorpicker {
   _setPickerControlPosition() {
     const controlStyle = this.pickerControl.style;
     const halfPickerWidth = this._colorpickerElement.clientWidth / 2 + 2;
-    const left = this.pickerControl.offsetWidth / 2 - halfPickerWidth;
-    let top = (this.pickerControl.offsetHeight + 10) * -1;
-
-    if (this._toggleDirection === 'down') {
-      top = 30;
-    }
+    const top = this._toggleDirection === 'down' ? 32 : (this.pickerControl.offsetHeight + 10) * -1;
+    const left = this._calculatePickerLeft(halfPickerWidth);
 
     controlStyle.top = `${top}px`;
     controlStyle.left = `-${left}px`;
+  }
+
+  /**
+   * Calculate picker left position and prevent clipping at left viewport boundary
+   * @param {number} halfPickerWidth - half picker width
+   * @returns {number}
+   * @private
+   */
+  _calculatePickerLeft(halfPickerWidth) {
+    let left = this.pickerControl.offsetWidth / 2 - halfPickerWidth;
+    const el = this._colorpickerElement;
+
+    if (el && typeof el.getBoundingClientRect === 'function') {
+      const rect = el.getBoundingClientRect();
+      if (rect && rect.left > 0 && rect.left < left) {
+        left = Math.max(0, rect.left - 8);
+      }
+    }
+
+    return left;
   }
 }
 
