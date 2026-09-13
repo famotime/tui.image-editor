@@ -652,7 +652,29 @@ class Graphics {
       width,
       height,
     });
-    this._canvas.centerObject(canvasImage);
+    if (this.getDrawingMode() === drawingModes.RESIZE) {
+      // 调整尺寸模式下，图片和控制框均对齐原点，避免居中偏移造成错位
+      canvasImage
+        .set({
+          originX: 'left',
+          originY: 'top',
+          left: 0,
+          top: 0,
+        })
+        .setCoords();
+
+      const resize = this.getComponent(components.RESIZE);
+      if (resize && resize._resizezone) {
+        resize._resizezone
+          .set({
+            left: 0,
+            top: 0,
+          })
+          .setCoords();
+      }
+    } else {
+      this._canvas.centerObject(canvasImage);
+    }
   }
 
   /**

@@ -118,4 +118,21 @@ describe('Zoom', () => {
 
     editorWithUI.destroy();
   });
+
+  it('should ignore zoomIn, zoomOut and startHandMode when in RESIZE mode', () => {
+    imageEditor.startDrawingMode('RESIZE');
+    const canvas = imageEditor._graphics.getCanvas();
+    const zoom = imageEditor._graphics.getComponent('ZOOM');
+
+    zoom.zoomIn();
+    expect(canvas.getZoom()).toBe(1.0);
+
+    zoom.zoomOut();
+    expect(canvas.getZoom()).toBe(1.0);
+
+    zoom.startHandMode();
+    expect(zoom.mode).toBe('normal');
+
+    imageEditor.stopDrawingMode();
+  });
 });

@@ -266,6 +266,11 @@ class Zoom extends Component {
    * Start hand mode
    */
   startHandMode() {
+    // 调整尺寸模式下禁止视图平移
+    if (this.graphics.getDrawingMode() === 'RESIZE') {
+      return;
+    }
+
     this.endZoomInMode();
     this.zoomMode = zoomModes.HAND;
 
@@ -470,7 +475,8 @@ class Zoom extends Component {
    * Zoom in one step
    */
   zoomIn() {
-    if (this._isMaxZoomLevel()) {
+    // 调整尺寸模式下禁止缩放画布
+    if (this.graphics.getDrawingMode() === 'RESIZE' || this._isMaxZoomLevel()) {
       return;
     }
     const canvas = this.getCanvas();
@@ -495,6 +501,11 @@ class Zoom extends Component {
    * Zoom out one step
    */
   zoomOut() {
+    // 调整尺寸模式下禁止缩放画布
+    if (this.graphics.getDrawingMode() === 'RESIZE') {
+      return;
+    }
+
     const centerPoints = this._centerPoints;
     const canvas = this.getCanvas();
 
@@ -842,9 +853,15 @@ class Zoom extends Component {
    * @param {{e: WheelEvent}} opt - Fabric event object
    * @private
    */
+  // eslint-disable-next-line complexity
   _onMouseWheel(opt) {
     const canvas = this.getCanvas();
     if (!this.graphics.canvasImage) {
+      return;
+    }
+
+    // 调整尺寸模式下禁止滚轮缩放
+    if (this.graphics.getDrawingMode() === 'RESIZE') {
       return;
     }
 

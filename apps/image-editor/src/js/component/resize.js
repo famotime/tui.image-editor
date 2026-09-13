@@ -112,14 +112,28 @@ class Resize extends Component {
   /**
    * Start resizing
    */
+  // eslint-disable-next-line complexity
   start() {
+    // 进入调整尺寸模式前重置缩放，保证图像完整显示且控制边框贴合边缘
+    if (this.graphics && this.graphics.resetZoom) {
+      this.graphics.resetZoom();
+    }
+
+    const canvas = this.getCanvas();
+    if (!canvas) {
+      return;
+    }
+
+    if (canvas.setViewportTransform) {
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    }
+
     const dimensions = this.getCurrentDimensions();
     if (dimensions) {
       this.setOriginalDimensions(dimensions);
     }
 
-    const canvas = this.getCanvas();
-    if (!canvas || !dimensions) {
+    if (!dimensions) {
       return;
     }
 

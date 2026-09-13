@@ -17,6 +17,10 @@ class ResizeDrawingMode extends DrawingMode {
    * @override
    */
   start(graphics) {
+    // 启动调整尺寸绘图模式前重置视图缩放
+    if (graphics && graphics.resetZoom) {
+      graphics.resetZoom();
+    }
     const resize = graphics.getComponent(components.RESIZE);
     resize.start();
   }

@@ -759,6 +759,8 @@ export default {
   _resizeAction() {
     return extend(
       {
+        // 重置缩放动作
+        resetZoom: () => this._graphics.resetZoom(),
         getCurrentDimensions: () => this._graphics.getCurrentDimensions(),
         preview: (actor, value, lockState) => {
           const currentDimensions = this._graphics.getCurrentDimensions();

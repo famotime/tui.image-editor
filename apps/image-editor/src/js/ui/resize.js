@@ -55,7 +55,12 @@ class Resize extends Submenu {
   /**
    * Executed when the menu starts.
    */
+  // eslint-disable-next-line complexity
   changeStartMode() {
+    // 进入调整尺寸前重置显示缩放为 100%，防止手柄错位
+    if (this.actions && this.actions.resetZoom) {
+      this.actions.resetZoom();
+    }
     this.actions.modeChange('resize');
     const dimensions = this.actions.getCurrentDimensions();
 

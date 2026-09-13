@@ -129,4 +129,23 @@ describe('Resize', () => {
 
     resize.end();
   });
+
+  it('should reset zoom to 100% and align Resizezone to image edges when zoom is not 100%', () => {
+    const canvas = graphics.getCanvas();
+    canvas.setZoom(2.0);
+    canvas.setViewportTransform([2, 0, 0, 2, 50, 50]);
+
+    resize.start();
+
+    expect(canvas.getZoom()).toBe(1.0);
+    expect(canvas.viewportTransform).toEqual([1, 0, 0, 1, 0, 0]);
+    expect(resize._resizezone.left).toBe(0);
+    expect(resize._resizezone.top).toBe(0);
+    expect(resize._resizezone.width).toBe(100);
+    expect(resize._resizezone.height).toBe(100);
+    expect(graphics.getCanvasImage().left).toBe(0);
+    expect(graphics.getCanvasImage().top).toBe(0);
+
+    resize.end();
+  });
 });
