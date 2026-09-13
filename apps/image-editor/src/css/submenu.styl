@@ -7,8 +7,7 @@
         width: 100% !important;
         height: 100% !important;
         white-space: nowrap !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
+        overflow: visible !important;
         position: relative !important;
         z-index: 2 !important;
         background: transparent !important;
@@ -318,20 +317,41 @@
                 transform: scale(1.08);
                 border-color: #fff !important;
     .color-picker-control
-        position: relative;
-        display: inline-flex;
-        align-items: center;
+        position: absolute !important;
+        top: 32px !important;
+        z-index: 1020 !important;
+        width: 192px !important;
+        background: #242426 !important;
+        border: 1px solid #3a3a3c !important;
+        border-radius: 6px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+        padding: 12px 10px !important;
+        box-sizing: border-box !important;
+        cursor: default;
         .triangle
-            display: none;
+            display: none !important;
         .tui-colorpicker-container
-            position: absolute;
-            top: 32px;
-            left: 0;
-            z-index: 1005;
-            background: #242426;
-            border: 1px solid #3a3a3c;
-            border-radius: 6px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            position: static !important;
+            width: 100% !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        div.tui-colorpicker-clearfix
+            background-color: #1a1a1c !important;
+            border: 1px solid #3a3a3c !important;
+            border-radius: 4px !important;
+            margin-top: 8px !important;
+            padding: 3px 6px !important;
+            box-sizing: border-box !important;
+        .tui-colorpicker-palette-hex
+            background-color: transparent !important;
+            color: #f2f2f7 !important;
+            font-family: monospace, sans-serif !important;
+            font-size: 12px !important;
+            outline: none !important;
+        .tui-colorpicker-palette-preview
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            cursor: pointer;
 
 /* Help menu bar history popover */
 .{prefix}-container

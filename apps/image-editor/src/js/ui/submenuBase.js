@@ -22,7 +22,8 @@ class Submenu {
   ) {
     this.subMenuElement = subMenuElement;
     this.menuBarPosition = menuBarPosition;
-    this.toggleDirection = menuBarPosition === 'top' ? 'down' : 'up';
+    // 在双层顶栏现代 UI 架构下，子菜单恒定置于顶部属性栏，选色器浮层统一向下展开
+    this.toggleDirection = 'down';
     this.colorPickerControls = [];
     this.usageStatistics = usageStatistics;
     this.eventHandler = {};
