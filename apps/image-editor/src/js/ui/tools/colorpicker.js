@@ -79,10 +79,11 @@ class Colorpicker {
    * @private
    */
   _makeCustomColorButton() {
-    const clearfixEl = this.pickerElement.querySelector(
-      '.tui-colorpicker-palette-container .tui-colorpicker-clearfix'
+    const hexInput = this.pickerElement.querySelector(
+      '.tui-colorpicker-palette-container .tui-colorpicker-palette-hex'
     );
-    if (!clearfixEl) {
+    const inputBar = hexInput ? hexInput.parentElement : null;
+    if (!inputBar || inputBar.querySelector('.tie-colorpicker-custom-btn')) {
       return;
     }
 
@@ -91,7 +92,7 @@ class Colorpicker {
     btn.className = 'tie-colorpicker-custom-btn';
     btn.title = '调色板自选色';
     btn.innerHTML =
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
       '<circle cx="13.5" cy="6.5" r="1" fill="currentColor"/>' +
       '<circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>' +
       '<circle cx="8.5" cy="7.5" r="1" fill="currentColor"/>' +
@@ -109,7 +110,7 @@ class Colorpicker {
     };
 
     btn.addEventListener('click', this._onCustomBtnClick);
-    clearfixEl.appendChild(btn);
+    inputBar.appendChild(btn);
     this._customColorButton = btn;
   }
 

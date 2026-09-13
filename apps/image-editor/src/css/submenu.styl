@@ -320,12 +320,12 @@
         position: absolute !important;
         top: 32px !important;
         z-index: 1020 !important;
-        width: 196px !important;
+        width: 204px !important;
         background: #242426 !important;
         border: 1px solid #3a3a3c !important;
         border-radius: 6px !important;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-        padding: 10px !important;
+        padding: 12px 10px !important;
         box-sizing: border-box !important;
         cursor: default;
         .triangle
@@ -354,6 +354,7 @@
                 padding: 0 6px !important;
                 box-sizing: border-box !important;
                 .tui-colorpicker-palette-preview
+                    order: 1 !important;
                     width: 15px !important;
                     height: 15px !important;
                     min-width: 15px !important;
@@ -364,6 +365,7 @@
                     cursor: pointer;
                     flex-shrink: 0 !important;
                 .tui-colorpicker-palette-hex
+                    order: 2 !important;
                     flex: 1 !important;
                     width: auto !important;
                     min-width: 0 !important;
@@ -380,6 +382,7 @@
                 .tui-colorpicker-palette-toggle-slider
                     display: none !important;
                 .tie-colorpicker-custom-btn
+                    order: 3 !important;
                     display: inline-flex !important;
                     align-items: center !important;
                     justify-content: center !important;
@@ -405,15 +408,18 @@
                         background: #3a3a3e !important;
                         color: #ffffff !important;
                         border-color: #636366 !important;
-            /* 下方色块网格 (8列 × 2行) */
+            /* 下方色块网格 (8列 × 2行，两端对齐，彻底消除溢出) */
             ul.tui-colorpicker-clearfix
                 width: 100% !important;
                 display: grid !important;
-                grid-template-columns: repeat(8, 1fr) !important;
-                gap: 4px !important;
+                grid-template-columns: repeat(8, 18px) !important;
+                justify-content: space-between !important;
+                row-gap: 6px !important;
+                column-gap: 0 !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 list-style: none !important;
+                box-sizing: border-box !important;
                 li
                     display: flex !important;
                     align-items: center !important;
@@ -421,20 +427,26 @@
                     float: none !important;
                     margin: 0 !important;
                     padding: 0 !important;
-                    width: auto !important;
-                    height: auto !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    box-sizing: border-box !important;
                 .tui-colorpicker-palette-button
                     display: block !important;
                     width: 18px !important;
                     height: 18px !important;
+                    min-width: 18px !important;
+                    min-height: 18px !important;
+                    max-width: 18px !important;
+                    max-height: 18px !important;
                     border-radius: 50% !important;
-                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.18) !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     cursor: pointer !important;
+                    box-sizing: border-box !important;
                     transition: transform 0.15s, border-color 0.15s !important;
                     &:hover
-                        transform: scale(1.18) !important;
+                        transform: scale(1.2) !important;
                         border-color: #ffffff !important;
                     &.tui-colorpicker-selected
                         border: 2px solid #3b82f6 !important;
