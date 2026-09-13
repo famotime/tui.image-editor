@@ -600,12 +600,12 @@ class Ui {
       this._selectedElement.classList.toggle('palette-collapsed');
       this._selectedElement.classList.toggle('tui-image-editor-palette-collapsed');
       const isCollapsed = this._selectedElement.classList.contains('palette-collapsed');
-      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠工具栏';
-      const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具栏';
+      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
+      const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具';
 
       toggleBtn.textContent = isCollapsed ? '▼' : '▲';
       const activeTooltipText = isCollapsed ? expandText : collapseText;
-      toggleBtn.title = activeTooltipText;
+      toggleBtn.removeAttribute('title');
       toggleBtn.setAttribute('tooltip-content', activeTooltipText);
       this.resizeEditor();
     };
@@ -1005,9 +1005,8 @@ class Ui {
       const isActive = item.classList.contains('active') || item.classList.contains(CLASS_NAME_ON);
 
       const dropdownItem = document.createElement('li');
-      dropdownItem.className = `tie-more-dropdown-item help ${isActive ? 'active' : ''} ${
-        isEnabled ? 'enabled' : 'disabled'
-      }`;
+      dropdownItem.className = `tie-more-dropdown-item help ${isActive ? 'active' : ''} ${isEnabled ? 'enabled' : 'disabled'
+        }`;
       dropdownItem.setAttribute('data-menu-name', menuName);
       dropdownItem.innerHTML = `${iconHtml}<span>${title}</span>`;
 
@@ -1074,8 +1073,8 @@ class Ui {
     moreWrap.title = this._locale.localize('More');
     moreWrap.innerHTML = `
       <button type="button" class="tie-submenu-more-btn" aria-label="${this._locale.localize(
-        'More'
-      )}">
+      'More'
+    )}">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
           <circle cx="6" cy="12" r="2" />
           <circle cx="12" cy="12" r="2" />

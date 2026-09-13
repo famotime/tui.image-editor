@@ -531,7 +531,8 @@
         .custom-annotation-shape-button,
         .custom-annotation-color-button,
         .custom-arrow-select-button,
-        .custom-annotation-step-wrap {
+        .custom-annotation-step-wrap,
+        .custom-annotation-range-wrap {
             display: inline-flex !important;
             align-items: center;
             height: 24px;
@@ -713,15 +714,21 @@
             outline: none;
         }
         .custom-reset-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+            box-sizing: border-box;
             margin-left: 4px;
             color: #007aff;
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
-            padding: 2px 6px;
+            padding: 0 6px;
             border: 1px solid #3c3c3c;
             border-radius: 3px;
             background: #252525;
+            line-height: 1;
             transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             white-space: nowrap;
             &:hover {
@@ -733,14 +740,14 @@
         .custom-label {
             display: inline-flex !important;
             align-items: center;
+            height: 24px;
             font-size: 11px;
             color: var(--tie-text-secondary, #98989f) !important;
-            margin-left: 6px;
-            margin-right: 2px;
+            margin: 0 4px;
             cursor: default;
             user-select: none;
             white-space: nowrap;
-            line-height: 24px;
+            line-height: 1;
             vertical-align: middle;
         }
         /* 箭头 SVG 图标色彩规范 */

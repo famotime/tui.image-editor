@@ -102,9 +102,10 @@ export default ({ locale }) => `
         
         <li class="tui-image-editor-partition"><div></div></li>
         
-        <!-- 下次序号与重置（中线高度对齐，文字在下） -->
+        <!-- 下次序号与重置（说明在数字输入框之前，中线高度水平对齐） -->
         <li class="custom-annotation-step-wrap">
             <div class="step-control-wrapper">
+                <label class="custom-label">${locale.localize('NextStep')}</label>
                 <div class="step-control-row">
                     <input class="tui-image-editor-range-value step-value-input tie-annotation-step-input" value="1" type="number" min="1" />
                     <span class="custom-reset-btn tie-annotation-reset-btn">${
@@ -113,7 +114,6 @@ export default ({ locale }) => `
                         : locale.localize('ResetStep')
                     }</span>
                 </div>
-                <label class="custom-label">${locale.localize('NextStep')}</label>
             </div>
         </li>
         

@@ -35,9 +35,9 @@ const zhCN = {
   viewOriginal: '查看原图',
   History: '历史记录',
   More: '更多',
-  Toolbar: '工具栏',
-  Collapse: '折叠工具栏',
-  Expand: '展开工具栏',
+  Toolbar: '工具',
+  Collapse: '折叠',
+  Expand: '展开工具',
 
   // 裁剪
   Custom: '自定义',
