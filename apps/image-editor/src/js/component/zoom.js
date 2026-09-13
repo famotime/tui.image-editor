@@ -654,16 +654,28 @@ class Zoom extends Component {
    * onChangeZoom handler in fabric canvas
    * @private
    */
-  // eslint-disable-next-line complexity
-  _changeScrollState({ viewport, zoomLevel }) {
+  _changeScrollState({ viewport, zoomLevel, fromWheel = false }) {
     const canvas = this.getCanvas();
 
     canvas.remove(this._verticalScroll);
     canvas.remove(this._horizontalScroll);
 
+    const isResizeMode = this.graphics.getDrawingMode() === 'RESIZE';
+
     if (this._isDefaultZoomLevel(zoomLevel)) {
-      this.graphics.adjustCanvasDimension();
+      if (!fromWheel && !isResizeMode) {
+        this.graphics.adjustCanvasDimension();
+      }
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
       canvas.calcOffset();
+      canvas.renderAll();
+
+      return;
+    }
+
+    if (fromWheel || isResizeMode) {
+      canvas.calcOffset();
+      canvas.renderAll();
 
       return;
     }
@@ -859,7 +871,7 @@ class Zoom extends Component {
         canvas.zoomToPoint({ x: pointer.x, y: pointer.y }, nextZoomLevel);
       }
       this.zoomLevel = nextZoomLevel;
-      this._fireZoomChanged(canvas, this.zoomLevel);
+      this._fireZoomChanged(canvas, this.zoomLevel, true);
     }
   }
 
@@ -908,9 +920,10 @@ class Zoom extends Component {
    * Fire 'zoomChanged' event
    * @param {fabric.Canvas} canvas - fabric canvas
    * @param {number} zoomLevel - 'zoomChanged' event params
+   * @param {boolean} [fromWheel=false] - whether triggered from mouse wheel
    */
-  _fireZoomChanged(canvas, zoomLevel) {
-    canvas.fire(ZOOM_CHANGED, { viewport: canvas.calcViewportBoundaries(), zoomLevel });
+  _fireZoomChanged(canvas, zoomLevel, fromWheel = false) {
+    canvas.fire(ZOOM_CHANGED, { viewport: canvas.calcViewportBoundaries(), zoomLevel, fromWheel });
   }
 
   /**

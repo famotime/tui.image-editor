@@ -121,8 +121,10 @@ const zhCN = {
   // 缩放
   'Zoom In': '放大',
   'Zoom Out': '缩小',
+  'Reset zoom': '重置缩放',
   ZoomIn: '放大',
   ZoomOut: '缩小',
+  ZoomReset: '重置缩放',
   Hand: '拖动',
 
   // 尺寸

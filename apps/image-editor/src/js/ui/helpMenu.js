@@ -18,6 +18,7 @@ export function makeHelpMenuWithPartitions() {
 export const HELP_MENU_TITLE_KEYS = {
   zoomIn: 'ZoomIn',
   zoomOut: 'ZoomOut',
+  zoomReset: 'ZoomReset',
   hand: 'Hand',
   undo: 'Undo',
   redo: 'Redo',

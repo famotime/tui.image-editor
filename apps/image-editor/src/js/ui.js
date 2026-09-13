@@ -452,7 +452,9 @@ class Ui {
     });
     this.on(eventNames.HAND_STOPPED, () => this.changeHandButtonStatus(false));
     this.on(eventNames.ZOOM_CHANGED, (opt) => {
-      this.resizeEditor();
+      if (opt && !opt.fromWheel && this.submenu !== 'resize') {
+        this.resizeEditor();
+      }
       if (opt && opt.zoomLevel) {
         this._showZoomRatio(opt.zoomLevel);
       }
@@ -465,6 +467,13 @@ class Ui {
    * @private
    */
   _showZoomRatio(zoomLevel) {
+    const zoomResetTextEl =
+      this._buttonElements.zoomReset &&
+      this._buttonElements.zoomReset.querySelector('.tie-zoom-reset-btn-text');
+    if (zoomResetTextEl) {
+      zoomResetTextEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
     const zoomInfoEl =
       this._selectedElement &&
       this._selectedElement.querySelector('.tui-image-editor-options-info .canvas-zoom-info');
@@ -1386,7 +1395,7 @@ class Ui {
    * @private
    */
   _enhanceSpecialMenuButton(btnElement, menuName) {
-    if (['load', 'download', 'viewOriginal'].indexOf(menuName) > -1) {
+    if (['load', 'download', 'viewOriginal', 'zoomReset'].indexOf(menuName) > -1) {
       btnElement.classList.add('enabled');
     }
     if (menuName === 'load') {
@@ -1403,17 +1412,20 @@ class Ui {
   /**
    * Make menu button element
    * @param {string} menuName - menu name
-   * @param {Array} useIconTypes - Possible values are  \['normal', 'active', 'hover', 'disabled'\]
+   * @param {Array} useIconTypes - Possible values are  ['normal', 'active', 'hover', 'disabled']
    * @param {string} menuType - 'normal' or 'help'
    * @private
    */
   _makeMenuElement(menuName, useIconTypes = ['normal', 'active', 'hover'], menuType = 'normal') {
     const btnElement = document.createElement('li');
-    const menuItemHtml = this.theme.makeMenSvgIconSet(useIconTypes, menuName);
 
     this._addTooltipAttribute(btnElement, menuName);
     btnElement.className = `tie-btn-${menuName} ${cls('item')} ${menuType}`;
-    btnElement.innerHTML = menuItemHtml;
+    if (menuName === 'zoomReset') {
+      btnElement.innerHTML = `<span class="tie-zoom-reset-btn-text">100%</span>`;
+    } else {
+      btnElement.innerHTML = this.theme.makeMenSvgIconSet(useIconTypes, menuName);
+    }
 
     this._enhanceSpecialMenuButton(btnElement, menuName);
 

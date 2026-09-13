@@ -88,6 +88,11 @@ export default {
     return extend(
       {
         adjustCanvasDimension: () => {
+          if (this.getDrawingMode() === drawingModes.RESIZE) {
+            this._graphics.adjustCanvasDimensionBase();
+
+            return;
+          }
           if (this._graphics.getZoomLevel() === 1.0) {
             this._graphics.adjustCanvasDimension();
           }
@@ -184,6 +189,13 @@ export default {
         },
         zoomOut: () => {
           this._graphics.zoomOut();
+        },
+        zoomReset: () => {
+          this.ui.offZoomInButtonStatus();
+          this.ui.changeHandButtonStatus(false);
+          this.deactivateAll();
+          this._graphics.resetZoom();
+          this.ui.resizeEditor();
         },
         hand: () => {
           this.ui.offZoomInButtonStatus();
@@ -750,38 +762,36 @@ export default {
         getCurrentDimensions: () => this._graphics.getCurrentDimensions(),
         preview: (actor, value, lockState) => {
           const currentDimensions = this._graphics.getCurrentDimensions();
-          const calcAspectRatio = () => currentDimensions.width / currentDimensions.height;
+          const aspectRatio = currentDimensions.width / currentDimensions.height;
 
           let dimensions = {};
           switch (actor) {
             case 'width':
               dimensions.width = value;
-              if (lockState) {
-                dimensions.height = value / calcAspectRatio();
-              } else {
-                dimensions.height = currentDimensions.height;
-              }
+              dimensions.height = lockState
+                ? Math.round(value / aspectRatio)
+                : currentDimensions.height;
               break;
             case 'height':
               dimensions.height = value;
-              if (lockState) {
-                dimensions.width = value * calcAspectRatio();
-              } else {
-                dimensions.width = currentDimensions.width;
-              }
+              dimensions.width = lockState
+                ? Math.round(value * aspectRatio)
+                : currentDimensions.width;
               break;
             default:
               dimensions = currentDimensions;
           }
 
-          this._graphics.resize(dimensions).then(() => {
-            this.ui.resizeEditor();
-          });
+          this._graphics.syncResizeDimensions(dimensions);
 
           if (lockState) {
             this.ui.resize.setWidthValue(dimensions.width);
             this.ui.resize.setHeightValue(dimensions.height);
           }
+          this.ui.resize.changeApplyButtonStatus(true);
+        },
+        lockAspectRatio: (lockState) => {
+          this._graphics.setResizeLockAspectRatio(lockState);
         },
         resize: (dimensions = null) => {
           if (!dimensions) {
@@ -791,6 +801,7 @@ export default {
           this.resize(dimensions)
             .then(() => {
               this._graphics.setOriginalDimensions(dimensions);
+              this._graphics.syncResizeDimensions(dimensions);
               this.stopDrawingMode();
               this.ui.resizeEditor();
               this.ui.changeMenu('resize');
@@ -800,16 +811,17 @@ export default {
         reset: (standByMode = false) => {
           const dimensions = this._graphics.getOriginalDimensions();
 
-          this.ui.resize.setWidthValue(dimensions.width, true);
-          this.ui.resize.setHeightValue(dimensions.height, true);
+          if (dimensions) {
+            this.ui.resize.setWidthValue(dimensions.width, true);
+            this.ui.resize.setHeightValue(dimensions.height, true);
+            this._graphics.syncResizeDimensions(dimensions);
 
-          this._graphics.resize(dimensions).then(() => {
             if (!standByMode) {
               this.stopDrawingMode();
               this.ui.resizeEditor();
               this.ui.changeMenu('resize');
             }
-          });
+          }
         },
       },
       this._commonAction()
@@ -854,6 +866,16 @@ export default {
    * Image Editor Event Observer
    */
   setReAction() {
+    if (this._graphics) {
+      this._graphics.on('resizing', (dimensions) => {
+        if (this.ui && this.ui.resize) {
+          this.ui.resize.setWidthValue(dimensions.width);
+          this.ui.resize.setHeightValue(dimensions.height);
+          this.ui.resize.changeApplyButtonStatus(true);
+        }
+      });
+    }
+
     this.on({
       undoStackChanged: (length) => {
         if (length) {

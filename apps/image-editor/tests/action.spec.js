@@ -95,6 +95,16 @@ describe('UI', () => {
       expect(clearUndoStackSpy).toHaveBeenCalled();
       expect(resizeEditorSpy).toHaveBeenCalled();
     });
+
+    it('should reset zoom and resize editor when zoomReset action occurs', () => {
+      const resetZoomSpy = jest.spyOn(imageEditorMock._graphics, 'resetZoom');
+      const resizeEditorSpy = jest.spyOn(imageEditorMock.ui, 'resizeEditor');
+
+      mainAction.zoomReset();
+
+      expect(resetZoomSpy).toHaveBeenCalled();
+      expect(resizeEditorSpy).toHaveBeenCalled();
+    });
   });
 
   describe('shapeAction', () => {

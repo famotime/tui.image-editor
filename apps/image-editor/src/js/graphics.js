@@ -614,7 +614,19 @@ class Graphics {
     if (!this.canvasImage) {
       return;
     }
-    this.adjustCanvasDimensionBase(this.canvasImage.scale(1));
+    const resize = this.getComponent(components.RESIZE);
+    const dimensions = resize ? resize.getCurrentDimensions() : null;
+    if (this.getDrawingMode() === drawingModes.RESIZE) {
+      this.adjustCanvasDimensionBase();
+    } else if (dimensions && this.canvasImage.width) {
+      const { width, height } = this.canvasImage;
+      const scaleX = dimensions.width / width;
+      const scaleY = dimensions.height / height;
+      this.canvasImage.set({ scaleX, scaleY }).setCoords();
+      this.adjustCanvasDimensionBase();
+    } else {
+      this.adjustCanvasDimensionBase(this.canvasImage.scale(1));
+    }
   }
 
   adjustCanvasDimensionBase(canvasImage = null) {
@@ -1615,6 +1627,28 @@ class Graphics {
     const resize = this.getComponent(components.RESIZE);
 
     return resize.resize(dimensions);
+  }
+
+  /**
+   * Sync resize dimensions with Resizezone
+   * @param {Object} dimensions - Dimensions
+   */
+  syncResizeDimensions(dimensions) {
+    const resize = this.getComponent(components.RESIZE);
+    if (resize && resize.syncDimensions) {
+      resize.syncDimensions(dimensions);
+    }
+  }
+
+  /**
+   * Set lock aspect ratio on Resizezone
+   * @param {boolean} lockState - Lock state
+   */
+  setResizeLockAspectRatio(lockState) {
+    const resize = this.getComponent(components.RESIZE);
+    if (resize && resize.setLockAspectRatio) {
+      resize.setLockAspectRatio(lockState);
+    }
   }
 }
 

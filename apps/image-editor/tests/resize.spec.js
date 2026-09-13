@@ -81,4 +81,52 @@ describe('Resize', () => {
 
     expect(obj).toBeUndefined();
   });
+
+  it('should create Resizezone on canvas and remove it on end', () => {
+    resize.start();
+
+    expect(resize._resizezone).not.toBeNull();
+    expect(graphics.getCanvas().contains(resize._resizezone)).toBe(true);
+
+    resize.end();
+    expect(resize._resizezone).toBeNull();
+  });
+
+  it('should scale canvasImage and expand canvas on zone resizing and modified', () => {
+    resize.start();
+    const canvas = graphics.getCanvas();
+    const canvasImage = graphics.getCanvasImage();
+
+    resize._onZoneResizing({ width: 200, height: 180 });
+    expect(canvasImage.left).toBe(0);
+    expect(canvasImage.top).toBe(0);
+    expect(canvas.width).toBeGreaterThanOrEqual(200);
+    expect(canvas.height).toBeGreaterThanOrEqual(180);
+    expect(resize.getCurrentDimensions()).toEqual({ width: 200, height: 180 });
+
+    resize._onZoneModified({ width: 250, height: 220 });
+    expect(canvasImage.left).toBe(0);
+    expect(canvasImage.top).toBe(0);
+    expect(canvas.width).toBe(250);
+    expect(canvas.height).toBe(220);
+    expect(resize.getCurrentDimensions()).toEqual({ width: 250, height: 220 });
+
+    resize.end();
+  });
+
+  it('should sync dimensions and lock aspect ratio with Resizezone', () => {
+    resize.start();
+
+    resize.syncDimensions({ width: 150, height: 120 });
+    expect(resize._resizezone.width).toBe(150);
+    expect(resize._resizezone.height).toBe(120);
+
+    resize.setLockAspectRatio(true);
+    expect(resize._resizezone.lockUniScaling).toBe(true);
+
+    resize.setLockAspectRatio(false);
+    expect(resize._resizezone.lockUniScaling).toBe(false);
+
+    resize.end();
+  });
 });

@@ -1,5 +1,6 @@
 import Component from '@/interface/component';
 import { componentNames } from '@/consts';
+import Resizezone from '@/extension/resizezone';
 
 /**
  * Resize components
@@ -25,6 +26,13 @@ class Resize extends Component {
      * @private
      */
     this._originalDimensions = null;
+
+    /**
+     * Resizezone object
+     * @type {Resizezone}
+     * @private
+     */
+    this._resizezone = null;
   }
 
   /**
@@ -33,9 +41,12 @@ class Resize extends Component {
    */
   getCurrentDimensions() {
     const canvasImage = this.getCanvasImage();
-    if (!this._dimensions && canvasImage) {
-      const { width, height } = canvasImage;
-      this._dimensions = { width, height };
+    if (canvasImage) {
+      const { width, height, scaleX = 1, scaleY = 1 } = canvasImage;
+      this._dimensions = {
+        width: Math.round(width * scaleX),
+        height: Math.round(height * scaleY),
+      };
     }
 
     return this._dimensions;
@@ -60,10 +71,15 @@ class Resize extends Component {
   /**
    * Resize Image
    * @param {Object} dimensions - Resize dimensions
+   * @param {boolean} [adjustCanvas=true] - Whether to adjust canvas dimensions
    * @returns {Promise}
    */
-  resize(dimensions) {
+  resize(dimensions, adjustCanvas = true) {
     const canvasImage = this.getCanvasImage();
+    if (!canvasImage) {
+      return Promise.resolve();
+    }
+
     const { width, height, scaleX, scaleY } = canvasImage;
     const { width: dimensionsWidth, height: dimensionsHeight } = dimensions;
 
@@ -76,12 +92,19 @@ class Resize extends Component {
       canvasImage.set(scaleValues).setCoords();
 
       this._dimensions = {
-        width: canvasImage.width * canvasImage.scaleX,
-        height: canvasImage.height * canvasImage.scaleY,
+        width: Math.round(canvasImage.width * canvasImage.scaleX),
+        height: Math.round(canvasImage.height * canvasImage.scaleY),
       };
     }
 
-    this.adjustCanvasDimensionBase();
+    if (adjustCanvas) {
+      this.adjustCanvasDimensionBase();
+    } else {
+      const canvas = this.getCanvas();
+      if (canvas) {
+        canvas.renderAll();
+      }
+    }
 
     return Promise.resolve();
   }
@@ -91,13 +114,220 @@ class Resize extends Component {
    */
   start() {
     const dimensions = this.getCurrentDimensions();
-    this.setOriginalDimensions(dimensions);
+    if (dimensions) {
+      this.setOriginalDimensions(dimensions);
+    }
+
+    const canvas = this.getCanvas();
+    if (!canvas || !dimensions) {
+      return;
+    }
+
+    const lowerEl = canvas.lowerCanvasEl;
+    const initialCssWidth =
+      lowerEl && lowerEl.getBoundingClientRect
+        ? lowerEl.getBoundingClientRect().width
+        : dimensions.width;
+    this._displayScale =
+      dimensions.width && initialCssWidth ? initialCssWidth / dimensions.width : 1;
+
+    if (!this._resizezone) {
+      canvas.forEachObject((obj) => {
+        obj.evented = false;
+      });
+
+      const canvasImage = this.getCanvasImage();
+      if (canvasImage) {
+        canvasImage
+          .set({
+            originX: 'left',
+            originY: 'top',
+            left: 0,
+            top: 0,
+          })
+          .setCoords();
+      }
+
+      this._resizezone = new Resizezone(canvas, {
+        width: dimensions.width,
+        height: dimensions.height,
+        left: 0,
+        top: 0,
+        onResizing: (dim) => this._onZoneResizing(dim),
+        onModified: (dim) => this._onZoneModified(dim),
+      });
+
+      canvas.discardActiveObject();
+      canvas.add(this._resizezone);
+      canvas.setActiveObject(this._resizezone);
+      canvas.selection = false;
+      canvas.renderAll();
+    }
   }
 
   /**
    * End resizing
    */
-  end() {}
+  end() {
+    const canvas = this.getCanvas();
+    if (!canvas) {
+      return;
+    }
+
+    if (this._resizezone) {
+      canvas.remove(this._resizezone);
+      this._resizezone = null;
+      canvas.selection = true;
+
+      canvas.forEachObject((obj) => {
+        obj.evented = true;
+      });
+      canvas.renderAll();
+    }
+  }
+
+  /**
+   * Zone resizing listener
+   * @param {{width: number, height: number}} dim - Dimensions
+   * @private
+   */
+  _onZoneResizing({ width, height }) {
+    const canvasImage = this.getCanvasImage();
+    const canvas = this.getCanvas();
+
+    if (canvasImage) {
+      canvasImage
+        .set({
+          originX: 'left',
+          originY: 'top',
+          left: 0,
+          top: 0,
+          scaleX: width / canvasImage.width,
+          scaleY: height / canvasImage.height,
+        })
+        .setCoords();
+
+      this._dimensions = { width, height };
+    }
+
+    if (canvas) {
+      canvas.setDimensions(
+        {
+          width: Math.max(canvas.width, width),
+          height: Math.max(canvas.height, height),
+        },
+        { backstoreOnly: true }
+      );
+      canvas.renderAll();
+    }
+
+    this.graphics.fire('resizing', { width, height });
+  }
+
+  /**
+   * Apply updated dimensions to canvas, image, resizezone and sync CSS display dimension
+   * @param {number} width - Target width
+   * @param {number} height - Target height
+   * @private
+   */
+  _applyDimensions(width, height) {
+    const canvasImage = this.getCanvasImage();
+    const canvas = this.getCanvas();
+
+    if (canvasImage) {
+      canvasImage
+        .set({
+          originX: 'left',
+          originY: 'top',
+          left: 0,
+          top: 0,
+          scaleX: width / canvasImage.width,
+          scaleY: height / canvasImage.height,
+        })
+        .setCoords();
+
+      this._dimensions = { width, height };
+    }
+
+    if (canvas) {
+      canvas.setDimensions({ width, height }, { backstoreOnly: true });
+
+      const displayScale = this._displayScale || 1;
+      const cssWidth = Math.round(width * displayScale);
+      const cssHeight = Math.round(height * displayScale);
+
+      this.graphics.setCanvasCssDimension({
+        width: `${cssWidth}px`,
+        height: `${cssHeight}px`,
+        'max-width': `${cssWidth}px`,
+        'max-height': `${cssHeight}px`,
+      });
+
+      if (canvas.wrapperEl) {
+        canvas.wrapperEl.style.width = `${cssWidth}px`;
+        canvas.wrapperEl.style.height = `${cssHeight}px`;
+        canvas.wrapperEl.style.maxWidth = `${cssWidth}px`;
+        canvas.wrapperEl.style.maxHeight = `${cssHeight}px`;
+      }
+      if (canvas.lowerCanvasEl) {
+        canvas.lowerCanvasEl.style.width = `${cssWidth}px`;
+        canvas.lowerCanvasEl.style.height = `${cssHeight}px`;
+        canvas.lowerCanvasEl.style.maxWidth = `${cssWidth}px`;
+        canvas.lowerCanvasEl.style.maxHeight = `${cssHeight}px`;
+      }
+      if (canvas.upperCanvasEl) {
+        canvas.upperCanvasEl.style.width = `${cssWidth}px`;
+        canvas.upperCanvasEl.style.height = `${cssHeight}px`;
+        canvas.upperCanvasEl.style.maxWidth = `${cssWidth}px`;
+        canvas.upperCanvasEl.style.maxHeight = `${cssHeight}px`;
+      }
+
+      if (canvas.wrapperEl && canvas.wrapperEl.closest) {
+        const editorArea = canvas.wrapperEl.closest('.tui-image-editor');
+        if (editorArea) {
+          editorArea.style.width = `${cssWidth}px`;
+          editorArea.style.height = `${cssHeight}px`;
+        }
+      }
+
+      canvas.calcOffset();
+      canvas.renderAll();
+    }
+
+    if (this._resizezone) {
+      this._resizezone.updateDimensions({ width, height, left: 0, top: 0 });
+    }
+
+    this.graphics.fire('resizing', { width, height });
+  }
+
+  /**
+   * Zone modified listener
+   * @param {{width: number, height: number}} dim - Dimensions
+   * @private
+   */
+  _onZoneModified({ width, height }) {
+    this._applyDimensions(width, height);
+  }
+
+  /**
+   * Sync dimensions with external UI inputs
+   * @param {{width: number, height: number}} dimensions - Dimensions
+   */
+  syncDimensions(dimensions) {
+    const { width, height } = dimensions;
+    this._applyDimensions(width, height);
+  }
+
+  /**
+   * Set lock aspect ratio
+   * @param {boolean} lockState - Lock state
+   */
+  setLockAspectRatio(lockState) {
+    if (this._resizezone) {
+      this._resizezone.setLockAspectRatio(lockState);
+    }
+  }
 }
 
 export default Resize;

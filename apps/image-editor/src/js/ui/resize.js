@@ -61,14 +61,23 @@ class Resize extends Submenu {
 
     this._originalDimensions = dimensions;
 
-    this.setWidthValue(dimensions.width);
-    this.setHeightValue(dimensions.height);
+    const maxLimit = Math.max(
+      defaultResizePixelValues.max || 4096,
+      dimensions && dimensions.width ? dimensions.width * 4 : 4096,
+      dimensions && dimensions.height ? dimensions.height * 4 : 4096
+    );
+
     this.setLimit({
       minWidth: defaultResizePixelValues.min,
       minHeight: defaultResizePixelValues.min,
-      maxWidth: dimensions.width,
-      maxHeight: dimensions.height,
+      maxWidth: maxLimit,
+      maxHeight: maxLimit,
     });
+
+    if (dimensions) {
+      this.setWidthValue(dimensions.width);
+      this.setHeightValue(dimensions.height);
+    }
   }
 
   /**
@@ -76,7 +85,9 @@ class Resize extends Submenu {
    */
   changeStandbyMode() {
     this.actions.stopDrawingMode();
-    this.actions.reset(true);
+    if (this._els.apply && this._els.apply.classList.contains('active')) {
+      this.actions.reset(true);
+    }
   }
 
   /**
@@ -96,8 +107,8 @@ class Resize extends Submenu {
    * @returns {number}
    */
   calcMaxValue(maxValue) {
-    if (maxValue <= 0) {
-      maxValue = defaultResizePixelValues.max;
+    if (!maxValue || maxValue <= 0) {
+      maxValue = defaultResizePixelValues.max || 4096;
     }
 
     return maxValue;
@@ -122,6 +133,9 @@ class Resize extends Submenu {
    * @param {boolean} trigger - fire change event control
    */
   setWidthValue(value, trigger = false) {
+    if (value > this._els.widthRange.max) {
+      this._els.widthRange.max = value * 2;
+    }
     this._els.widthRange.value = value;
     if (trigger) {
       this._els.widthRange.trigger('change');
@@ -134,6 +148,9 @@ class Resize extends Submenu {
    * @param {boolean} trigger - fire change event control
    */
   setHeightValue(value, trigger = false) {
+    if (value > this._els.heightRange.max) {
+      this._els.heightRange.max = value * 2;
+    }
     this._els.heightRange.value = value;
     if (trigger) {
       this._els.heightRange.trigger('change');
@@ -216,8 +233,8 @@ class Resize extends Submenu {
   }
 
   _applyEventHandler() {
-    this.actions.resize();
     this._els.apply.classList.remove('active');
+    this.actions.resize();
   }
 
   _cancelEventHandler() {

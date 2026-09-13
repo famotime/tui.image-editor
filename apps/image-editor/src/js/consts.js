@@ -4,7 +4,7 @@ import { keyMirror } from '@/util';
  * Help features for zoom
  * @type {Array.<string>}
  */
-export const ZOOM_HELP_MENUS = ['zoomIn', 'zoomOut', 'hand'];
+export const ZOOM_HELP_MENUS = ['zoomIn', 'zoomOut', 'zoomReset', 'hand'];
 
 /**
  * Help features for command
