@@ -178,8 +178,15 @@ class Theme {
       const encodedURI = icon.replace(/data:image\/svg\+xml;base64,/, '');
       const dom = parser.parseFromString(atob(encodedURI), 'text/xml');
       const svg = dom.documentElement;
-      svg.style.cssText =
-        'display: none !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important; visibility: hidden !important;';
+      if (svg.style) {
+        svg.style.cssText =
+          'display: none !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important; visibility: hidden !important;';
+      } else {
+        svg.setAttribute(
+          'style',
+          'display: none !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important; visibility: hidden !important;'
+        );
+      }
 
       document.body.appendChild(svg);
     }

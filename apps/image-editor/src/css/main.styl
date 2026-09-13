@@ -120,16 +120,29 @@ body > textarea
         height: 24px;
         flex-shrink: 0;
         transition: all 0.15s ease;
+        // 激活工具徽章图标：强制统一为白色填充与描边，避免 flip 等依赖 fill="inherit" 的图标显示为黑色
         .-active-tool-icon,
         .active-tool-icon
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-right: 4px;
+            color: #ffffff;
             svg
                 width: 15px;
                 height: 15px;
-                stroke: currentColor;
+                fill: currentColor !important;
+                stroke: currentColor !important;
+                use
+                    fill: currentColor !important;
+                    stroke: currentColor !important;
+                > use
+                    display: none;
+                > use.normal,
+                > use:first-child
+                    display: block;
+                > use.normal ~ use
+                    display: none;
         .-active-tool-title,
         .active-tool-title
             line-height: 20px;

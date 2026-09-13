@@ -150,4 +150,11 @@ export default ({
         fill: ${submenuIconStyle.active.color};
         stroke: ${submenuIconStyle.active.color};
     }
+    .tui-image-editor-active-tool-badge use.use-default,
+    .tui-image-editor-active-tool-badge use.normal.use-default,
+    .tui-image-editor-active-tool-badge use.active.use-default {
+        fill-rule: evenodd;
+        fill: ${menuIconStyle.active.color || '#ffffff'};
+        stroke: ${menuIconStyle.active.color || '#ffffff'};
+    }
 `;
