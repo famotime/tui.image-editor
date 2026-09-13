@@ -320,12 +320,12 @@
         position: absolute !important;
         top: 32px !important;
         z-index: 1020 !important;
-        width: 192px !important;
+        width: 196px !important;
         background: #242426 !important;
         border: 1px solid #3a3a3c !important;
         border-radius: 6px !important;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
-        padding: 12px 10px !important;
+        padding: 10px !important;
         box-sizing: border-box !important;
         cursor: default;
         .triangle
@@ -336,22 +336,109 @@
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
-        div.tui-colorpicker-clearfix
-            background-color: #1a1a1c !important;
-            border: 1px solid #3a3a3c !important;
-            border-radius: 4px !important;
-            margin-top: 8px !important;
-            padding: 3px 6px !important;
-            box-sizing: border-box !important;
-        .tui-colorpicker-palette-hex
-            background-color: transparent !important;
-            color: #f2f2f7 !important;
-            font-family: monospace, sans-serif !important;
-            font-size: 12px !important;
-            outline: none !important;
-        .tui-colorpicker-palette-preview
-            border: 1px solid rgba(255, 255, 255, 0.25) !important;
-            cursor: pointer;
+        .tui-colorpicker-palette-container
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            /* 顶部输入框与自选色按钮栏 */
+            div.tui-colorpicker-clearfix
+                order: -1 !important;
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                height: 28px !important;
+                background-color: #1a1a1c !important;
+                border: 1px solid #3a3a3c !important;
+                border-radius: 4px !important;
+                margin: 0 0 10px 0 !important;
+                padding: 0 6px !important;
+                box-sizing: border-box !important;
+                .tui-colorpicker-palette-preview
+                    width: 15px !important;
+                    height: 15px !important;
+                    min-width: 15px !important;
+                    border-radius: 50% !important;
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                    margin: 0 6px 0 0 !important;
+                    float: none !important;
+                    cursor: pointer;
+                    flex-shrink: 0 !important;
+                .tui-colorpicker-palette-hex
+                    flex: 1 !important;
+                    width: auto !important;
+                    min-width: 0 !important;
+                    height: 24px !important;
+                    line-height: 24px !important;
+                    background-color: transparent !important;
+                    border: none !important;
+                    color: #f2f2f7 !important;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace !important;
+                    font-size: 12px !important;
+                    outline: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                .tui-colorpicker-palette-toggle-slider
+                    display: none !important;
+                .tie-colorpicker-custom-btn
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 20px !important;
+                    height: 20px !important;
+                    min-width: 20px !important;
+                    margin-left: 4px !important;
+                    padding: 0 !important;
+                    background: #2a2a2d !important;
+                    border: 1px solid #444446 !important;
+                    border-radius: 3px !important;
+                    cursor: pointer !important;
+                    color: #98989f !important;
+                    outline: none !important;
+                    flex-shrink: 0 !important;
+                    transition: all 0.15s ease !important;
+                    svg
+                        width: 13px !important;
+                        height: 13px !important;
+                        display: block !important;
+                        stroke: currentColor !important;
+                    &:hover
+                        background: #3a3a3e !important;
+                        color: #ffffff !important;
+                        border-color: #636366 !important;
+            /* 下方色块网格 (8列 × 2行) */
+            ul.tui-colorpicker-clearfix
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: repeat(8, 1fr) !important;
+                gap: 4px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                list-style: none !important;
+                li
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    float: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: auto !important;
+                    height: auto !important;
+                .tui-colorpicker-palette-button
+                    display: block !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    border-radius: 50% !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    cursor: pointer !important;
+                    transition: transform 0.15s, border-color 0.15s !important;
+                    &:hover
+                        transform: scale(1.18) !important;
+                        border-color: #ffffff !important;
+                    &.tui-colorpicker-selected
+                        border: 2px solid #3b82f6 !important;
+                        transform: scale(1.1) !important;
 
 /* Help menu bar history popover */
 .{prefix}-container

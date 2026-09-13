@@ -152,4 +152,17 @@ describe('Photoshop Layout UI Integration', () => {
     zhEditor.destroy();
     zhContainer.parentNode.removeChild(zhContainer);
   });
+
+  it('configures colorpicker with downward toggleDirection in top options bar', () => {
+    const drawSubmenu = imageEditor.ui.draw;
+    expect(drawSubmenu.toggleDirection).toBe('down');
+    expect(drawSubmenu._els.drawColorPicker._toggleDirection).toBe('down');
+
+    // 模拟点击触发选色器展开
+    const colorBtn = container.querySelector('.tie-draw-color');
+    colorBtn.click();
+    const pickerControl = colorBtn.querySelector('.color-picker-control');
+    expect(pickerControl.style.display).toBe('block');
+    expect(pickerControl.style.top).toBe('32px');
+  });
 });

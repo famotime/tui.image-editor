@@ -70,7 +70,47 @@ class Colorpicker {
       usageStatistics: this.usageStatistics,
     });
 
+    this._makeCustomColorButton();
     this._addEvent();
+  }
+
+  /**
+   * Make custom color palette trigger button in hex input bar
+   * @private
+   */
+  _makeCustomColorButton() {
+    const clearfixEl = this.pickerElement.querySelector(
+      '.tui-colorpicker-palette-container .tui-colorpicker-clearfix'
+    );
+    if (!clearfixEl) {
+      return;
+    }
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tie-colorpicker-custom-btn';
+    btn.title = '调色板自选色';
+    btn.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="13.5" cy="6.5" r="1" fill="currentColor"/>' +
+      '<circle cx="17.5" cy="10.5" r="1" fill="currentColor"/>' +
+      '<circle cx="8.5" cy="7.5" r="1" fill="currentColor"/>' +
+      '<circle cx="6.5" cy="12.5" r="1" fill="currentColor"/>' +
+      '<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.66 1.5-1.5 0-.39-.15-.74-.39-1.04-.24-.3-.39-.65-.39-1.04 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-5.5-4.5-9.92-10-9.92z"/>' +
+      '</svg>';
+
+    this._onCustomBtnClick = (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      const validHex =
+        this._color && /^#[0-9a-fA-F]{6}$/.test(this._color) ? this._color : '#00a9ff';
+      this._hiddenColorInput.value = validHex;
+      this._hiddenColorInput.click();
+    };
+
+    btn.addEventListener('click', this._onCustomBtnClick);
+    clearfixEl.appendChild(btn);
+    this._customColorButton = btn;
   }
 
   /**
@@ -78,6 +118,9 @@ class Colorpicker {
    */
   destroy() {
     this._removeEvent();
+    if (this._customColorButton && this._onCustomBtnClick) {
+      this._customColorButton.removeEventListener('click', this._onCustomBtnClick);
+    }
     this.picker.destroy();
     this.colorpickerElement.innerHTML = '';
     forEach(this, (value, key) => {

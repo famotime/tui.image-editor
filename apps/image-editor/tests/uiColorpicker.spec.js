@@ -49,4 +49,18 @@ describe('Colorpicker', () => {
     expect(colorpicker.colorElement.style.backgroundColor).toBe('');
     expect(colorpicker.colorElement.classList.contains('transparent')).toBe(true);
   });
+
+  it('should create custom color button and trigger native color input on click', () => {
+    expect(colorpicker._customColorButton).not.toBeNull();
+    expect(colorpicker._customColorButton.classList.contains('tie-colorpicker-custom-btn')).toBe(
+      true
+    );
+
+    const clickSpy = jest.spyOn(colorpicker._hiddenColorInput, 'click');
+    colorpicker.color = '#ff0055';
+    colorpicker._customColorButton.click();
+
+    expect(clickSpy).toHaveBeenCalled();
+    expect(colorpicker._hiddenColorInput.value).toBe('#ff0055');
+  });
 });
