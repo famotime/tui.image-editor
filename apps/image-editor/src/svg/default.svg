@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg display="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg display="none" style="display:none!important;position:absolute!important;top:-9999px!important;left:-9999px!important;width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important;visibility:hidden!important;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <defs id="tui-image-editor-svg-default-icons">
 <symbol id="ic-apply" viewBox="0 0 24 24">
     <polyline fill="none" stroke="inherit" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="4 12 9 17 20 6"/>
