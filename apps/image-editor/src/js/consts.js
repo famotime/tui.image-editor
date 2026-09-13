@@ -437,6 +437,7 @@ export const emptyCropRectValues = {
 export const defaultResizePixelValues = {
   realTimeEvent: true,
   min: 32,
+  max: 4096,
 };
 
 export const defaultMosaicSizeRangeValues = {
