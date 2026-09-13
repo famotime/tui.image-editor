@@ -19,6 +19,15 @@ export default ({ locale, makeSvgIcon }) => `
                 </div>
                 <label> -30 </label>
             </div>
+            <!-- 新增：旋转重置按钮，恢复初始角度0 -->
+            <div class="tui-image-editor-button reset">
+                <div>
+                    ${makeSvgIcon(['normal', 'active'], 'reset', true)}
+                </div>
+                <label>
+                    ${locale.localize('Reset')}
+                </label>
+            </div>
         </li>
         <li class="tui-image-editor-partition only-left-right">
             <div></div>

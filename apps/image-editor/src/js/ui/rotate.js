@@ -106,15 +106,20 @@ class Rotate extends Submenu {
     const angle = this._els.rotateRange.value;
 
     if (button) {
-      const rotateType = this.getButtonType(button, ['counterclockwise', 'clockwise']);
-      const rotateAngle = {
-        clockwise: CLOCKWISE,
-        counterclockwise: COUNTERCLOCKWISE,
-      }[rotateType];
-      const newAngle = parseInt(angle, 10) + rotateAngle;
-      const isRotatable = newAngle >= -360 && newAngle <= 360;
-      if (isRotatable) {
-        this.actions.rotate(rotateAngle);
+      const rotateType = this.getButtonType(button, ['counterclockwise', 'clockwise', 'reset']);
+      // 处理旋转重置动作
+      if (rotateType === 'reset') {
+        this.actions.setAngle(0);
+      } else if (rotateType) {
+        const rotateAngle = {
+          clockwise: CLOCKWISE,
+          counterclockwise: COUNTERCLOCKWISE,
+        }[rotateType];
+        const newAngle = parseInt(angle, 10) + rotateAngle;
+        const isRotatable = newAngle >= -360 && newAngle <= 360;
+        if (isRotatable) {
+          this.actions.rotate(rotateAngle);
+        }
       }
     }
   }
