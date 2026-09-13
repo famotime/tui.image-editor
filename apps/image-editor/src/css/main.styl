@@ -195,7 +195,7 @@ body > textarea
         z-index: 15 !important;
         transition: height 0.2s ease, max-height 0.2s ease !important;
         flex-shrink: 0 !important;
-        overflow: hidden !important;
+        overflow: visible !important;
 
     .-palette-header
         width: 100% !important;
@@ -227,6 +227,7 @@ body > textarea
         pointer-events: none;
 
     .-palette-toggle-btn
+        position: relative;
         width: 18px;
         height: 18px;
         line-height: 18px;
@@ -246,12 +247,34 @@ body > textarea
         &:hover
             color: #fff;
             background-color: #333;
+        &[tooltip-content]:hover
+            &:after
+                content: attr(tooltip-content);
+                position: absolute;
+                display: inline-block;
+                background-color: rgba(24, 24, 27, 0.94);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                color: #f2f2f7;
+                padding: 4px 8px;
+                font-size: 11px;
+                font-weight: 400;
+                border-radius: 4px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                line-height: 14px;
+                top: 50%;
+                left: 26px;
+                transform: translateY(-50%);
+                white-space: nowrap;
+                z-index: 1002;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                pointer-events: none;
+                animation: tie-tooltip-fade-right 0.18s ease forwards;
 
     .-palette-body
         width: 100% !important;
         flex: 1 !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
+        overflow: visible !important;
         padding: 4px 0 !important;
         display: flex !important;
         flex-direction: column !important;
@@ -279,6 +302,7 @@ body > textarea
             height: 28px !important;
             min-height: 28px !important;
             max-height: 28px !important;
+            overflow: hidden !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
         .-palette-title
             display: inline-block !important;

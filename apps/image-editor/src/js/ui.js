@@ -595,7 +595,9 @@ class Ui {
       const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具栏';
 
       toggleBtn.textContent = isCollapsed ? '▼' : '▲';
-      toggleBtn.title = isCollapsed ? expandText : collapseText;
+      const activeTooltipText = isCollapsed ? expandText : collapseText;
+      toggleBtn.title = activeTooltipText;
+      toggleBtn.setAttribute('tooltip-content', activeTooltipText);
       this.resizeEditor();
     };
     toggleBtn.addEventListener('click', this._onTogglePalette);
