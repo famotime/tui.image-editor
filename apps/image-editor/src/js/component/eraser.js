@@ -57,6 +57,11 @@ class Eraser extends Component {
     canvas.off('erasing:start', this._listeners.erasingStart);
     canvas.off('erasing:end', this._listeners.erasingEnd);
     this._restoreErasableStates();
+
+    // 退出橡皮擦模式时恢复默认画笔，避免残留 EraserBrush 影响其他绘制功能
+    if (fabric.EraserBrush && canvas.freeDrawingBrush instanceof fabric.EraserBrush) {
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    }
   }
 
   /**

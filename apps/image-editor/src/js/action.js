@@ -479,7 +479,7 @@ export default {
       canvas.on('path:created', (options) => {
         const { arrowType } = this.ui.draw;
         const originalPath = options ? options.path : null;
-        if (!originalPath) {
+        if (!originalPath || originalPath._isEraserPath || originalPath._isMosaicPath) {
           return;
         }
 

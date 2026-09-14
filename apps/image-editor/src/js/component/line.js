@@ -85,7 +85,12 @@ class Line extends Component {
    * @param {{width: ?number, color: ?string}} [setting] - Brush width & color
    */
   setBrush(setting) {
-    const brush = this.getCanvas().freeDrawingBrush;
+    const canvas = this.getCanvas();
+
+    if (!canvas.freeDrawingBrush || canvas.freeDrawingBrush.constructor !== fabric.PencilBrush) {
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    }
+    const brush = canvas.freeDrawingBrush;
 
     setting = setting || {};
     this._width = setting.width || this._width;

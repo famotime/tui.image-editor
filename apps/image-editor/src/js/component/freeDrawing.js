@@ -34,10 +34,8 @@ class FreeDrawing extends Component {
     const canvas = this.getCanvas();
 
     canvas.isDrawingMode = true;
-    if (
-      !(canvas.freeDrawingBrush instanceof fabric.PencilBrush) ||
-      canvas.freeDrawingBrush instanceof fabric.PatternBrush
-    ) {
+    // 确保画笔为标准的 PencilBrush（排除 EraserBrush、PatternBrush 等继承自 PencilBrush 的子类）
+    if (!canvas.freeDrawingBrush || canvas.freeDrawingBrush.constructor !== fabric.PencilBrush) {
       canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
     }
     this.setBrush(setting);
@@ -48,7 +46,12 @@ class FreeDrawing extends Component {
    * @param {{width: ?number, color: ?string}} [setting] - Brush width & color
    */
   setBrush(setting) {
-    const brush = this.getCanvas().freeDrawingBrush;
+    const canvas = this.getCanvas();
+
+    if (!canvas.freeDrawingBrush || canvas.freeDrawingBrush.constructor !== fabric.PencilBrush) {
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+    }
+    const brush = canvas.freeDrawingBrush;
 
     setting = setting || {};
     this.width = setting.width || this.width;

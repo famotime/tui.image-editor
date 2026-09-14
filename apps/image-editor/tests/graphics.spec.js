@@ -163,6 +163,17 @@ describe('Graphics', () => {
     expect(canvas.freeDrawingBrush.width).toBe(18);
   });
 
+  it('should restore pencil brush when switching from ERASER to FREE_DRAWING', () => {
+    graphics.startDrawingMode(drawingModes.ERASER, { width: 18 });
+    expect(canvas.freeDrawingBrush).toEqual(expect.any(fabric.EraserBrush));
+
+    graphics.startDrawingMode(drawingModes.FREE_DRAWING, { width: 10, color: '#00a9ff' });
+    expect(canvas.freeDrawingBrush.constructor).toBe(fabric.PencilBrush);
+    expect(canvas.freeDrawingBrush).not.toEqual(expect.any(fabric.EraserBrush));
+    expect(canvas.freeDrawingBrush.color).toBe('rgba(0,169,255,1)');
+    expect(canvas.freeDrawingBrush.width).toBe(10);
+  });
+
   it('should change a drawing shape', () => {
     const shapeComp = graphics.getComponent(components.SHAPE);
     graphics.setDrawingShape('circle', {
@@ -234,7 +245,7 @@ describe('Graphics', () => {
 
   describe('Visibility Control', () => {
     it('changeVisibilityAll should change visibility of all non-cropzone objects', () => {
-      const canvas = graphics.getCanvas();
+      canvas = graphics.getCanvas();
       const obj1 = new fabric.Object({ type: 'rect', visible: true });
       const obj2 = new fabric.Object({ type: 'text', visible: true });
       const cropzone = new fabric.Object({ type: 'cropzone', visible: true });
@@ -249,7 +260,7 @@ describe('Graphics', () => {
     });
 
     it('toggleVisibilityAll should toggle visibility based on current state', () => {
-      const canvas = graphics.getCanvas();
+      canvas = graphics.getCanvas();
       const obj1 = new fabric.Object({ type: 'rect', visible: true });
       canvas.add(obj1);
 
