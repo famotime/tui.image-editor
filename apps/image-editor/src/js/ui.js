@@ -1005,8 +1005,9 @@ class Ui {
       const isActive = item.classList.contains('active') || item.classList.contains(CLASS_NAME_ON);
 
       const dropdownItem = document.createElement('li');
-      dropdownItem.className = `tie-more-dropdown-item help ${isActive ? 'active' : ''} ${isEnabled ? 'enabled' : 'disabled'
-        }`;
+      dropdownItem.className = `tie-more-dropdown-item help ${isActive ? 'active' : ''} ${
+        isEnabled ? 'enabled' : 'disabled'
+      }`;
       dropdownItem.setAttribute('data-menu-name', menuName);
       dropdownItem.innerHTML = `${iconHtml}<span>${title}</span>`;
 
@@ -1073,8 +1074,8 @@ class Ui {
     moreWrap.title = this._locale.localize('More');
     moreWrap.innerHTML = `
       <button type="button" class="tie-submenu-more-btn" aria-label="${this._locale.localize(
-      'More'
-    )}">
+        'More'
+      )}">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
           <circle cx="6" cy="12" r="2" />
           <circle cx="12" cy="12" r="2" />
