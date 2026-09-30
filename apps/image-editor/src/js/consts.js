@@ -91,7 +91,8 @@ export const componentNames = keyMirror(
   'RESIZE',
   'ANNOTATION',
   'LASSO',
-  'ERASER'
+  'ERASER',
+  'COMPRESS'
 );
 
 /**
@@ -145,6 +146,7 @@ export const commandNames = {
   CHANGE_SELECTION: 'changeSelection',
   RESIZE_IMAGE: 'resize',
   APPLY_ERASER: 'applyEraser',
+  COMPRESS_IMAGE: 'compress',
 };
 
 /**
@@ -216,6 +218,7 @@ export const historyNames = {
   CHANGE_TEXT_STYLE: 'Text',
   REMOVE_OBJECT: 'Delete',
   CLEAR_OBJECTS: 'Delete',
+  COMPRESS: 'Compress',
 };
 
 /**
@@ -234,7 +237,8 @@ export const drawingModes = keyMirror(
   'RESIZE',
   'ANNOTATION',
   'LASSO',
-  'ERASER'
+  'ERASER',
+  'COMPRESS'
 );
 
 /**
@@ -250,6 +254,7 @@ export const drawingMenuNames = {
   ANNOTATION: 'annotation',
   LASSO: 'lasso',
   ERASER: 'eraser',
+  COMPRESS: 'compress',
 };
 
 /**
@@ -450,4 +455,13 @@ export const defaultMosaicBrushRangeValues = {
   min: 5,
   max: 150,
   value: 30,
+};
+
+export const defaultCompressRangeValues = {
+  qualityRange: {
+    realTimeEvent: true,
+    min: 1,
+    max: 100,
+    value: 80,
+  },
 };

@@ -17,6 +17,7 @@ const zhCN = {
   Filter: '滤镜',
   Annotation: '序号标注',
   Resize: '调整尺寸',
+  Compress: '压缩',
   Flip: '翻转',
   Rotate: '旋转',
   Zoom: '缩放',
@@ -148,6 +149,15 @@ const zhCN = {
   Rectangular: '矩形选择',
   Freehand: '自由选择',
   Eraser: '橡皮',
+
+  // 压缩工具
+  Quality: '画质',
+  Format: '格式',
+  Original: '原图',
+  Compressed: '压缩后',
+  'Original Format': '保持原格式',
+  Reduction: '减少',
+  'Compare Split': '左右对比',
 };
 
 export default zhCN;
