@@ -10,6 +10,7 @@ import Theme from '@/ui/theme/theme';
 import Shape from '@/ui/shape';
 import Crop from '@/ui/crop';
 import Resize from '@/ui/resize';
+import Compress from '@/ui/compress';
 import Flip from '@/ui/flip';
 import Rotate from '@/ui/rotate';
 import Text from '@/ui/text';
@@ -29,6 +30,7 @@ const SUB_UI_COMPONENT = {
   Shape,
   Crop,
   Resize,
+  Compress,
   Flip,
   Rotate,
   Text,
@@ -54,7 +56,7 @@ const ZOOM_BUTTON_TYPE = {
 
 // 工具分组定义：构图与选区、绘制与修饰、矢量与标注、效果与蒙版
 const TOOL_GROUPS = [
-  ['crop', 'resize', 'rotate', 'flip', 'lasso'],
+  ['crop', 'resize', 'compress', 'rotate', 'flip', 'lasso'],
   ['draw', 'eraser', 'mosaic'],
   ['text', 'shape', 'icon', 'annotation'],
   ['mask', 'filter'],
@@ -341,6 +343,7 @@ class Ui {
         menuIconPath: '',
         menu: [
           'resize',
+          'compress',
           'crop',
           'flip',
           'rotate',

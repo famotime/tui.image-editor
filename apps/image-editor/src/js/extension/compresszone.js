@@ -37,6 +37,7 @@ class Compresszone {
    * Initialize DOM elements
    * @private
    */
+  // eslint-disable-next-line complexity
   _initDom() {
     if (!this._wrapperEl) {
       return;

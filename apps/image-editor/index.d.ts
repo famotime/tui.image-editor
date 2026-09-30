@@ -324,6 +324,7 @@ declare namespace tuiImageEditor {
     public startDrawingMode(mode: string, option?: { width?: number; color?: string }): boolean;
     public stopDrawingMode(): void;
     public toDataURL(options?: IToDataURLOptions): string;
+    public compress(options?: { quality?: number; format?: string }): Promise<any>;
     public undo(iterationCount?: number): Promise<any>;
     public on(eventName: string, handler: (...args: any[]) => void): void;
   }

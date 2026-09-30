@@ -18,6 +18,7 @@ import clearObjectsCommand from '@/command/clearObjects';
 import removeObjectCommand from '@/command/removeObject';
 import resizeCommand from '@/command/resize';
 import applyEraserCommand from '@/command/applyEraser';
+import compressCommand from '@/command/compress';
 
 import img1 from 'fixtures/sampleImage.jpg';
 import img2 from 'fixtures/TOAST UI Component.png';
@@ -39,6 +40,7 @@ describe('commandFactory', () => {
     commandFactory.register(removeObjectCommand);
     commandFactory.register(resizeCommand);
     commandFactory.register(applyEraserCommand);
+    commandFactory.register(compressCommand);
   });
 
   beforeEach(() => {
@@ -556,6 +558,18 @@ describe('commandFactory', () => {
       await invoker.undo();
 
       expect(object.eraser).toBeNull();
+    });
+  });
+
+  describe('compressCommand', () => {
+    it('should execute and undo compress command', async () => {
+      const compressComp = graphics.getComponent('COMPRESS');
+      await compressComp.start();
+
+      await invoker.execute(commands.COMPRESS_IMAGE, graphics, { quality: 80 });
+      expect(invoker._undoStack.length).toBeGreaterThan(0);
+
+      await invoker.undo();
     });
   });
 });

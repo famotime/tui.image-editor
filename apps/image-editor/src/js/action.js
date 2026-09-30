@@ -24,6 +24,7 @@ export default {
       shape: this._shapeAction(),
       crop: this._cropAction(),
       resize: this._resizeAction(),
+      compress: this._compressAction(),
       flip: this._flipAction(),
       rotate: this._rotateAction(),
       text: this._textAction(),
@@ -823,6 +824,52 @@ export default {
               this.ui.resizeEditor();
               this.ui.changeMenu('resize');
             }
+          }
+        },
+      },
+      this._commonAction()
+    );
+  },
+
+  /**
+   * Compress Action
+   * @returns {Object} actions for compress
+   * @private
+   */
+  _compressAction() {
+    return extend(
+      {
+        start: (options) => {
+          const compress = this._graphics.getComponent(componentNames.COMPRESS);
+          return compress ? compress.start(options) : Promise.resolve(null);
+        },
+        update: (options) => {
+          const compress = this._graphics.getComponent(componentNames.COMPRESS);
+          return compress ? compress.update(options) : Promise.resolve(null);
+        },
+        apply: (options) => {
+          return this.compress(options)
+            .then((result) => {
+              this.stopDrawingMode();
+              this.ui.resizeEditor();
+              this.ui.changeMenu('compress');
+              return result;
+            })
+            ['catch']((message) => Promise.reject(message));
+        },
+        cancel: () => {
+          const compress = this._graphics.getComponent(componentNames.COMPRESS);
+          if (compress) {
+            compress.end();
+          }
+          this.stopDrawingMode();
+          this.ui.resizeEditor();
+          this.ui.changeMenu('compress');
+        },
+        setSplitPosition: (percent) => {
+          const compress = this._graphics.getComponent(componentNames.COMPRESS);
+          if (compress) {
+            compress.setSplitPosition(percent);
           }
         },
       },

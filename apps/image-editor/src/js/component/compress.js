@@ -1,6 +1,7 @@
 import { fabric } from 'fabric';
+import isUndefined from 'tui-code-snippet/type/isUndefined';
 import Component from '@/interface/component';
-import { componentNames, rejectMessages } from '@/consts';
+import { componentNames } from '@/consts';
 import Compresszone from '@/extension/compresszone';
 
 const DEFAULT_QUALITY = 80;
@@ -17,7 +18,7 @@ export function formatFileSize(bytes) {
   }
   const units = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  const val = (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 2);
+  const val = (bytes / 1024 ** i).toFixed(i === 0 ? 0 : 2);
 
   return `${val} ${units[i] || 'B'}`;
 }
@@ -36,7 +37,12 @@ export function getByteLengthFromDataUrl(dataUrl) {
     return dataUrl.length;
   }
   const base64 = dataUrl.substring(base64Index + 8);
-  const padding = (base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0);
+  let padding = 0;
+  if (base64.endsWith('==')) {
+    padding = 2;
+  } else if (base64.endsWith('=')) {
+    padding = 1;
+  }
 
   return Math.max(0, Math.round((base64.length * 3) / 4 - padding));
 }
@@ -103,6 +109,7 @@ class Compress extends Component {
    * @param {Function} [options.onStatsChange]
    * @returns {Promise<Object>}
    */
+  // eslint-disable-next-line complexity
   start(options = {}) {
     const canvas = this.getCanvas();
     const canvasImage = this.getCanvasImage();
@@ -110,7 +117,7 @@ class Compress extends Component {
       return Promise.resolve(null);
     }
 
-    this._quality = options.quality !== undefined ? options.quality : DEFAULT_QUALITY;
+    this._quality = !isUndefined(options.quality) ? options.quality : DEFAULT_QUALITY;
     this._format = options.format || DEFAULT_FORMAT;
     this._onStatsChange = options.onStatsChange || null;
     this._isStarted = true;
@@ -125,7 +132,7 @@ class Compress extends Component {
     this._originalSize = getByteLengthFromDataUrl(this._originalUrl);
 
     // Mount compresszone overlay on canvas wrapper element
-    const wrapperEl = canvas.wrapperEl;
+    const { wrapperEl } = canvas;
     if (wrapperEl) {
       if (this._compresszone) {
         this._compresszone.destroy();
@@ -149,10 +156,10 @@ class Compress extends Component {
    * @returns {Promise<Object>}
    */
   update(options = {}) {
-    if (options.quality !== undefined) {
+    if (!isUndefined(options.quality)) {
       this._quality = Math.max(1, Math.min(100, options.quality));
     }
-    if (options.format !== undefined) {
+    if (!isUndefined(options.format)) {
       this._format = options.format;
     }
 
@@ -166,7 +173,10 @@ class Compress extends Component {
 
       const reductionRate =
         this._originalSize > 0
-          ? Math.max(0, Math.round(((this._originalSize - this._compressedSize) / this._originalSize) * 100))
+          ? Math.max(
+              0,
+              Math.round(((this._originalSize - this._compressedSize) / this._originalSize) * 100)
+            )
           : 0;
 
       const stats = {
@@ -207,10 +217,9 @@ class Compress extends Component {
 
   /**
    * Apply compressed image to canvas background
-   * @param {Object} [options]
    * @returns {Promise<Object>}
    */
-  apply(options = {}) {
+  apply() {
     const prevUrl = this._originalUrl;
     const newUrl = this._compressedUrl || prevUrl;
 
@@ -257,6 +266,7 @@ class Compress extends Component {
    * @returns {string}
    * @private
    */
+  // eslint-disable-next-line complexity
   _extractCanvasImageUrl(canvasImage) {
     if (!canvasImage) {
       return '';
@@ -283,11 +293,14 @@ class Compress extends Component {
    * @returns {Promise<{ dataUrl: string, size: number }>}
    * @private
    */
+  // eslint-disable-next-line complexity
   _generateCompressedData(quality, format) {
+    // eslint-disable-next-line complexity
     return new Promise((resolve) => {
       const canvasImage = this.getCanvasImage();
       if (!canvasImage) {
         resolve({ dataUrl: this._originalUrl, size: this._originalSize });
+
         return;
       }
 
@@ -297,6 +310,7 @@ class Compress extends Component {
 
       if (typeof document === 'undefined') {
         resolve({ dataUrl: this._originalUrl, size: this._originalSize });
+
         return;
       }
 
@@ -307,6 +321,7 @@ class Compress extends Component {
 
       if (!ctx) {
         resolve({ dataUrl: this._originalUrl, size: this._originalSize });
+
         return;
       }
 
@@ -358,6 +373,7 @@ class Compress extends Component {
    * @returns {Promise<fabric.Image>}
    * @private
    */
+  // eslint-disable-next-line complexity
   _replaceBackgroundImage(url) {
     const canvas = this.getCanvas();
     const prevImage = this.getCanvasImage();
@@ -373,33 +389,44 @@ class Compress extends Component {
         }
       : {};
 
+    // eslint-disable-next-line complexity
     return new Promise((resolve) => {
-      if (!canvas) {
+      if (!canvas || !url) {
         resolve(null);
+
         return;
       }
 
-      if (!url) {
-        resolve(null);
-        return;
+      let fabricImg;
+      if (url instanceof fabric.Image) {
+        fabricImg = url;
+      } else if (typeof Image !== 'undefined') {
+        const imgEl = new Image();
+        imgEl.src = url;
+        fabricImg = new fabric.Image(imgEl);
+      } else {
+        fabricImg = new fabric.Image(null);
       }
 
-      fabric.Image.fromURL(
-        url,
-        (newImage) => {
-          if (newImage) {
-            newImage.set(prevProps);
-            this.setCanvasImage(this.getImageName(), newImage);
-            canvas.setBackgroundImage(newImage, () => {
+      if (fabricImg && fabricImg.set) {
+        fabricImg.set(prevProps);
+      }
+      this.setCanvasImage(this.getImageName(), fabricImg);
+
+      if (canvas.setBackgroundImage) {
+        canvas.setBackgroundImage(
+          fabricImg,
+          () => {
+            if (canvas.renderAll) {
               canvas.renderAll();
-              resolve(newImage);
-            });
-          } else {
-            resolve(null);
-          }
-        },
-        { crossOrigin: 'Anonymous' }
-      );
+            }
+            resolve(fabricImg);
+          },
+          { padding: 0, crossOrigin: 'Anonymous' }
+        );
+      } else {
+        resolve(fabricImg);
+      }
     });
   }
 }
