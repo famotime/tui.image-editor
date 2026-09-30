@@ -847,6 +847,12 @@ export default {
           const compress = this._graphics.getComponent(componentNames.COMPRESS);
           return compress ? compress.update(options) : Promise.resolve(null);
         },
+        end: () => {
+          const compress = this._graphics.getComponent(componentNames.COMPRESS);
+          if (compress) {
+            compress.end();
+          }
+        },
         apply: (options) => {
           return this.compress(options)
             .then((result) => {

@@ -57,7 +57,7 @@ class Compresszone {
       'overflow: hidden',
       'user-select: none',
       '-webkit-user-select: none',
-      'z-index: 25',
+      'z-index: 10',
       'cursor: ew-resize',
     ].join(';');
 

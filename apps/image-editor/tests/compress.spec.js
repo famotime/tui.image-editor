@@ -3,6 +3,7 @@ import Graphics from '@/graphics';
 import Compress, { formatFileSize, getByteLengthFromDataUrl } from '@/component/compress';
 import Compresszone from '@/extension/compresszone';
 import compressCommand from '@/command/compress';
+import UI from '@/ui';
 
 describe('Compress and Split Comparison', () => {
   describe('Utility functions', () => {
@@ -191,4 +192,64 @@ describe('Compress and Split Comparison', () => {
       await expect(compressCommand.undo(graphics)).resolves.not.toThrow();
     });
   });
+
+  describe('Compress UI Menu Switching', () => {
+    it('switches between compress and other menus cleanly', () => {
+      const options = {
+        menu: ['resize', 'compress', 'crop', 'draw'],
+        initMenu: '',
+        menuBarPosition: 'bottom',
+      };
+      const actions = {
+        compress: {
+          start: jest.fn().mockResolvedValue({}),
+          stopDrawingMode: jest.fn(),
+          end: jest.fn(),
+          modeChange: jest.fn(),
+        },
+        crop: {
+          stopDrawingMode: jest.fn(),
+          modeChange: jest.fn(),
+        },
+        draw: {
+          stopDrawingMode: jest.fn(),
+          modeChange: jest.fn(),
+        },
+        resize: {
+          stopDrawingMode: jest.fn(),
+          modeChange: jest.fn(),
+        },
+        main: {
+          changeSelectableAll: jest.fn(),
+        },
+      };
+      const container = document.createElement('div');
+      const ui = new UI(container, options, actions);
+      ui.activeMenuEvent();
+
+      ui.resizeEditor = jest.fn();
+
+      // Switch to compress
+      ui._changeMenu('compress', true, true);
+      expect(ui.submenu).toBe('compress');
+
+      // Switch to crop
+      ui._changeMenu('crop', true, true);
+      expect(ui.submenu).toBe('crop');
+      expect(actions.compress.stopDrawingMode).toHaveBeenCalled();
+      expect(actions.compress.end).toHaveBeenCalled();
+
+      // Switch back to compress
+      ui._changeMenu('compress', true, true);
+      expect(ui.submenu).toBe('compress');
+      expect(actions.crop.stopDrawingMode).toHaveBeenCalled();
+
+      // Toggle off compress
+      ui._changeMenu('compress', true, true);
+      expect(ui.submenu).toBeNull();
+
+      ui.destroy();
+    });
+  });
 });
+

@@ -47,30 +47,40 @@ class Compress extends Submenu {
   /**
    * Executed when menu starts
    */
+  // eslint-disable-next-line complexity
   changeStartMode() {
     if (this.actions && this.actions.resetZoom) {
       this.actions.resetZoom();
     }
-    this.actions.modeChange('compress');
+    if (this.actions && this.actions.modeChange) {
+      this.actions.modeChange('compress');
+    }
 
-    this.actions
-      .start({
-        quality: this._quality,
-        format: this._format,
-        onStatsChange: this.updateStats.bind(this),
-      })
-      .then((stats) => {
-        if (stats) {
-          this.updateStats(stats);
-        }
-      });
+    if (this.actions && this.actions.start) {
+      this.actions
+        .start({
+          quality: this._quality,
+          format: this._format,
+          onStatsChange: this.updateStats.bind(this),
+        })
+        .then((stats) => {
+          if (stats) {
+            this.updateStats(stats);
+          }
+        });
+    }
   }
 
   /**
    * Return menu to default state
    */
   changeStandbyMode() {
-    this.actions.stopDrawingMode();
+    if (this.actions && this.actions.stopDrawingMode) {
+      this.actions.stopDrawingMode();
+    }
+    if (this.actions && this.actions.end) {
+      this.actions.end();
+    }
   }
 
   /**
@@ -79,7 +89,7 @@ class Compress extends Submenu {
    */
   // eslint-disable-next-line complexity
   updateStats(stats) {
-    if (!this._els.statsText || !stats) {
+    if (!this._els || !this._els.statsText || !stats) {
       return;
     }
     const origLabel = (this.locale && this.locale.localize('Original')) || '原图';
