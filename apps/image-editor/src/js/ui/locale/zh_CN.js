@@ -18,6 +18,7 @@ const zhCN = {
   Annotation: '序号标注',
   Resize: '调整尺寸',
   Compress: '压缩',
+  compress: '压缩',
   Flip: '翻转',
   Rotate: '旋转',
   Zoom: '缩放',

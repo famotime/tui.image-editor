@@ -1238,7 +1238,7 @@ export default {
   },
 
   _commonAction() {
-    const { TEXT, CROPPER, SHAPE, ZOOM, RESIZE, ANNOTATION } = drawingModes;
+    const { TEXT, CROPPER, SHAPE, ZOOM, RESIZE, ANNOTATION, COMPRESS } = drawingModes;
 
     return {
       // eslint-disable-next-line complexity
@@ -1259,6 +1259,9 @@ export default {
             break;
           case drawingMenuNames.RESIZE:
             this.startDrawingMode(RESIZE);
+            break;
+          case drawingMenuNames.COMPRESS:
+            this.startDrawingMode(COMPRESS);
             break;
           case drawingMenuNames.ANNOTATION:
             this._changeActivateMode(ANNOTATION);

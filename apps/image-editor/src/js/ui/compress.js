@@ -71,9 +71,6 @@ class Compress extends Submenu {
    */
   changeStandbyMode() {
     this.actions.stopDrawingMode();
-    if (this.actions && this.actions.cancel) {
-      this.actions.cancel();
-    }
   }
 
   /**
