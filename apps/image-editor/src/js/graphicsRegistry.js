@@ -13,6 +13,7 @@ import Resize from '@/component/resize';
 import Annotation from '@/component/annotation';
 import Lasso from '@/component/lasso';
 import Eraser from '@/component/eraser';
+import Compress from '@/component/compress';
 import CropperDrawingMode from '@/drawingMode/cropper';
 import FreeDrawingMode from '@/drawingMode/freeDrawing';
 import LineDrawingMode from '@/drawingMode/lineDrawing';
@@ -24,6 +25,7 @@ import ResizeDrawingMode from '@/drawingMode/resize';
 import AnnotationDrawingMode from '@/drawingMode/annotation';
 import LassoDrawingMode from '@/drawingMode/lasso';
 import EraserDrawingMode from '@/drawingMode/eraser';
+import CompressDrawingMode from '@/drawingMode/compress';
 
 const DRAWING_MODE_TYPES = [
   CropperDrawingMode,
@@ -37,6 +39,7 @@ const DRAWING_MODE_TYPES = [
   AnnotationDrawingMode,
   LassoDrawingMode,
   EraserDrawingMode,
+  CompressDrawingMode,
 ];
 
 const COMPONENT_TYPES = [
@@ -55,6 +58,7 @@ const COMPONENT_TYPES = [
   Annotation,
   Lasso,
   Eraser,
+  Compress,
 ];
 
 export function createDrawingModeInstances() {

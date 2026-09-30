@@ -22,6 +22,7 @@ describe('graphicsRegistry', () => {
       drawingModes.ANNOTATION,
       drawingModes.LASSO,
       drawingModes.ERASER,
+      drawingModes.COMPRESS,
     ]);
   });
 
@@ -48,6 +49,7 @@ describe('graphicsRegistry', () => {
       components.ANNOTATION,
       components.LASSO,
       components.ERASER,
+      components.COMPRESS,
     ]);
 
     graphics.destroy();

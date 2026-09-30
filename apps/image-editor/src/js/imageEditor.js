@@ -1868,6 +1868,15 @@ class ImageEditor {
   resize(dimensions) {
     return this.execute(commands.RESIZE_IMAGE, dimensions);
   }
+
+  /**
+   * Compress background image
+   * @param {Object} [options] - Compress options
+   * @returns {Promise}
+   */
+  compress(options) {
+    return this.execute(commands.COMPRESS_IMAGE, options);
+  }
 }
 
 action.mixin(ImageEditor);

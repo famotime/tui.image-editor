@@ -25,6 +25,7 @@ import '@/command/setObjectProperties';
 import '@/command/setObjectPosition';
 import '@/command/changeSelection';
 import '@/command/resize';
+import '@/command/compress';
 
 ImageEditor['default'] = ImageEditor;
 export default ImageEditor;
