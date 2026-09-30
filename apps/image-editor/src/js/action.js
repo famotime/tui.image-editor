@@ -10,7 +10,14 @@ import {
   getFillTypeFromOption,
 } from '@/util';
 
-import { eventNames, historyNames, drawingModes, drawingMenuNames, zoomModes } from '@/consts';
+import {
+  eventNames,
+  historyNames,
+  drawingModes,
+  drawingMenuNames,
+  zoomModes,
+  componentNames,
+} from '@/consts';
 
 export default {
   /**

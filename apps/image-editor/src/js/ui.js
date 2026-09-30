@@ -1769,8 +1769,11 @@ class Ui {
   changeMenu(menuName, toggle = true, discardSelection = true) {
     if (!this._submenuChangeTransection) {
       this._submenuChangeTransection = true;
-      this._changeMenu(menuName, toggle, discardSelection);
-      this._submenuChangeTransection = false;
+      try {
+        this._changeMenu(menuName, toggle, discardSelection);
+      } finally {
+        this._submenuChangeTransection = false;
+      }
     }
   }
 
