@@ -835,6 +835,15 @@ class ImageEditor {
     imageName = imageName || imgFile.name;
 
     return this.loadImageFromURL(imgUrl, imageName).then((value) => {
+      const canvasImage = this._graphics ? this._graphics.getCanvasImage() : null;
+      if (canvasImage) {
+        canvasImage.__originalFileSize = imgFile.size;
+        canvasImage.__originalMimeType = imgFile.type;
+      }
+      if (this._graphics) {
+        this._graphics.__originalFileSize = imgFile.size;
+        this._graphics.__originalMimeType = imgFile.type;
+      }
       URL.revokeObjectURL(imgUrl);
 
       return value;

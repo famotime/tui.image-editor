@@ -96,7 +96,12 @@ class Compress extends Submenu {
     const compLabel = (this.locale && this.locale.localize('Compressed')) || '压缩后';
     const origStr = formatFileSize(stats.originalSize);
     const compStr = formatFileSize(stats.compressedSize);
-    const rateStr = `-${stats.reductionRate || 0}%`;
+    let rateStr = '0%';
+    if (stats.reductionRate > 0) {
+      rateStr = `-${stats.reductionRate}%`;
+    } else if (stats.reductionRate < 0) {
+      rateStr = `+${Math.abs(stats.reductionRate)}%`;
+    }
 
     this._els.statsText.innerText = `${origLabel}: ${origStr} → ${compLabel}: ${compStr} (${rateStr})`;
   }

@@ -19,6 +19,7 @@ const command = {
       this.undoData = {
         prevUrl: result.prevUrl,
         newUrl: result.newUrl,
+        prevSize: result.prevSize,
       };
 
       return result;

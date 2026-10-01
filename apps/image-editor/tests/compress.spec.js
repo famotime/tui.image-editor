@@ -3,6 +3,7 @@ import Graphics from '@/graphics';
 import Compress, { formatFileSize, getByteLengthFromDataUrl } from '@/component/compress';
 import Compresszone from '@/extension/compresszone';
 import compressCommand from '@/command/compress';
+import CompressSubmenu from '@/ui/compress';
 import UI from '@/ui';
 
 describe('Compress and Split Comparison', () => {
@@ -24,6 +25,12 @@ describe('Compress and Split Comparison', () => {
       // 'hello' in base64 is 'aGVsbG8=' (5 bytes)
       const dataUrl = 'data:image/png;base64,aGVsbG8=';
       expect(getByteLengthFromDataUrl(dataUrl)).toBe(5);
+    });
+
+    it('getByteLengthFromDataUrl returns 0 for non-data URLs', () => {
+      expect(getByteLengthFromDataUrl('http://localhost:8080/img/sampleImage.jpg')).toBe(0);
+      expect(getByteLengthFromDataUrl('blob:http://localhost:8080/abcd-1234')).toBe(0);
+      expect(getByteLengthFromDataUrl('img/sampleImage2.png')).toBe(0);
     });
   });
 
@@ -115,6 +122,7 @@ describe('Compress and Split Comparison', () => {
         img.src = 'data:image/png;base64,sample';
         img.width = 200;
         img.height = 150;
+
         return img;
       };
       graphics.setCanvasImage('testImage', mockImage);
@@ -133,6 +141,30 @@ describe('Compress and Split Comparison', () => {
       expect(compress.getQuality()).toBe(80);
       expect(compress.getFormat()).toBe('auto');
       expect(stats).toBeDefined();
+    });
+
+    it('resolves original size from stored metadata', async () => {
+      mockImage.__originalFileSize = 50000;
+      mockImage.__originalMimeType = 'image/jpeg';
+      const stats = await compress.start();
+
+      expect(stats.originalSize).toBe(50000);
+      expect(compress.getOriginalSize()).toBe(50000);
+      expect(compress.getOriginalMimeType()).toBe('image/jpeg');
+    });
+
+    it('quantizes PNG pixels when quality is less than 100', () => {
+      const mockData = new Uint8ClampedArray([105, 203, 57, 255, 0, 0, 0, 0]);
+      const mockCtx = {
+        getImageData: jest.fn().mockReturnValue({ data: mockData }),
+        putImageData: jest.fn(),
+      };
+
+      compress._quantizePngCanvas(mockCtx, 2, 1, 26);
+      expect(mockCtx.getImageData).toHaveBeenCalledWith(0, 0, 2, 1);
+      expect(mockCtx.putImageData).toHaveBeenCalled();
+      expect(mockData[0]).toBe(96);
+      expect(mockData[7]).toBe(0);
     });
 
     it('updates quality and format', async () => {
@@ -250,6 +282,24 @@ describe('Compress and Split Comparison', () => {
 
       ui.destroy();
     });
+
+    it('formats stats text properly and avoids -0%', () => {
+      const subMenuElement = document.createElement('div');
+      const compressSubmenu = new CompressSubmenu(subMenuElement, {
+        locale: { localize: (k) => k },
+        makeSvgIcon: () => '',
+        menuBarPosition: 'bottom',
+      });
+
+      compressSubmenu.updateStats({ originalSize: 1024, compressedSize: 1024, reductionRate: 0 });
+      expect(compressSubmenu._els.statsText.innerText).toContain('(0%)');
+      expect(compressSubmenu._els.statsText.innerText).not.toContain('(-0%)');
+
+      compressSubmenu.updateStats({ originalSize: 1024, compressedSize: 512, reductionRate: 50 });
+      expect(compressSubmenu._els.statsText.innerText).toContain('(-50%)');
+
+      compressSubmenu.updateStats({ originalSize: 1024, compressedSize: 1200, reductionRate: -17 });
+      expect(compressSubmenu._els.statsText.innerText).toContain('(+17%)');
+    });
   });
 });
-
