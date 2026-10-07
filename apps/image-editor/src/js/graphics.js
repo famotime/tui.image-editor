@@ -120,6 +120,7 @@ class Graphics {
      */
     this._handler = {
       onMouseDown: this._onMouseDown.bind(this),
+      onMouseUp: this._onMouseUp.bind(this),
       onObjectAdded: this._onObjectAdded.bind(this),
       onObjectRemoved: this._onObjectRemoved.bind(this),
       onObjectMoved: this._onObjectMoved.bind(this),
@@ -131,6 +132,8 @@ class Graphics {
       onSelectionCleared: this._onSelectionCleared.bind(this),
       onSelectionCreated: this._onSelectionCreated.bind(this),
     };
+
+    this._dragState = null;
 
     this._setObjectCachingToFalse();
     this._setCanvasElement(element);
@@ -1193,6 +1196,7 @@ class Graphics {
     const handler = this._handler;
     canvas.on({
       'mouse:down': handler.onMouseDown,
+      'mouse:up': handler.onMouseUp,
       'object:added': handler.onObjectAdded,
       'object:removed': handler.onObjectRemoved,
       'object:moving': handler.onObjectMoved,
@@ -1211,9 +1215,22 @@ class Graphics {
    * @param {{target: fabric.Object, e: MouseEvent}} fEvent - Fabric event
    * @private
    */
+  /* eslint-disable complexity */
   _onMouseDown(fEvent) {
     const { e: event, target } = fEvent;
-    const originPointer = this._canvas.getPointer(event);
+    let originPointer = null;
+    if (event && typeof event.clientX === 'number') {
+      originPointer = this._canvas.getPointer(event);
+    }
+    let startX = 0;
+    let startY = 0;
+    if (originPointer && !isNaN(originPointer.x)) {
+      startX = originPointer.x;
+      startY = originPointer.y;
+    } else if (target) {
+      startX = target.left;
+      startY = target.top;
+    }
 
     if (target) {
       const { type } = target;
@@ -1222,9 +1239,47 @@ class Graphics {
       );
 
       setCachedUndoDataForDimension(undoData);
+
+      const isCopyCandidate = Boolean(event && (event.ctrlKey || event.altKey || event.metaKey));
+      this._dragState = {
+        startX,
+        startY,
+        startLeft: target.left,
+        startTop: target.top,
+        target,
+        isCopyCandidate,
+        isCloned: false,
+        clonedObjects: null,
+        activeClone: null,
+      };
+      target.lastLeft = target.left;
+      target.lastTop = target.top;
+      if (target.relatedObj) {
+        target.relatedObj.lastLeft = target.relatedObj.left;
+        target.relatedObj.lastTop = target.relatedObj.top;
+      }
+    } else {
+      this._dragState = null;
     }
 
-    this.fire(events.MOUSE_DOWN, event, originPointer);
+    this.fire(events.MOUSE_DOWN, event, originPointer || { x: startX, y: startY });
+  }
+
+  /**
+   * "mouse:up" canvas event handler
+   * @private
+   */
+  _onMouseUp() {
+    if (this._dragState && this._dragState.isCloned) {
+      const clonedObjects = this._dragState.clonedObjects || [];
+      clonedObjects.forEach((obj) => {
+        const objectProperties = this.createObjectProperties(obj);
+        this.fire(events.ADD_OBJECT, objectProperties);
+      });
+      this._dragState = null;
+    } else {
+      this._dragState = null;
+    }
   }
 
   /**
@@ -1253,16 +1308,211 @@ class Graphics {
   }
 
   /**
+   * Start drag clone when dragging with modifier key
+   * @param {fabric.Object} target - target object
+   * @private
+   */
+  _startDragClone(target) {
+    this._dragState.isCloned = true;
+
+    const currentLeft = target.left;
+    const currentTop = target.top;
+    const isGroup = target.type === 'activeSelection';
+
+    target.set({
+      left: this._dragState.startLeft,
+      top: this._dragState.startTop,
+    });
+    target.setCoords();
+
+    if (target.relatedObj) {
+      target.relatedObj.set({
+        left: target.relatedObj.lastLeft,
+        top: target.relatedObj.lastTop,
+      });
+      target.relatedObj.setCoords();
+    }
+
+    if (isGroup) {
+      const originalItems = target.getObjects();
+      target.clone((clonedSel) => {
+        const clonedItems = clonedSel.getObjects();
+        clonedItems.forEach((clonedItem, index) => {
+          const originalItem = originalItems[index];
+          const shapeComp = this.getComponent(components.SHAPE);
+          if (isShape(clonedItem)) {
+            shapeComp.processForCopiedObject(clonedItem, originalItem);
+          }
+          this.add(clonedItem);
+        });
+
+        originalItems.forEach((orig, idx) => {
+          if (orig.relatedObj) {
+            const relIdx = originalItems.indexOf(orig.relatedObj);
+            if (relIdx !== -1 && clonedItems[idx] && clonedItems[relIdx]) {
+              clonedItems[idx].relatedObj = clonedItems[relIdx];
+            }
+          }
+        });
+
+        clonedSel.set({
+          left: currentLeft,
+          top: currentTop,
+        });
+        clonedSel.setCoords();
+
+        this._dragState.activeClone = clonedSel;
+        this._dragState.clonedObjects = clonedItems;
+
+        if (this._canvas._currentTransform) {
+          this._canvas._currentTransform.target = clonedSel;
+        }
+        this.setActiveObject(clonedSel);
+        this._canvas.renderAll();
+      });
+    } else {
+      target.clone((cloned) => {
+        const shapeComp = this.getComponent(components.SHAPE);
+        if (isShape(cloned)) {
+          shapeComp.processForCopiedObject(cloned, target);
+        }
+
+        cloned.set(
+          extend(
+            {
+              left: currentLeft,
+              top: currentTop,
+            },
+            fObjectOptions.SELECTION_STYLE
+          )
+        );
+
+        this.add(cloned);
+        this._dragState.activeClone = cloned;
+        this._dragState.clonedObjects = [cloned];
+
+        if (target.relatedObj) {
+          target.relatedObj.clone((clonedRelated) => {
+            const relatedDx = target.relatedObj.left - this._dragState.startLeft;
+            const relatedDy = target.relatedObj.top - this._dragState.startTop;
+
+            clonedRelated.set({
+              left: currentLeft + relatedDx,
+              top: currentTop + relatedDy,
+            });
+
+            this.add(clonedRelated);
+            cloned.relatedObj = clonedRelated;
+            clonedRelated.relatedObj = cloned;
+            this._dragState.clonedObjects.push(clonedRelated);
+          });
+        }
+
+        if (this._canvas._currentTransform) {
+          this._canvas._currentTransform.target = cloned;
+        }
+        this.setActiveObject(cloned);
+        this._canvas.renderAll();
+      });
+    }
+  }
+
+  /**
    * "object:moving" canvas event handler
    * @param {{target: fabric.Object, e: MouseEvent}} fEvent - Fabric event
    * @private
    */
   _onObjectMoved(fEvent) {
+    const { target, e: event } = fEvent;
+
+    if (this._dragState && target && !target.isType('cropzone')) {
+      this._handleDragInteraction(target, event);
+    }
+
+    this._syncRelatedObject(target);
+
     this._lazyFire(
       events.OBJECT_MOVED,
       (object) => this.createObjectProperties(object),
       fEvent.target
     );
+  }
+
+  /**
+   * Handle drag interaction for copy-drag and axis lock
+   * @param {fabric.Object} target - target object
+   * @param {MouseEvent} event - mouse event
+   * @private
+   */
+  _handleDragInteraction(target, event) {
+    const isCopyKey = Boolean(
+      event && (event.ctrlKey || event.altKey || event.metaKey || this._dragState.isCopyCandidate)
+    );
+
+    if (isCopyKey && !this._dragState.isCloned) {
+      let pointerDist = 0;
+      if (event && typeof event.clientX === 'number') {
+        const pointer = this._canvas.getPointer(event);
+        if (pointer && !isNaN(pointer.x) && !isNaN(pointer.y)) {
+          pointerDist = Math.hypot(
+            pointer.x - this._dragState.startX,
+            pointer.y - this._dragState.startY
+          );
+        }
+      }
+      const moveDist = Math.hypot(
+        target.left - this._dragState.startLeft,
+        target.top - this._dragState.startTop
+      );
+      const dist = Math.max(pointerDist, moveDist);
+
+      if (dist >= 3) {
+        this._startDragClone(target);
+      }
+    }
+
+    if (event && event.shiftKey) {
+      const active = this._dragState.isCloned ? this._dragState.activeClone : target;
+      if (active) {
+        const dx = active.left - this._dragState.startLeft;
+        const dy = active.top - this._dragState.startTop;
+
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          active.set('top', this._dragState.startTop);
+        } else {
+          active.set('left', this._dragState.startLeft);
+        }
+        active.setCoords();
+      }
+    }
+  }
+
+  /**
+   * Synchronize position with relatedObj
+   * @param {fabric.Object} target - target object
+   * @private
+   */
+  _syncRelatedObject(target) {
+    const activeTarget =
+      this._dragState && this._dragState.isCloned ? this._dragState.activeClone : target;
+
+    if (activeTarget && activeTarget.relatedObj) {
+      const related = activeTarget.relatedObj;
+      if (
+        typeof activeTarget.lastLeft !== 'undefined' &&
+        typeof activeTarget.lastTop !== 'undefined'
+      ) {
+        const dx = activeTarget.left - activeTarget.lastLeft;
+        const dy = activeTarget.top - activeTarget.lastTop;
+        related.set({
+          left: related.left + dx,
+          top: related.top + dy,
+        });
+        related.setCoords();
+      }
+      activeTarget.lastLeft = activeTarget.left;
+      activeTarget.lastTop = activeTarget.top;
+    }
   }
 
   /**
@@ -1285,6 +1535,20 @@ class Graphics {
    */
   _onObjectModified(fEvent) {
     const { target } = fEvent;
+
+    if (this._dragState && this._dragState.isCloned) {
+      const clonedObjects = this._dragState.clonedObjects || [];
+      clonedObjects.forEach((obj) => {
+        const objectProperties = this.createObjectProperties(obj);
+        this.fire(events.ADD_OBJECT, objectProperties);
+      });
+      this._dragState = null;
+
+      return;
+    }
+
+    this._dragState = null;
+
     if (target.type === 'activeSelection') {
       const items = target.getObjects();
 
@@ -1496,6 +1760,14 @@ class Graphics {
   }
 
   /**
+   * Check whether targetObjectForCopyPaste exists
+   * @returns {boolean}
+   */
+  hasTargetObjectForCopyPaste() {
+    return Boolean(this.targetObjectForCopyPaste);
+  }
+
+  /**
    * Reset targetObjectForCopyPaste value from activeObject
    */
   resetTargetObjectForCopyPaste() {
@@ -1517,20 +1789,65 @@ class Graphics {
 
     const targetObject = this.targetObjectForCopyPaste;
     const isGroupSelect = targetObject.type === 'activeSelection';
-    const targetObjects = isGroupSelect ? targetObject.getObjects() : [targetObject];
+    const originalTargetObjects = isGroupSelect ? targetObject.getObjects() : [targetObject];
+    const targetObjects = [...originalTargetObjects];
+
+    targetObjects.forEach((obj) => {
+      if (obj.relatedObj && !targetObjects.includes(obj.relatedObj)) {
+        targetObjects.push(obj.relatedObj);
+      }
+    });
+
     let newTargetObject = null;
 
     this.discardSelection();
 
     return this._cloneObject(targetObjects).then((addedObjects) => {
-      if (addedObjects.length > 1) {
-        newTargetObject = this.getActiveSelectionFromObjects(addedObjects);
-      } else {
-        [newTargetObject] = addedObjects;
-      }
+      this._relinkRelatedObjects(targetObjects, addedObjects);
+      newTargetObject = this._resolvePastedTarget(
+        originalTargetObjects,
+        addedObjects,
+        isGroupSelect
+      );
       this.targetObjectForCopyPaste = newTargetObject;
       this.setActiveObject(newTargetObject);
     });
+  }
+
+  /**
+   * Re-link relatedObj pairs in added objects
+   * @param {Array.<fabric.Object>} targetObjects - target objects
+   * @param {Array.<fabric.Object>} addedObjects - added objects
+   * @private
+   */
+  _relinkRelatedObjects(targetObjects, addedObjects) {
+    targetObjects.forEach((orig, idx) => {
+      if (orig.relatedObj) {
+        const relIdx = targetObjects.indexOf(orig.relatedObj);
+        if (relIdx !== -1 && addedObjects[idx] && addedObjects[relIdx]) {
+          addedObjects[idx].relatedObj = addedObjects[relIdx];
+        }
+      }
+    });
+  }
+
+  /**
+   * Resolve active target for pasted objects
+   * @param {Array.<fabric.Object>} originalTargetObjects - original targets
+   * @param {Array.<fabric.Object>} addedObjects - added objects
+   * @param {boolean} isGroupSelect - whether originally group select
+   * @returns {fabric.Object} resolved target
+   * @private
+   */
+  _resolvePastedTarget(originalTargetObjects, addedObjects, isGroupSelect) {
+    if (addedObjects.length === 1) {
+      return addedObjects[0];
+    }
+    if (!isGroupSelect && originalTargetObjects.length === 1) {
+      return addedObjects[0];
+    }
+
+    return this.getActiveSelectionFromObjects(addedObjects);
   }
 
   /**

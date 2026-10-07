@@ -241,6 +241,125 @@ describe('Graphics', () => {
 
       expect(canvas.getObjects()).toHaveLength(3);
     });
+
+    it('should duplicate paired annotation objects and link relatedObj', async () => {
+      targetObject1.relatedObj = targetObject2;
+      targetObject2.relatedObj = targetObject1;
+
+      graphics.setActiveObject(targetObject1);
+      graphics.resetTargetObjectForCopyPaste();
+
+      await graphics.pasteObject();
+
+      // Original 2 objects + 2 cloned objects = 4
+      expect(canvas.getObjects()).toHaveLength(4);
+      const clonedShape = canvas.getActiveObject();
+      expect(clonedShape).not.toBe(targetObject1);
+      expect(clonedShape.relatedObj).toBeDefined();
+      expect(clonedShape.relatedObj).not.toBe(targetObject2);
+      expect(clonedShape.relatedObj.relatedObj).toBe(clonedShape);
+    });
+  });
+
+  describe('Drag interactions (Shift axis lock & Ctrl drag copy)', () => {
+    let rect;
+
+    beforeEach(() => {
+      rect = new fabric.Rect({
+        left: 100,
+        top: 100,
+        width: 50,
+        height: 50,
+      });
+      canvas.add(rect);
+      canvas.setActiveObject(rect);
+    });
+
+    it('should constrain movement to horizontal axis when shiftKey is pressed and |dx| >= |dy|', () => {
+      // Simulate mousedown at (100, 100)
+      graphics._onMouseDown({
+        target: rect,
+        e: { ctrlKey: false, shiftKey: false, altKey: false, metaKey: false },
+      });
+
+      // Move to (150, 120) with shiftKey (dx=50, dy=20 => horizontal lock)
+      rect.set({ left: 150, top: 120 });
+      graphics._onObjectMoved({
+        target: rect,
+        e: { shiftKey: true },
+      });
+
+      expect(rect.left).toBe(150);
+      expect(rect.top).toBe(100);
+    });
+
+    it('should constrain movement to vertical axis when shiftKey is pressed and |dy| > |dx|', () => {
+      graphics._onMouseDown({
+        target: rect,
+        e: { ctrlKey: false, shiftKey: false, altKey: false, metaKey: false },
+      });
+
+      // Move to (120, 160) with shiftKey (dx=20, dy=60 => vertical lock)
+      rect.set({ left: 120, top: 160 });
+      graphics._onObjectMoved({
+        target: rect,
+        e: { shiftKey: true },
+      });
+
+      expect(rect.left).toBe(100);
+      expect(rect.top).toBe(160);
+    });
+
+    it('should clone object when ctrlKey is pressed and drag exceeds 3px', () => {
+      const addObjectSpy = jest.fn();
+      graphics.on('addObject', addObjectSpy);
+
+      graphics._onMouseDown({
+        target: rect,
+        e: { ctrlKey: true, shiftKey: false, altKey: false, metaKey: false },
+      });
+
+      // Move to (130, 130) -> dist > 3px
+      rect.set({ left: 130, top: 130 });
+      graphics._onObjectMoved({
+        target: rect,
+        e: { ctrlKey: true },
+      });
+
+      // Original object should stay at start (100, 100)
+      expect(rect.left).toBe(100);
+      expect(rect.top).toBe(100);
+
+      // Cloned object should have been added
+      expect(canvas.getObjects().length).toBeGreaterThan(1);
+      const cloned = canvas.getActiveObject();
+      expect(cloned).not.toBe(rect);
+
+      // Finish drag
+      graphics._onObjectModified({ target: cloned });
+      expect(addObjectSpy).toHaveBeenCalled();
+    });
+
+    it('should support both clone and axis lock on Ctrl + Shift + drag', () => {
+      graphics._onMouseDown({
+        target: rect,
+        e: { ctrlKey: true, shiftKey: true, altKey: false, metaKey: false },
+      });
+
+      // Move to (150, 110) with Ctrl + Shift (dx=50, dy=10 => horizontal lock)
+      rect.set({ left: 150, top: 110 });
+      graphics._onObjectMoved({
+        target: rect,
+        e: { ctrlKey: true, shiftKey: true },
+      });
+
+      const cloned = canvas.getActiveObject();
+      expect(cloned).not.toBe(rect);
+      expect(cloned.left).toBe(150);
+      expect(cloned.top).toBe(100); // axis-locked to startTop
+      expect(rect.left).toBe(100);
+      expect(rect.top).toBe(100);
+    });
   });
 
   describe('Visibility Control', () => {

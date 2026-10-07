@@ -392,11 +392,25 @@ class ImageEditor {
   _onKeyDown(e) {
     const { ctrlKey, keyCode, metaKey, target } = e;
     const isModifierKey = ctrlKey || metaKey;
+    const targetNodeName = target && target.nodeName ? target.nodeName.toUpperCase() : '';
+    const isInputTarget =
+      targetNodeName === 'INPUT' ||
+      targetNodeName === 'TEXTAREA' ||
+      Boolean(target && target.isContentEditable);
+    const activeObject = this._graphics.getActiveObject();
+    const isTextEditing = Boolean(activeObject && activeObject.isEditing);
+
+    if (this.isColorPickerInputBoxEditing || isInputTarget || isTextEditing) {
+      return;
+    }
 
     if (isModifierKey) {
       if (keyCode === keyCodes.C) {
         this._graphics.resetTargetObjectForCopyPaste();
-      } else if (keyCode === keyCodes.V) {
+      } else if (keyCode === keyCodes.V && this._graphics.hasTargetObjectForCopyPaste()) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
         this._graphics.pasteObject();
         this.clearRedoStack();
       } else if (keyCode === keyCodes.Z) {
@@ -408,12 +422,6 @@ class ImageEditor {
       }
     }
 
-    const targetNodeName = target && target.nodeName ? target.nodeName.toUpperCase() : '';
-    const isInputTarget =
-      targetNodeName === 'INPUT' ||
-      targetNodeName === 'TEXTAREA' ||
-      Boolean(target && target.isContentEditable);
-
     const isDeleteKey = keyCode === keyCodes.BACKSPACE || keyCode === keyCodes.DEL;
     const isArrowKey =
       keyCode === keyCodes.ARROW_LEFT ||
@@ -422,12 +430,16 @@ class ImageEditor {
       keyCode === keyCodes.ARROW_DOWN;
     const isRemoveReady = this._graphics.isReadyRemoveObject();
 
-    if (!this.isColorPickerInputBoxEditing && !isInputTarget && isRemoveReady) {
+    if (isRemoveReady) {
       if (isDeleteKey) {
-        e.preventDefault();
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
         this.removeActiveObject();
       } else if (isArrowKey) {
-        e.preventDefault();
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
         this._moveActiveObject(keyCode);
       }
     }
@@ -470,6 +482,15 @@ class ImageEditor {
         top: activeObject.top + dy,
       });
       activeObject.setCoords();
+
+      if (activeObject.relatedObj) {
+        activeObject.relatedObj.set({
+          left: activeObject.relatedObj.left + dx,
+          top: activeObject.relatedObj.top + dy,
+        });
+        activeObject.relatedObj.setCoords();
+      }
+
       this._graphics.renderAll();
 
       if (activeObject.type === 'activeSelection') {

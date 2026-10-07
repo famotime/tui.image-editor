@@ -183,5 +183,108 @@ describe('ImageEditor', () => {
       expect(preventDefaultSpy).not.toHaveBeenCalled();
       expect(rectObj.left).toBe(100);
     });
+
+    it('should move relatedObj synchronously when active object has relatedObj', () => {
+      const relatedText = new fabric.Text('1', { left: 100, top: 100 });
+      rectObj.relatedObj = relatedText;
+
+      imageEditor._onKeyDown({
+        keyCode: keyCodes.ARROW_RIGHT,
+        preventDefault: jest.fn(),
+      });
+
+      expect(rectObj.left).toBe(101);
+      expect(relatedText.left).toBe(101);
+    });
+  });
+
+  describe('_onKeyDown Ctrl+C and Ctrl+V copy paste', () => {
+    let imageEditor, el, rectObj;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+      imageEditor = new ImageEditor(el, { usageStatistics: false });
+
+      rectObj = new fabric.Rect({
+        left: 100,
+        top: 100,
+        width: 50,
+        height: 50,
+      });
+      imageEditor._graphics.getCanvas().add(rectObj);
+      imageEditor._graphics.getCanvas().setActiveObject(rectObj);
+    });
+
+    afterEach(() => {
+      imageEditor.destroy();
+    });
+
+    it('should copy active object on Ctrl+C and paste with offset on Ctrl+V', async () => {
+      const canvas = imageEditor._graphics.getCanvas();
+      expect(canvas.getObjects()).toHaveLength(1);
+
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.C,
+      });
+
+      const preventDefaultSpy = jest.fn();
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.V,
+        preventDefault: preventDefaultSpy,
+      });
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+
+      expect(canvas.getObjects()).toHaveLength(2);
+      const pasted = canvas.getActiveObject();
+      expect(pasted).not.toBe(rectObj);
+      expect(Math.abs(pasted.left - 100)).toBe(10);
+      expect(Math.abs(pasted.top - 100)).toBe(10);
+    });
+
+    it('should not trigger canvas copy/paste when focused inside an input element', () => {
+      const inputEl = document.createElement('input');
+      const resetSpy = jest.spyOn(imageEditor._graphics, 'resetTargetObjectForCopyPaste');
+      const pasteSpy = jest.spyOn(imageEditor._graphics, 'pasteObject');
+
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.C,
+        target: inputEl,
+      });
+
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.V,
+        target: inputEl,
+      });
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      expect(pasteSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger canvas copy/paste when active object is editing', () => {
+      rectObj.isEditing = true;
+      const resetSpy = jest.spyOn(imageEditor._graphics, 'resetTargetObjectForCopyPaste');
+      const pasteSpy = jest.spyOn(imageEditor._graphics, 'pasteObject');
+
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.C,
+      });
+
+      imageEditor._onKeyDown({
+        ctrlKey: true,
+        keyCode: keyCodes.V,
+      });
+
+      expect(resetSpy).not.toHaveBeenCalled();
+      expect(pasteSpy).not.toHaveBeenCalled();
+    });
   });
 });
