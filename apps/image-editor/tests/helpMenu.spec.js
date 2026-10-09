@@ -18,6 +18,7 @@ describe('helpMenu', () => {
       ...VIEW_HELP_MENUS,
       '',
       'load',
+      'addImage',
       'download',
     ]);
   });

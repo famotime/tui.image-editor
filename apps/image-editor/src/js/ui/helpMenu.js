@@ -11,6 +11,7 @@ export function makeHelpMenuWithPartitions() {
     ...VIEW_HELP_MENUS,
     '',
     'load',
+    'addImage',
     'download',
   ];
 }
@@ -28,5 +29,6 @@ export const HELP_MENU_TITLE_KEYS = {
   deleteAll: 'DeleteAll',
   viewOriginal: 'ViewOriginal',
   load: 'Load',
+  addImage: 'AddImage',
   download: 'Download',
 };

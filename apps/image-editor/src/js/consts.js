@@ -147,6 +147,8 @@ export const commandNames = {
   RESIZE_IMAGE: 'resize',
   APPLY_ERASER: 'applyEraser',
   COMPRESS_IMAGE: 'compress',
+  CHANGE_LAYER_ORDER: 'changeLayerOrder',
+  CHANGE_LAYER_OPACITY: 'changeLayerOpacity',
 };
 
 /**
@@ -219,6 +221,9 @@ export const historyNames = {
   REMOVE_OBJECT: 'Delete',
   CLEAR_OBJECTS: 'Delete',
   COMPRESS: 'Compress',
+  ADD_IMAGE: 'AddImage',
+  CHANGE_LAYER_ORDER: 'Order',
+  CHANGE_LAYER_OPACITY: 'Opacity',
 };
 
 /**

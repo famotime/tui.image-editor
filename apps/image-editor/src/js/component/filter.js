@@ -151,6 +151,12 @@ class Filter extends Component {
    * @private
    */
   _getSourceImage() {
+    const canvas = this.getCanvas();
+    const activeObject = canvas ? canvas.getActiveObject() : null;
+    if (activeObject && activeObject.type === 'image') {
+      return activeObject;
+    }
+
     return this.getCanvasImage();
   }
 

@@ -26,6 +26,8 @@ import '@/command/setObjectPosition';
 import '@/command/changeSelection';
 import '@/command/resize';
 import '@/command/compress';
+import '@/command/changeLayerOrder';
+import '@/command/changeLayerOpacity';
 
 ImageEditor['default'] = ImageEditor;
 export default ImageEditor;

@@ -44,6 +44,7 @@ export default {
       annotation: this._annotationAction(),
       lasso: this._lassoAction(),
       eraser: this._eraserAction(),
+      layer: this._layerAction(),
     };
   },
 
@@ -167,6 +168,35 @@ export default {
               this._invoker.fire(eventNames.EXECUTE_COMMAND, historyNames.LOAD_IMAGE);
             })
             ['catch']((message) => Promise.reject(message));
+        },
+        addImage: (file) => {
+          if (!isSupportFileApi()) {
+            alert('This browser does not support file-api');
+
+            return Promise.reject(new Error('File API not supported'));
+          }
+
+          const imgUrl = URL.createObjectURL(file);
+
+          return this.addImageObject(imgUrl)
+            .then((objectProps) => {
+              URL.revokeObjectURL(imgUrl);
+              const obj = this.getObject(objectProps.id);
+              if (obj && file.name) {
+                obj.layerName = file.name;
+              }
+              this._invoker.fire(eventNames.EXECUTE_COMMAND, historyNames.ADD_IMAGE || 'AddImage');
+              if (this.ui && this.ui.layer) {
+                this.ui.layer.refresh();
+              }
+
+              return objectProps;
+            })
+            ['catch']((message) => {
+              URL.revokeObjectURL(imgUrl);
+
+              return Promise.reject(message);
+            });
         },
         viewOriginal: () => {
           const isVisible = this.toggleAllObjectsVisibility();
@@ -1337,6 +1367,149 @@ export default {
         changeEraserWidth: (width) => {
           this.setBrush({ width });
         },
+      },
+      this._commonAction()
+    );
+  },
+
+  /**
+   * Layer Action
+   * @returns {Object} actions for ui layer
+   * @private
+   */
+  _layerAction() {
+    return extend(
+      {
+        addImage: (file) => this._actions.main.addImage(file),
+        reorderLayer: (id, targetIndex) =>
+          this.execute(commands.CHANGE_LAYER_ORDER, id, targetIndex),
+        setLayerOpacity: (id, opacity) =>
+          this.execute(commands.CHANGE_LAYER_OPACITY, id, opacity),
+        setLayerVisibility: (id, visible) => {
+          const target =
+            id === 'background'
+              ? this._graphics && this._graphics.getCanvasImage()
+              : this.getObject(id);
+          if (target) {
+            target.set('visible', visible);
+            if (!visible && this._graphics.getCanvas().getActiveObject() === target) {
+              this._graphics.getCanvas().discardActiveObject();
+            }
+            this._graphics.getCanvas().renderAll();
+          }
+        },
+        setLayerLock: (id, locked) => {
+          if (id === 'background') {
+            const canvas = this._graphics.getCanvas();
+            if (canvas.backgroundImage) {
+              const bgObj = canvas.backgroundImage;
+              canvas.backgroundImage = null;
+              bgObj.set({
+                selectable: true,
+                evented: true,
+                lockMovementX: false,
+                lockMovementY: false,
+              });
+              bgObj.layerName = this.getImageName() || 'Background';
+              this._graphics.setCanvasImage('', null);
+              canvas.add(bgObj);
+              canvas.moveTo(bgObj, 0);
+              this._graphics.createObjectProperties(bgObj);
+              canvas.setActiveObject(bgObj);
+              canvas.renderAll();
+              if (this.ui && this.ui.layer) {
+                this.ui.layer.refresh();
+              }
+            }
+
+            return;
+          }
+          const target = this.getObject(id);
+          if (target) {
+            target.set({
+              selectable: !locked,
+              evented: !locked,
+              lockMovementX: locked,
+              lockMovementY: locked,
+              lockRotation: locked,
+              lockScalingX: locked,
+              lockScalingY: locked,
+            });
+            if (locked && this._graphics.getCanvas().getActiveObject() === target) {
+              this._graphics.getCanvas().discardActiveObject();
+            }
+            this._graphics.getCanvas().renderAll();
+          }
+        },
+        removeLayer: (id) => {
+          if (id === 'background') {
+            const canvas = this._graphics.getCanvas();
+            canvas.backgroundImage = null;
+            this._graphics.setCanvasImage('', null);
+            canvas.renderAll();
+            if (this.ui && this.ui.layer) {
+              this.ui.layer.refresh();
+            }
+
+            return Promise.resolve();
+          }
+          const target = this.getObject(id);
+          if (target) {
+            return this.removeObject(id);
+          }
+
+          return Promise.resolve();
+        },
+        cloneLayer: (id) => {
+          const target = this.getObject(id);
+          if (target) {
+            target.clone((cloned) => {
+              cloned.set({
+                left: target.left + 20,
+                top: target.top + 20,
+                evented: true,
+                selectable: true,
+              });
+              cloned.layerName = `${target.layerName || target.type || 'Object'} Copy`;
+              this._graphics.getCanvas().add(cloned);
+              this._graphics.createObjectProperties(cloned);
+              this._graphics.getCanvas().setActiveObject(cloned);
+              this._graphics.getCanvas().renderAll();
+              if (this.ui && this.ui.layer) {
+                this.ui.layer.refresh();
+              }
+            });
+          }
+        },
+        renameLayer: (id, name) => {
+          const target =
+            id === 'background'
+              ? this._graphics && this._graphics.getCanvasImage()
+              : this.getObject(id);
+          if (target) {
+            target.layerName = name;
+          }
+        },
+        selectLayer: (id) => {
+          if (!this._graphics) {
+            return;
+          }
+          const canvas = this._graphics.getCanvas();
+          if (id === 'background') {
+            canvas.discardActiveObject();
+            canvas.renderAll();
+
+            return;
+          }
+          const target = this.getObject(id);
+          if (target && target.selectable) {
+            canvas.setActiveObject(target);
+            canvas.renderAll();
+          }
+        },
+        getCanvas: () => (this._graphics ? this._graphics.getCanvas() : null),
+        getCanvasImage: () => (this._graphics ? this._graphics.getCanvasImage() : null),
+        getObject: (id) => (this._graphics ? this.getObject(id) : null),
       },
       this._commonAction()
     );

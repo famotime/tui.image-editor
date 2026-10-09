@@ -4,6 +4,7 @@ export default ({
     locale,
 }) => {
     const toolbarTitle = (locale && locale.localize('Toolbar')) || '工具';
+    const layerTitle = (locale && locale.localize('Layers')) || '图层';
     const collapseText = (locale && locale.localize('Collapse')) || '折叠';
 
     return `
@@ -25,6 +26,14 @@ export default ({
                             <div class="tui-image-editor"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="tui-image-editor-controls tui-image-editor-right-palette right-palette">
+                <div class="tui-image-editor-palette-header">
+                    <span class="tui-image-editor-palette-title">${layerTitle}</span>
+                    <button type="button" class="tui-image-editor-palette-toggle-btn tie-layer-toggle-btn" tooltip-content="${collapseText}">▲</button>
+                </div>
+                <div class="tui-image-editor-palette-body tui-image-editor-layer-body">
                 </div>
             </div>
         </div>

@@ -1176,7 +1176,18 @@ class Graphics {
    * @private
    */
   _callbackAfterLoadingImageObject(obj) {
-    const centerPos = this.getCanvasImage().getCenterPoint();
+    const canvasImage = this.getCanvasImage();
+    const centerPos = canvasImage ? canvasImage.getCenterPoint() : this.getCenter();
+    const canvas = this.getCanvas();
+    const canvasWidth = canvas.getWidth ? canvas.getWidth() : canvas.width || 800;
+    const canvasHeight = canvas.getHeight ? canvas.getHeight() : canvas.height || 600;
+    const maxW = canvasWidth * 0.8;
+    const maxH = canvasHeight * 0.8;
+
+    if (obj.width > maxW || obj.height > maxH) {
+      const scale = Math.min(maxW / obj.width, maxH / obj.height);
+      obj.scale(scale);
+    }
 
     obj.set(fObjectOptions.SELECTION_STYLE);
     obj.set({
@@ -1184,6 +1195,9 @@ class Graphics {
       top: centerPos.y,
       crossOrigin: 'Anonymous',
     });
+    if (!obj.layerName) {
+      obj.layerName = 'Image';
+    }
 
     this.getCanvas().add(obj).setActiveObject(obj);
   }
@@ -1698,8 +1712,10 @@ class Graphics {
       'opacity',
       'angle',
     ];
+    const id = stamp(obj);
+    obj.id = id;
     const props = {
-      id: stamp(obj),
+      id,
       type: obj.type,
     };
 
@@ -1746,6 +1762,7 @@ class Graphics {
    */
   _addFabricObject(obj) {
     const id = stamp(obj);
+    obj.id = id;
     this._objects[id] = obj;
 
     return id;

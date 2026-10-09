@@ -1,0 +1,264 @@
+/* LAYER MANAGEMENT PALETTE */
+prefix = 'tui-image-editor'
+
+.{prefix}-controls.-right-palette,
+.{prefix}-controls.right-palette,
+.{prefix}-workspace .{prefix}-controls.right-palette
+    position: absolute !important;
+    top: 16px;
+    right: 16px;
+    left: auto !important;
+    bottom: auto !important;
+    width: 230px !important;
+    min-width: 230px !important;
+    max-width: 260px !important;
+    height: auto !important;
+    max-height: calc(100% - 32px) !important;
+    background-color: #222222 !important;
+    border: 1px solid #3c3c3c !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    z-index: 30 !important;
+    transition: height 0.2s ease, max-height 0.2s ease !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+
+/* LAYER PALETTE COLLAPSED STATE */
+.{prefix}-controls.right-palette.palette-collapsed,
+.{prefix}-controls.-right-palette.palette-collapsed
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    .-palette-title
+        display: inline-block !important;
+    .-palette-header
+        border-bottom: none !important;
+    .{prefix}-layer-body
+        display: none !important;
+
+/* LAYER BODY & PANEL */
+.{prefix}-layer-body
+    width: 100% !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+
+.tui-image-editor-layer-panel
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    color: #e0e0e0;
+    font-size: 12px;
+
+/* TOOLBAR */
+.tie-layer-toolbar
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-bottom: 1px solid #2d2d2d;
+    background-color: #1e1e1e;
+    gap: 4px;
+
+.tie-layer-add-btn
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    background-color: #007acc;
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    user-select: none;
+    transition: background-color 0.15s ease;
+    flex-shrink: 0;
+    &:hover
+        background-color: #0098ff;
+    .tie-layer-add-input
+        display: none;
+
+.tie-layer-tools
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+.tie-layer-tool-btn
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    color: #999;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    &:hover
+        color: #fff;
+        background-color: #383838;
+
+/* OPACITY CONTROL */
+.tie-layer-opacity-wrap
+    display: flex;
+    align-items: center;
+    padding: 5px 8px;
+    gap: 6px;
+    border-bottom: 1px solid #2d2d2d;
+    background-color: #252525;
+    font-size: 11px;
+    color: #aaa;
+
+.tie-layer-opacity-label
+    flex-shrink: 0;
+    font-size: 10px;
+
+.tie-layer-opacity-range
+    flex: 1;
+    height: 3px;
+    accent-color: #007acc;
+    cursor: pointer;
+
+.tie-layer-opacity-val
+    min-width: 30px;
+    text-align: right;
+    font-size: 10px;
+    color: #bbb;
+    font-variant-numeric: tabular-nums;
+
+/* LAYER LIST */
+.tie-layer-list-container
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 320px;
+    padding: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
+
+.tie-layer-list
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+.tie-layer-item
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background-color: #2a2a2a;
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    gap: 4px;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+    &:hover
+        background-color: #333333;
+    &.active
+        background-color: #223c52 !important;
+        border-color: #007acc !important;
+        .tie-layer-item-name
+            color: #fff !important;
+            font-weight: 500;
+    &.locked
+        opacity: 0.75;
+        .tie-layer-item-lock-btn
+            color: #e5a00d;
+    &.hidden
+        opacity: 0.45;
+    &.dragging
+        opacity: 0.3;
+    &.drag-over
+        border-top: 2px solid #007acc !important;
+
+.tie-layer-item-drag-handle
+    cursor: grab;
+    color: #666;
+    font-size: 10px;
+    line-height: 1;
+    flex-shrink: 0;
+    &.disabled
+        opacity: 0.2;
+        cursor: default;
+
+.tie-layer-item-vis-btn,
+.tie-layer-item-lock-btn,
+.tie-layer-item-del-btn
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #888;
+    font-size: 11px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    &:hover
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.1);
+
+.tie-layer-item-del-btn
+    font-size: 10px;
+    &:hover
+        color: #ff5252 !important;
+
+.tie-layer-item-type-icon
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+.tie-layer-item-name
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    color: #ccc;
+    padding: 0 2px;
+
+.tie-layer-rename-input
+    flex: 1;
+    background: #181818;
+    border: 1px solid #007acc;
+    color: #fff;
+    padding: 1px 3px;
+    font-size: 11px;
+    border-radius: 2px;
+    outline: none;
+
+/* TOP BAR ADD-IMAGE BUTTON */
+.tie-btn-addImage
+    position: relative;
+    overflow: hidden;
+    .tui-image-editor-add-image-btn
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;

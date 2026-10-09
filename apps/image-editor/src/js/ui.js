@@ -23,6 +23,7 @@ import Mosaic from '@/ui/mosaic';
 import Lasso from '@/ui/lasso';
 import Eraser from '@/ui/eraser';
 import History from '@/ui/history';
+import Layer from '@/ui/layer';
 import Locale from '@/ui/locale/locale';
 import { makeHelpMenuWithPartitions, HELP_MENU_TITLE_KEYS } from '@/ui/helpMenu';
 
@@ -570,15 +571,33 @@ class Ui {
     this._buttonElements.load = this._selectedElement.querySelectorAll(
       '.tui-image-editor-load-btn'
     );
+    this._buttonElements.addImage = this._selectedElement.querySelectorAll(
+      '.tui-image-editor-add-image-btn'
+    );
 
     this._historyMenu = new History(this._buttonElements[HISTORY_MENU], {
       locale: this._locale,
       makeSvgIcon: this.theme.makeMenSvgIconSet.bind(this.theme),
     });
 
+    const rightPalette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    if (rightPalette && this._actions.layer) {
+      this.layer = new Layer(
+        rightPalette,
+        {
+          locale: this._locale,
+          theme: this.theme,
+        },
+        this._actions.layer
+      );
+    }
+
     this._activateZoomMenus();
     this._attachPaletteToggleEvent();
     this._attachPaletteDragEvent();
+    this._attachLayerPaletteToggleEvent();
+    this._attachLayerPaletteDragEvent();
+    this._attachCanvasDropAndPasteEvents();
     this._attachHistoryOutsideClick();
     this._attachSubmenuWheelEvent();
     this._makeSubmenuMoreElement();
@@ -722,6 +741,223 @@ class Ui {
       document.removeEventListener('touchmove', onPointerMove);
       document.removeEventListener('touchend', onPointerUp);
     };
+  }
+
+  /**
+   * Attach layer palette toggle event for folding/expanding right layer panel
+   * @private
+   */
+  _attachLayerPaletteToggleEvent() {
+    const rightPalette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    if (!rightPalette) {
+      return;
+    }
+    const toggleBtn = rightPalette.querySelector('.tui-image-editor-palette-toggle-btn');
+    if (!toggleBtn) {
+      return;
+    }
+
+    this._onToggleLayerPalette = (event) => {
+      if (event) {
+        event.stopPropagation();
+      }
+      rightPalette.classList.toggle('palette-collapsed');
+      const isCollapsed = rightPalette.classList.contains('palette-collapsed');
+      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
+      const expandText = (this._locale && this._locale.localize('Expand')) || '展开图层';
+
+      toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+      toggleBtn.setAttribute('tooltip-content', isCollapsed ? expandText : collapseText);
+      this.resizeEditor();
+    };
+    toggleBtn.addEventListener('click', this._onToggleLayerPalette);
+  }
+
+  /**
+   * Attach drag event to right layer palette
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _attachLayerPaletteDragEvent() {
+    const palette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    if (!palette) {
+      return;
+    }
+    const header = palette.querySelector('.tui-image-editor-palette-header');
+    if (!header) {
+      return;
+    }
+
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let isDragging = false;
+
+    // eslint-disable-next-line complexity
+    const onPointerMove = (e) => {
+      if (!isDragging) {
+        return;
+      }
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+      const pos = getPointerPos(e);
+      if (typeof pos.x !== 'number' || typeof pos.y !== 'number') {
+        return;
+      }
+
+      const dx = pos.x - startX;
+      const dy = pos.y - startY;
+
+      const workspace = palette.closest('.tui-image-editor-workspace') || this._selectedElement;
+      const maxLeft =
+        workspace && workspace.clientWidth
+          ? Math.max(0, workspace.clientWidth - palette.offsetWidth)
+          : 99999;
+      const maxTop =
+        workspace && workspace.clientHeight
+          ? Math.max(0, workspace.clientHeight - palette.offsetHeight)
+          : 99999;
+
+      const newLeft = Math.max(0, Math.min(maxLeft, startLeft + dx));
+      const newTop = Math.max(0, Math.min(maxTop, startTop + dy));
+
+      palette.style.setProperty('left', `${newLeft}px`, 'important');
+      palette.style.setProperty('top', `${newTop}px`, 'important');
+      palette.style.setProperty('right', 'auto', 'important');
+      palette.style.setProperty('bottom', 'auto', 'important');
+    };
+
+    const onPointerUp = () => {
+      if (!isDragging) {
+        return;
+      }
+      isDragging = false;
+      header.style.cursor = 'grab';
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+    };
+
+    const onPointerDown = (e) => {
+      if (
+        (e.target.closest && e.target.closest('.tui-image-editor-palette-toggle-btn')) ||
+        e.target.tagName === 'BUTTON'
+      ) {
+        return;
+      }
+
+      const pos = getPointerPos(e);
+      if (typeof pos.x !== 'number' || typeof pos.y !== 'number') {
+        return;
+      }
+
+      isDragging = true;
+      header.style.cursor = 'grabbing';
+      startX = pos.x;
+      startY = pos.y;
+
+      startLeft = palette.offsetLeft;
+      startTop = palette.offsetTop;
+
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('mouseup', onPointerUp);
+      document.addEventListener('touchmove', onPointerMove, { passive: false });
+      document.addEventListener('touchend', onPointerUp);
+    };
+
+    header.addEventListener('mousedown', onPointerDown);
+    header.addEventListener('touchstart', onPointerDown, { passive: true });
+
+    this._layerPaletteDragCleanup = () => {
+      header.removeEventListener('mousedown', onPointerDown);
+      header.removeEventListener('touchstart', onPointerDown);
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+    };
+  }
+
+  /**
+   * Attach drag & drop image and clipboard paste events to canvas
+   * @private
+   */
+  _attachCanvasDropAndPasteEvents() {
+    const mainWrap =
+      this._selectedElement.querySelector('.tui-image-editor-main') || this._selectedElement;
+
+    this._onDragOver = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    this._onDrop = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const files = e.dataTransfer ? e.dataTransfer.files : null;
+      this._addDroppedFiles(files);
+    };
+
+    this._onPaste = (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (activeTag === 'input' || activeTag === 'textarea') {
+        return;
+      }
+      const items = e.clipboardData ? e.clipboardData.items : null;
+      this._addPastedItems(items, e);
+    };
+
+    mainWrap.addEventListener('dragover', this._onDragOver);
+    mainWrap.addEventListener('drop', this._onDrop);
+    document.addEventListener('paste', this._onPaste);
+
+    this._canvasDropAndPasteCleanup = () => {
+      mainWrap.removeEventListener('dragover', this._onDragOver);
+      mainWrap.removeEventListener('drop', this._onDrop);
+      document.removeEventListener('paste', this._onPaste);
+    };
+  }
+
+  /**
+   * Add dropped files as image layers
+   * @param {FileList|null} files - File list
+   * @private
+   */
+  _addDroppedFiles(files) {
+    if (!files || files.length === 0) {
+      return;
+    }
+    for (let i = 0; i < files.length; i += 1) {
+      const file = files[i];
+      if (file.type && file.type.indexOf('image/') === 0) {
+        this._actions.main.addImage(file);
+      }
+    }
+  }
+
+  /**
+   * Add pasted clipboard items as image layers
+   * @param {DataTransferItemList|null} items - Data transfer items
+   * @param {ClipboardEvent} e - Clipboard event
+   * @private
+   */
+  _addPastedItems(items, e) {
+    if (!items) {
+      return;
+    }
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.type && item.type.indexOf('image/') === 0) {
+        const blob = item.getAsFile();
+        if (blob) {
+          this._actions.main.addImage(blob);
+          e.preventDefault();
+        }
+      }
+    }
   }
 
   /**
@@ -1398,13 +1634,20 @@ class Ui {
    * @private
    */
   _enhanceSpecialMenuButton(btnElement, menuName) {
-    if (['load', 'download', 'viewOriginal', 'zoomReset'].indexOf(menuName) > -1) {
+    if (['load', 'addImage', 'download', 'viewOriginal', 'zoomReset'].indexOf(menuName) > -1) {
       btnElement.classList.add('enabled');
     }
     if (menuName === 'load') {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.className = 'tui-image-editor-load-btn';
+      btnElement.appendChild(fileInput);
+    }
+    if (menuName === 'addImage') {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.className = 'tui-image-editor-add-image-btn';
+      fileInput.accept = 'image/*';
       btnElement.appendChild(fileInput);
     }
     if (menuName === 'download') {
@@ -1426,6 +1669,8 @@ class Ui {
     btnElement.className = `tie-btn-${menuName} ${cls('item')} ${menuType}`;
     if (menuName === 'zoomReset') {
       btnElement.innerHTML = `<span class="tie-zoom-reset-btn-text">100%</span>`;
+    } else if (menuName === 'addImage') {
+      btnElement.innerHTML = `<svg class="svg_ic-menu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>`;
     } else {
       btnElement.innerHTML = this.theme.makeMenSvgIconSet(useIconTypes, menuName);
     }
@@ -1574,6 +1819,34 @@ class Ui {
   }
 
   /**
+   * Add add-image event
+   * @private
+   */
+  _addImageEvent() {
+    this.eventHandler.addImage = (event) => {
+      const [file] = event.target.files;
+      if (file) {
+        this._actions.main.addImage(file);
+        event.target.value = '';
+      }
+    };
+
+    forEach(this._buttonElements.addImage, (element) => {
+      element.addEventListener('change', this.eventHandler.addImage);
+    });
+  }
+
+  /**
+   * Remove add-image event
+   * @private
+   */
+  _removeAddImageEvent() {
+    forEach(this._buttonElements.addImage, (element) => {
+      element.removeEventListener('change', this.eventHandler.addImage);
+    });
+  }
+
+  /**
    * Add menu event
    * @param {string} menuName - menu name
    * @private
@@ -1656,8 +1929,28 @@ class Ui {
     this._removeHelpActionEvent();
     this._removeDownloadEvent();
     this._removeLoadEvent();
+    this._removeAddImageEvent();
     this._removeMainMenuEvent();
     this._historyMenu.removeEvent();
+    if (this._onToggleLayerPalette) {
+      const rightPalette =
+        this._selectedElement &&
+        this._selectedElement.querySelector('.tui-image-editor-right-palette');
+      const layerToggleBtn =
+        rightPalette && rightPalette.querySelector('.tui-image-editor-palette-toggle-btn');
+      if (layerToggleBtn) {
+        layerToggleBtn.removeEventListener('click', this._onToggleLayerPalette);
+      }
+      this._onToggleLayerPalette = null;
+    }
+    if (this._layerPaletteDragCleanup) {
+      this._layerPaletteDragCleanup();
+      this._layerPaletteDragCleanup = null;
+    }
+    if (this._canvasDropAndPasteCleanup) {
+      this._canvasDropAndPasteCleanup();
+      this._canvasDropAndPasteCleanup = null;
+    }
     if (this._onDocumentClickForHistory) {
       document.removeEventListener('click', this._onDocumentClickForHistory);
     }
@@ -1719,6 +2012,9 @@ class Ui {
     });
 
     this._historyMenu.destroy();
+    if (this.layer) {
+      this.layer.destroy();
+    }
   }
 
   /**
@@ -1734,6 +2030,10 @@ class Ui {
     }
 
     this._addLoadEvent();
+    this._addImageEvent();
+    if (this.layer) {
+      this.layer.initCanvas();
+    }
 
     const gridVisual = document.createElement('div');
 
