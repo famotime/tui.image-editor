@@ -809,6 +809,14 @@ class Graphics {
   }
 
   /**
+   * Get crop target object (for layer mode)
+   * @returns {fabric.Image|null}
+   */
+  getCropTargetObject() {
+    return this.getComponent(components.CROPPER).getTargetObject();
+  }
+
+  /**
    * Set brush option
    * @param {Object} option brush option
    *  @param {Number} option.width width

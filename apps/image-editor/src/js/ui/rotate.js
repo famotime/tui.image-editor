@@ -46,6 +46,17 @@ class Rotate extends Submenu {
     assignmentForDestroy(this);
   }
 
+  /**
+   * Executed when the menu starts.
+   */
+  changeStartMode() {
+    this.actions.modeChange('rotate');
+    if (this.actions.getCurrentAngle) {
+      const angle = this.actions.getCurrentAngle();
+      this.setRangeBarAngle('setAngle', angle);
+    }
+  }
+
   setRangeBarAngle(type, angle) {
     let resultAngle = angle;
 

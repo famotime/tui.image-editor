@@ -15,11 +15,39 @@ class Rotation extends Component {
   }
 
   /**
+   * Get target image object (layer object if active, otherwise null for background)
+   * @param {number} [targetId] - target object id
+   * @returns {fabric.Image|null}
+   * @private
+   */
+  _getTarget(targetId) {
+    if (typeof targetId !== 'undefined' && targetId !== null) {
+      return this.graphics ? this.graphics.getObject(targetId) : null;
+    }
+    const canvas = this.getCanvas();
+    const activeObject = canvas ? canvas.getActiveObject() : null;
+    const canvasImage = this.getCanvasImage();
+    if (activeObject && activeObject.type === 'image' && activeObject !== canvasImage) {
+      return activeObject;
+    }
+
+    return null;
+  }
+
+  /**
    * Get current angle
+   * @param {number} [targetId] - target object id
    * @returns {Number}
    */
-  getCurrentAngle() {
-    return this.getCanvasImage().angle;
+  getCurrentAngle(targetId) {
+    const target = this._getTarget(targetId);
+    if (target) {
+      return target.angle || 0;
+    }
+
+    const canvasImage = this.getCanvasImage();
+
+    return canvasImage ? canvasImage.angle : 0;
   }
 
   /**
@@ -30,9 +58,19 @@ class Rotation extends Component {
    *      See "http://fabricjs.com/docs/fabric.Object.html#setAngle"
    *
    * @param {number} angle - Angle value
+   * @param {number} [targetId] - target object id
    * @returns {Promise}
    */
-  setAngle(angle) {
+  setAngle(angle, targetId) {
+    const target = this._getTarget(targetId);
+    if (target) {
+      angle %= 360;
+      target.set({ angle }).setCoords();
+      this.getCanvas().renderAll();
+
+      return Promise.resolve(angle);
+    }
+
     const oldAngle = this.getCurrentAngle() % 360; // The angle is lower than 2*PI(===360 degrees)
 
     angle %= 360;
@@ -79,12 +117,13 @@ class Rotation extends Component {
   /**
    * Rotate the image
    * @param {number} additionalAngle - Additional angle
+   * @param {number} [targetId] - target object id
    * @returns {Promise}
    */
-  rotate(additionalAngle) {
-    const current = this.getCurrentAngle();
+  rotate(additionalAngle, targetId) {
+    const current = this.getCurrentAngle(targetId);
 
-    return this.setAngle(current + additionalAngle);
+    return this.setAngle(current + additionalAngle, targetId);
   }
 }
 

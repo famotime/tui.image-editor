@@ -149,6 +149,7 @@ export const commandNames = {
   COMPRESS_IMAGE: 'compress',
   CHANGE_LAYER_ORDER: 'changeLayerOrder',
   CHANGE_LAYER_OPACITY: 'changeLayerOpacity',
+  CROP_IMAGE_OBJECT: 'cropImageObject',
 };
 
 /**
@@ -224,6 +225,7 @@ export const historyNames = {
   ADD_IMAGE: 'AddImage',
   CHANGE_LAYER_ORDER: 'Order',
   CHANGE_LAYER_OPACITY: 'Opacity',
+  CROP_IMAGE_OBJECT: 'Crop',
 };
 
 /**

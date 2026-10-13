@@ -15,8 +15,11 @@ let cachedUndoDataForSilent = null;
  * @returns {object} - undodata
  */
 function makeUndoData(rotationComp) {
+  const target = rotationComp._getTarget ? rotationComp._getTarget() : null;
+
   return {
-    angle: rotationComp.getCurrentAngle(),
+    angle: rotationComp.getCurrentAngle(target ? target.id : null),
+    targetId: target ? target.id : null,
   };
 }
 
@@ -40,7 +43,9 @@ const command = {
       cachedUndoDataForSilent = this.setUndoData(undoData, cachedUndoDataForSilent, isSilent);
     }
 
-    return rotationComp[type](angle);
+    const targetId = this.undoData ? this.undoData.targetId : null;
+
+    return rotationComp[type](angle, targetId);
   },
 
   /**
@@ -50,12 +55,13 @@ const command = {
   undo(graphics) {
     const rotationComp = graphics.getComponent(ROTATION);
     const [, type, angle] = this.args;
+    const targetId = this.undoData ? this.undoData.targetId : null;
 
     if (type === 'setAngle') {
-      return rotationComp[type](this.undoData.angle);
+      return rotationComp[type](this.undoData.angle, targetId);
     }
 
-    return rotationComp.rotate(-angle);
+    return rotationComp.rotate(-angle, targetId);
   },
 };
 

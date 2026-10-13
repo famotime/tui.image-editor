@@ -28,6 +28,7 @@ import '@/command/resize';
 import '@/command/compress';
 import '@/command/changeLayerOrder';
 import '@/command/changeLayerOpacity';
+import '@/command/cropImageObject';
 
 ImageEditor['default'] = ImageEditor;
 export default ImageEditor;

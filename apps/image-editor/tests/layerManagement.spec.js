@@ -2,9 +2,12 @@ import { fabric } from 'fabric';
 import Graphics from '@/graphics';
 import Invoker from '@/invoker';
 import commandFactory from '@/factory/command';
-import { commandNames as commands } from '@/consts';
+import { componentNames, commandNames as commands } from '@/consts';
 import changeLayerOrderCommand from '@/command/changeLayerOrder';
 import changeLayerOpacityCommand from '@/command/changeLayerOpacity';
+import flipCommand from '@/command/flip';
+import rotateCommand from '@/command/rotate';
+import cropImageObjectCommand from '@/command/cropImageObject';
 import Layer from '@/ui/layer';
 import Locale from '@/ui/locale/locale';
 
@@ -14,6 +17,9 @@ describe('Layer Management & Multi-Image Addition', () => {
   beforeAll(() => {
     commandFactory.register(changeLayerOrderCommand);
     commandFactory.register(changeLayerOpacityCommand);
+    commandFactory.register(flipCommand);
+    commandFactory.register(rotateCommand);
+    commandFactory.register(cropImageObjectCommand);
   });
 
   beforeEach(() => {
@@ -291,4 +297,91 @@ describe('Layer Management & Multi-Image Addition', () => {
       expect(largeImg.getScaledHeight()).toBeLessThanOrEqual(240.01);
     });
   });
+
+  describe('Tool Scoping to Current Image Layer (Flip, Rotate, Crop)', () => {
+    let mockBg;
+
+    beforeEach(() => {
+      mockBg = graphics.getCanvasImage();
+    });
+
+    it('flips only the active image layer without affecting background or other objects', async () => {
+      canvas.setActiveObject(imgObj);
+
+      const command = commandFactory.create(commands.FLIP_IMAGE, graphics, 'flipX');
+      await invoker.execute(command);
+
+      expect(imgObj.flipX).toBe(true);
+      expect(mockBg.flipX).toBeFalsy();
+      expect(rect1.flipX).toBeFalsy();
+      expect(rect2.flipX).toBeFalsy();
+
+      // Undo restores the layer flip
+      await invoker.undo();
+      expect(imgObj.flipX).toBe(false);
+      expect(mockBg.flipX).toBeFalsy();
+    });
+
+    it('rotates only the active image layer without adjusting canvas dimension or rotating other objects', async () => {
+      canvas.setActiveObject(imgObj);
+
+      const command = commandFactory.create(commands.ROTATE_IMAGE, graphics, 'rotate', 90);
+      await invoker.execute(command);
+
+      expect(imgObj.angle).toBe(90);
+      expect(mockBg.angle).toBeFalsy();
+      expect(rect1.angle).toBeFalsy();
+      expect(rect2.angle).toBeFalsy();
+
+      // Undo restores the layer angle
+      await invoker.undo();
+      expect(imgObj.angle).toBe(0);
+      expect(mockBg.angle).toBeFalsy();
+    });
+
+    it('crops only the active image layer without replacing canvas background or clearing other objects', async () => {
+      canvas.setActiveObject(imgObj);
+      const cropper = graphics.getComponent(componentNames.CROPPER);
+      cropper.start();
+
+      expect(cropper.getTargetObject()).toBe(imgObj);
+
+      const cropRect = { left: 10, top: 10, width: 40, height: 40 };
+      const croppedData = cropper.getCroppedImageData(cropRect);
+
+      expect(croppedData.targetId).toBe(imgObj.id);
+
+      // Execute cropImageObject command
+      const command = commandFactory.create(
+        commands.CROP_IMAGE_OBJECT,
+        graphics,
+        imgObj.id,
+        cropRect,
+        croppedData.url
+      );
+      await invoker.execute(command);
+
+      // Verify that layer properties updated to cropped bounding box
+      expect(imgObj.left).toBe(10);
+      expect(imgObj.top).toBe(10);
+      expect(imgObj.width).toBe(40);
+      expect(imgObj.height).toBe(40);
+
+      // Verify background and other layer objects are preserved intact on canvas
+      expect(graphics.getCanvasImage()).toBe(mockBg);
+      expect(canvas.getObjects()).toContain(rect1);
+      expect(canvas.getObjects()).toContain(rect2);
+      expect(canvas.getObjects()).toContain(imgObj);
+
+      // Undo restores layer dimensions and positions
+      await invoker.undo();
+      expect(imgObj.width).toBe(80);
+      expect(imgObj.height).toBe(80);
+      expect(canvas.getObjects()).toContain(rect1);
+      expect(canvas.getObjects()).toContain(rect2);
+
+      cropper.end();
+    });
+  });
 });
+

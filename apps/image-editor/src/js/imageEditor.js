@@ -970,7 +970,19 @@ class ImageEditor {
       return Promise.reject(rejectMessages.invalidParameters);
     }
 
+    if (data.targetId) {
+      return this.execute(commands.CROP_IMAGE_OBJECT, data.targetId, rect, data.url);
+    }
+
     return this.loadImageFromURL(data.url, data.imageName);
+  }
+
+  /**
+   * Get crop target object (for layer mode)
+   * @returns {fabric.Image|null}
+   */
+  getCropTargetObject() {
+    return this._graphics.getCropTargetObject();
   }
 
   /**

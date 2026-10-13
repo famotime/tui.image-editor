@@ -706,6 +706,13 @@ export default {
           this.ui.resizeEditor();
           this.ui.rotate.setRangeBarAngle('setAngle', angle);
         },
+        getCurrentAngle: () => {
+          if (!this._graphics) {
+            return 0;
+          }
+
+          return this._graphics.getComponent(componentNames.ROTATION).getCurrentAngle();
+        },
       },
       this._commonAction()
     );
@@ -749,6 +756,9 @@ export default {
                 this.ui.resizeEditor();
                 this.ui.changeMenu('crop');
                 this._invoker.fire(eventNames.EXECUTE_COMMAND, historyNames.CROP);
+                if (this.ui && this.ui.layer) {
+                  this.ui.layer.refresh();
+                }
               })
               ['catch']((message) => Promise.reject(message));
           }
