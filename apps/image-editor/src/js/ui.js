@@ -26,6 +26,7 @@ import History from '@/ui/history';
 import Layer from '@/ui/layer';
 import Locale from '@/ui/locale/locale';
 import { makeHelpMenuWithPartitions, HELP_MENU_TITLE_KEYS } from '@/ui/helpMenu';
+import { layerIcons } from '@/ui/icons/layerIcons';
 
 const SUB_UI_COMPONENT = {
   Shape,
@@ -766,7 +767,7 @@ class Ui {
       const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
       const expandText = (this._locale && this._locale.localize('Expand')) || '展开图层';
 
-      toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+      toggleBtn.innerHTML = isCollapsed ? layerIcons.chevronDown : layerIcons.chevronUp;
       toggleBtn.setAttribute('tooltip-content', isCollapsed ? expandText : collapseText);
       this.resizeEditor();
     };

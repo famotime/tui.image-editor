@@ -73,12 +73,12 @@ prefix = 'tui-image-editor'
 .tie-layer-add-btn
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     cursor: pointer;
     background-color: #007acc;
     color: #fff;
-    padding: 3px 7px;
-    border-radius: 3px;
+    padding: 3px 8px;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 500;
     user-select: none;
@@ -86,6 +86,15 @@ prefix = 'tui-image-editor'
     flex-shrink: 0;
     &:hover
         background-color: #0098ff;
+    .tie-layer-add-icon
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        svg
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            pointer-events: none;
     .tie-layer-add-input
         display: none;
 
@@ -95,8 +104,8 @@ prefix = 'tui-image-editor'
     gap: 2px;
 
 .tie-layer-tool-btn
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     padding: 0;
     display: inline-flex;
     align-items: center;
@@ -104,10 +113,15 @@ prefix = 'tui-image-editor'
     background: transparent;
     border: none;
     border-radius: 3px;
-    color: #999;
-    font-size: 11px;
+    color: #9aa0a6;
     cursor: pointer;
     transition: all 0.15s ease;
+    svg
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        stroke-width: 2;
+        pointer-events: none;
     &:hover
         color: #fff;
         background-color: #383838;
@@ -191,9 +205,14 @@ prefix = 'tui-image-editor'
 .tie-layer-item-drag-handle
     cursor: grab;
     color: #666;
-    font-size: 10px;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    svg
+        width: 12px;
+        height: 12px;
+        pointer-events: none;
     &.disabled
         opacity: 0.2;
         cursor: default;
@@ -205,21 +224,31 @@ prefix = 'tui-image-editor'
     border: none;
     padding: 0;
     color: #888;
-    font-size: 11px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
     flex-shrink: 0;
+    transition: all 0.15s ease;
+    svg
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        stroke-width: 2;
+        pointer-events: none;
     &:hover
         color: #fff;
         background-color: rgba(255, 255, 255, 0.1);
+    &.disabled
+        opacity: 0.25;
+        cursor: default;
+        &:hover
+            background-color: transparent;
 
 .tie-layer-item-del-btn
-    font-size: 10px;
     &:hover
         color: #ff5252 !important;
 
@@ -227,8 +256,16 @@ prefix = 'tui-image-editor'
     width: 14px;
     height: 14px;
     flex-shrink: 0;
-    background-repeat: no-repeat;
-    background-position: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #8ab4f8;
+    svg
+        width: 13px;
+        height: 13px;
+        stroke: currentColor;
+        stroke-width: 2;
+        pointer-events: none;
     background-size: contain;
 
 .tie-layer-item-name

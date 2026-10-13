@@ -1,3 +1,5 @@
+import { layerIcons } from '@/ui/icons/layerIcons';
+
 /* eslint-disable prettier/prettier */
 export default ({
     commonStyle,
@@ -31,9 +33,9 @@ export default ({
             <div class="tui-image-editor-controls tui-image-editor-right-palette right-palette">
                 <div class="tui-image-editor-palette-header">
                     <span class="tui-image-editor-palette-title">${layerTitle}</span>
-                    <button type="button" class="tui-image-editor-palette-toggle-btn tie-layer-toggle-btn" tooltip-content="${collapseText}">▲</button>
+                    <button type="button" class="tui-image-editor-palette-toggle-btn tie-layer-toggle-btn" tooltip-content="${collapseText}">${layerIcons.chevronUp}</button>
                 </div>
-                <div class="tui-image-editor-palette-body tui-image-editor-layer-body">
+                <div class="tui-image-editor-layer-body">
                 </div>
             </div>
         </div>

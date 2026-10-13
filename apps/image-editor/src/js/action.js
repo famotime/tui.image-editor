@@ -181,7 +181,7 @@ export default {
           return this.addImageObject(imgUrl)
             .then((objectProps) => {
               URL.revokeObjectURL(imgUrl);
-              const obj = this.getObject(objectProps.id);
+              const obj = this._graphics ? this._graphics.getObject(objectProps.id) : null;
               if (obj && file.name) {
                 obj.layerName = file.name;
               }
@@ -1389,7 +1389,7 @@ export default {
           const target =
             id === 'background'
               ? this._graphics && this._graphics.getCanvasImage()
-              : this.getObject(id);
+              : this._graphics && this._graphics.getObject(id);
           if (target) {
             target.set('visible', visible);
             if (!visible && this._graphics.getCanvas().getActiveObject() === target) {
@@ -1424,7 +1424,7 @@ export default {
 
             return;
           }
-          const target = this.getObject(id);
+          const target = this._graphics ? this._graphics.getObject(id) : null;
           if (target) {
             target.set({
               selectable: !locked,
@@ -1453,7 +1453,7 @@ export default {
 
             return Promise.resolve();
           }
-          const target = this.getObject(id);
+          const target = this._graphics ? this._graphics.getObject(id) : null;
           if (target) {
             return this.removeObject(id);
           }
@@ -1461,7 +1461,7 @@ export default {
           return Promise.resolve();
         },
         cloneLayer: (id) => {
-          const target = this.getObject(id);
+          const target = this._graphics ? this._graphics.getObject(id) : null;
           if (target) {
             target.clone((cloned) => {
               cloned.set({
@@ -1485,7 +1485,7 @@ export default {
           const target =
             id === 'background'
               ? this._graphics && this._graphics.getCanvasImage()
-              : this.getObject(id);
+              : this._graphics && this._graphics.getObject(id);
           if (target) {
             target.layerName = name;
           }
@@ -1501,7 +1501,7 @@ export default {
 
             return;
           }
-          const target = this.getObject(id);
+          const target = this._graphics.getObject(id);
           if (target && target.selectable) {
             canvas.setActiveObject(target);
             canvas.renderAll();
@@ -1509,7 +1509,7 @@ export default {
         },
         getCanvas: () => (this._graphics ? this._graphics.getCanvas() : null),
         getCanvasImage: () => (this._graphics ? this._graphics.getCanvasImage() : null),
-        getObject: (id) => (this._graphics ? this.getObject(id) : null),
+        getObject: (id) => (this._graphics ? this._graphics.getObject(id) : null),
       },
       this._commonAction()
     );

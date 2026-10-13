@@ -1,3 +1,5 @@
+import { layerIcons } from '@/ui/icons/layerIcons';
+
 export default ({ locale }) => {
   const addImageText = (locale && locale.localize('Add Image')) || '添加图片';
   const bringToFrontText = (locale && locale.localize('Bring To Front')) || '置顶';
@@ -13,16 +15,16 @@ export default ({ locale }) => {
       <div class="tie-layer-toolbar">
         <label class="tie-layer-add-btn" tooltip-content="${addImageText}">
           <input type="file" class="tie-layer-add-input" accept="image/*" />
-          <span class="tie-layer-add-icon">+</span>
+          <span class="tie-layer-add-icon">${layerIcons.plus}</span>
           <span class="tie-layer-add-text">${addImageText}</span>
         </label>
         <div class="tie-layer-tools">
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-top" tooltip-content="${bringToFrontText}">⤊</button>
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-up" tooltip-content="${bringForwardText}">↑</button>
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-down" tooltip-content="${sendBackwardText}">↓</button>
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-bottom" tooltip-content="${sendToBackText}">⤋</button>
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-clone" tooltip-content="${duplicateText}">❐</button>
-          <button type="button" class="tie-layer-tool-btn tie-layer-btn-delete" tooltip-content="${deleteText}">🗑</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-top" tooltip-content="${bringToFrontText}">${layerIcons.bringToFront}</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-up" tooltip-content="${bringForwardText}">${layerIcons.bringForward}</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-down" tooltip-content="${sendBackwardText}">${layerIcons.sendBackward}</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-bottom" tooltip-content="${sendToBackText}">${layerIcons.sendToBack}</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-clone" tooltip-content="${duplicateText}">${layerIcons.duplicate}</button>
+          <button type="button" class="tie-layer-tool-btn tie-layer-btn-delete" tooltip-content="${deleteText}">${layerIcons.trash}</button>
         </div>
       </div>
       <div class="tie-layer-opacity-wrap">

@@ -1,5 +1,6 @@
 import templateHtml from '@/ui/template/submenu/layer';
 import { isNil, stamp } from '@/util';
+import { layerIcons, getLayerTypeIcon } from '@/ui/icons/layerIcons';
 
 /**
  * Get or assign unique id of a fabric object
@@ -554,20 +555,22 @@ class Layer {
         <li class="tie-layer-item ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''} ${
         !isVisible ? 'hidden' : ''
       }" data-id="${id}" draggable="true">
-          <div class="tie-layer-item-drag-handle" title="拖拽排序">⋮⋮</div>
+          <div class="tie-layer-item-drag-handle" title="拖拽排序">${layerIcons.gripVertical}</div>
           <button type="button" class="tie-layer-item-vis-btn" title="${
             isVisible ? '隐藏' : '显示'
           }">
-            ${isVisible ? '👁' : '👁‍🗨'}
+            ${isVisible ? layerIcons.eye : layerIcons.eyeOff}
           </button>
-          <div class="tie-layer-item-type-icon tie-layer-icon-${obj.type || 'item'}"></div>
+          <div class="tie-layer-item-type-icon">${getLayerTypeIcon(obj.type)}</div>
           <span class="tie-layer-item-name" title="${label}">${label}</span>
           <button type="button" class="tie-layer-item-lock-btn" title="${
             isLocked ? '解锁' : '锁定'
           }">
-            ${isLocked ? '🔒' : '🔓'}
+            ${isLocked ? layerIcons.lock : layerIcons.unlock}
           </button>
-          <button type="button" class="tie-layer-item-del-btn" title="删除">✕</button>
+          <button type="button" class="tie-layer-item-del-btn" title="删除">${
+            layerIcons.close
+          }</button>
         </li>
       `;
     }
@@ -582,16 +585,20 @@ class Layer {
         <li class="tie-layer-item tie-layer-bg-item ${
           !isVisible ? 'hidden' : ''
         }" data-id="background">
-          <div class="tie-layer-item-drag-handle disabled">⋮⋮</div>
+          <div class="tie-layer-item-drag-handle disabled">${layerIcons.gripVertical}</div>
           <button type="button" class="tie-layer-item-vis-btn" title="${
             isVisible ? '隐藏' : '显示'
           }">
-            ${isVisible ? '👁' : '👁‍🗨'}
+            ${isVisible ? layerIcons.eye : layerIcons.eyeOff}
           </button>
-          <div class="tie-layer-item-type-icon tie-layer-icon-background"></div>
+          <div class="tie-layer-item-type-icon">${layerIcons.typeBackground}</div>
           <span class="tie-layer-item-name" title="${bgLabel}">${bgLabel}</span>
-          <button type="button" class="tie-layer-item-lock-btn" title="点击解锁为普通图层">🔒</button>
-          <button type="button" class="tie-layer-item-del-btn" title="删除底图">✕</button>
+          <button type="button" class="tie-layer-item-lock-btn" title="点击解锁为普通图层">${
+            layerIcons.lock
+          }</button>
+          <button type="button" class="tie-layer-item-del-btn disabled" title="底图不可删除">${
+            layerIcons.close
+          }</button>
         </li>
       `;
     }

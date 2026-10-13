@@ -683,6 +683,15 @@ class ImageEditor {
   }
 
   /**
+   * Get object by id
+   * @param {number|string} id - object id
+   * @returns {fabric.Object|null}
+   */
+  getObject(id) {
+    return this._graphics ? this._graphics.getObject(id) : null;
+  }
+
+  /**
    * Hide all objects on the canvas (excluding background image)
    * @example
    * imageEditor.hideAllObjects();

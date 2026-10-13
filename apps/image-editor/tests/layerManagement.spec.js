@@ -228,6 +228,53 @@ describe('Layer Management & Multi-Image Addition', () => {
 
       expect(actions.renameLayer).toHaveBeenCalledWith(String(rect1.id), 'New Layer Name');
     });
+
+    it('renders Lucide wireframe icons for toolbar tools and layer items', () => {
+      // Check toolbar buttons have lucide-icon SVGs
+      const topBtn = container.querySelector('.tie-layer-btn-top');
+      const addBtn = container.querySelector('.tie-layer-add-btn');
+      expect(topBtn.querySelector('svg.lucide-icon')).not.toBeNull();
+      expect(addBtn.querySelector('svg.lucide-icon')).not.toBeNull();
+
+      // Check item buttons have lucide-icon SVGs
+      const item = container.querySelector(`.tie-layer-item[data-id="${rect1.id}"]`);
+      const dragHandle = item.querySelector('.tie-layer-item-drag-handle');
+      const visBtn = item.querySelector('.tie-layer-item-vis-btn');
+      const lockBtn = item.querySelector('.tie-layer-item-lock-btn');
+      const delBtn = item.querySelector('.tie-layer-item-del-btn');
+
+      expect(dragHandle.querySelector('svg.lucide-icon')).not.toBeNull();
+      expect(visBtn.querySelector('svg.lucide-icon')).not.toBeNull();
+      expect(lockBtn.querySelector('svg.lucide-icon')).not.toBeNull();
+      expect(delBtn.querySelector('svg.lucide-icon')).not.toBeNull();
+    });
+  });
+
+  describe('Multi-Image Drag & Drop Interaction', () => {
+    it('successfully finishes dragging added image without getting stuck to cursor', () => {
+      const addedImg = new fabric.Image(null, { width: 120, height: 120, left: 100, top: 100 });
+      graphics._callbackAfterLoadingImageObject(addedImg);
+
+      expect(canvas.getActiveObject()).toBe(addedImg);
+
+      // Simulate mousedown
+      const evt = { clientX: 100, clientY: 100, preventDefault: jest.fn() };
+      canvas.fire('mouse:down', { target: addedImg, e: evt });
+      expect(graphics._dragState).not.toBeNull();
+
+      // Simulate moving
+      addedImg.set({ left: 160, top: 180 });
+      canvas.fire('object:moving', { target: addedImg, e: evt });
+
+      // Simulate mouseup
+      canvas.fire('mouse:up', { target: addedImg, e: evt });
+      canvas.fire('object:modified', { target: addedImg, e: evt });
+
+      // Drag state should be cleanly cleared and object dropped at new coordinates
+      expect(graphics._dragState).toBeNull();
+      expect(addedImg.left).toBe(160);
+      expect(addedImg.top).toBe(180);
+    });
   });
 
   describe('Smart Scaling for Image Objects', () => {
