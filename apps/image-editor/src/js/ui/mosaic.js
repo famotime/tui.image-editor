@@ -111,8 +111,8 @@ class Mosaic extends Submenu {
     this.actions.discardSelection();
     this.changeStandbyMode();
 
-    // Default to box selection (rect)
-    this._changeMosaicType('rect');
+    // Default to box selection (rect) or saved type
+    this._changeMosaicType(this.savedType || 'rect');
   }
 
   /**
@@ -144,6 +144,7 @@ class Mosaic extends Submenu {
   _changeMosaicType(newType) {
     this.changeStandbyMode();
     this.type = newType;
+    this.savedType = newType;
     this._els.mosaicTypeSelectButton.classList.add(newType);
 
     // Show/hide brush elements depending on mode
@@ -157,6 +158,7 @@ class Mosaic extends Submenu {
     }
 
     this.setMosaicMode();
+    this._fireConfigChanged();
   }
 
   /**
@@ -171,6 +173,7 @@ class Mosaic extends Submenu {
     } else {
       this.actions.changeMosaicSize(this.type, value);
     }
+    this._fireConfigChanged();
   }
 
   /**
@@ -182,6 +185,45 @@ class Mosaic extends Submenu {
     this.brushWidth = value;
     if (this.type === 'brush') {
       this.actions.changeMosaicBrushWidth(value);
+    }
+    this._fireConfigChanged();
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取马赛克持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      type: this.type || this.savedType || 'rect',
+      mosaicSize: this.mosaicSize,
+      brushWidth: this.brushWidth,
+    };
+  }
+
+  /**
+   * 恢复马赛克持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  setPersistentConfig(config = {}) {
+    if (config.type) {
+      this.savedType = config.type;
+    }
+    if (typeof config.mosaicSize === 'number') {
+      this.mosaicSize = config.mosaicSize;
+      this._els.mosaicSizeRange.value = config.mosaicSize;
+    }
+    if (typeof config.brushWidth === 'number') {
+      this.brushWidth = config.brushWidth;
+      this._els.mosaicBrushRange.value = config.brushWidth;
     }
   }
 }

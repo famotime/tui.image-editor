@@ -143,6 +143,7 @@ class Shape extends Submenu {
     this.options.strokeWidth = strokeWidth;
 
     this.actions.setDrawingShape(this.type, this.options);
+    this._fireConfigChanged();
   }
 
   /**
@@ -152,8 +153,8 @@ class Shape extends Submenu {
     this.actions.stopDrawingMode();
     this.actions.discardSelection();
     this.changeStandbyMode();
-    this.type = 'rect';
-    this._els.shapeSelectButton.classList.add('rect');
+    this.type = this.savedType || 'rect';
+    this._els.shapeSelectButton.classList.add(this.type);
     this.actions.changeSelectableAll(false);
     this.actions.modeChange('shape');
     this.actions.setDrawingShape(this.type, this.options);
@@ -218,9 +219,11 @@ class Shape extends Submenu {
       }
       this.changeStandbyMode();
       this.type = shapeType;
+      this.savedType = shapeType;
       event.currentTarget.classList.add(shapeType);
       this.actions.changeSelectableAll(false);
       this.actions.modeChange('shape');
+      this._fireConfigChanged();
     }
   }
 
@@ -240,6 +243,7 @@ class Shape extends Submenu {
     );
 
     this.actions.setDrawingShape(this.type, this.options);
+    this._fireConfigChanged();
   }
 
   /**
@@ -254,6 +258,7 @@ class Shape extends Submenu {
       fill: color,
     });
     this.actions.setDrawingShape(this.type, this.options);
+    this._fireConfigChanged();
   }
 
   /**
@@ -268,6 +273,50 @@ class Shape extends Submenu {
       stroke: color,
     });
     this.actions.setDrawingShape(this.type, this.options);
+    this._fireConfigChanged();
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取形状持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      type: this.type || this.savedType || 'rect',
+      stroke: this.options.stroke,
+      fill: this.options.fill,
+      strokeWidth: this.options.strokeWidth,
+    };
+  }
+
+  /**
+   * 恢复形状持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  setPersistentConfig(config = {}) {
+    if (config.type) {
+      this.savedType = config.type;
+    }
+    if (config.stroke) {
+      this.options.stroke = config.stroke;
+      this._els.strokeColorpicker.color = config.stroke;
+    }
+    if (typeof config.fill === 'string') {
+      this.options.fill = config.fill;
+      this._els.fillColorpicker.color = config.fill;
+    }
+    if (typeof config.strokeWidth === 'number') {
+      this.options.strokeWidth = config.strokeWidth;
+      this._els.strokeRange.value = config.strokeWidth;
+    }
   }
 }
 

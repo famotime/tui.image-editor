@@ -177,6 +177,12 @@ declare namespace tuiImageEditor {
     };
     menuBarPosition?: string;
     usageStatistics?: boolean;
+    persistence?:
+      | boolean
+      | {
+          enable?: boolean;
+          storageKey?: string;
+        };
   }
 
   interface ISelectionStyleConfig {
@@ -327,6 +333,8 @@ declare namespace tuiImageEditor {
     public compress(options?: { quality?: number; format?: string }): Promise<any>;
     public undo(iterationCount?: number): Promise<any>;
     public on(eventName: string, handler: (...args: any[]) => void): void;
+    public clearPersistentConfig(): void;
+    public getPersistentConfig(): Record<string, any>;
   }
 }
 

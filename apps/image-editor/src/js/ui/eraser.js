@@ -94,6 +94,36 @@ class Eraser extends Submenu {
   _changeEraserRange(value) {
     this.width = value;
     this.actions.changeEraserWidth(value);
+    this._fireConfigChanged();
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取橡皮擦持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      width: this.width,
+    };
+  }
+
+  /**
+   * 恢复橡皮擦持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  setPersistentConfig(config = {}) {
+    if (typeof config.width === 'number') {
+      this.width = config.width;
+      this._els.eraserRange.value = config.width;
+    }
   }
 }
 

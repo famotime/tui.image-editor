@@ -117,6 +117,7 @@ class Annotation extends Submenu {
       this.fontSize = val;
       this._els.fontSizeInput.value = val;
       this.actions.setFontSize(val);
+      this._fireConfigChanged();
     });
     this._els.fontSizeInput.addEventListener('change', (e) => {
       let val = parseInt(e.target.value, 10) || 20;
@@ -125,6 +126,7 @@ class Annotation extends Submenu {
       this._els.fontSizeRange.value = val;
       this._els.fontSizeInput.value = val;
       this.actions.setFontSize(val);
+      this._fireConfigChanged();
     });
     this._els.fontSizeInput.addEventListener('keydown', (e) => {
       if (e.keyCode === 13) {
@@ -169,7 +171,10 @@ class Annotation extends Submenu {
       this._els.shapeTriangle.classList.add('active');
     }
 
-    this.actions.setShape(shape);
+    if (this.actions && this.actions.setShape) {
+      this.actions.setShape(shape);
+    }
+    this._fireConfigChanged();
   }
 
   /**
@@ -225,6 +230,7 @@ class Annotation extends Submenu {
           this.actions.setColor(color);
         }
         this._closePickers();
+        this._fireConfigChanged();
       });
     });
   }
@@ -245,6 +251,7 @@ class Annotation extends Submenu {
       this._els.bgColorPreview.style.backgroundColor = color;
       this.actions.setColor(color);
     }
+    this._fireConfigChanged();
   }
 
   _onGlobalClick(e) {
@@ -266,8 +273,83 @@ class Annotation extends Submenu {
   /**
    * Start mode handler
    */
+  // eslint-disable-next-line complexity
   changeStartMode() {
     this.actions.modeChange('annotation');
+    if (this.actions && this.actions.setShape) {
+      this.actions.setShape(this.shape);
+    }
+    if (this.actions && this.actions.setColor) {
+      this.actions.setColor(this.color);
+    }
+    if (this.actions && this.actions.setTextColor) {
+      this.actions.setTextColor(this.textColor);
+    }
+    if (this.actions && this.actions.setFontSize) {
+      this.actions.setFontSize(this.fontSize);
+    }
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取序号标注持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      shape: this.shape,
+      color: this.color,
+      textColor: this.textColor,
+      fontSize: this.fontSize,
+    };
+  }
+
+  /**
+   * 恢复序号标注持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  // eslint-disable-next-line complexity
+  setPersistentConfig(config = {}) {
+    if (config.shape) {
+      this._changeShape(config.shape);
+    }
+    if (config.color) {
+      this.color = config.color;
+      if (this._els.bgColorPreview) {
+        this._els.bgColorPreview.style.backgroundColor = config.color;
+      }
+      if (this.actions && this.actions.setColor) {
+        this.actions.setColor(config.color);
+      }
+    }
+    if (config.textColor) {
+      this.textColor = config.textColor;
+      if (this._els.textColorPreview) {
+        this._els.textColorPreview.style.backgroundColor = config.textColor;
+      }
+      if (this.actions && this.actions.setTextColor) {
+        this.actions.setTextColor(config.textColor);
+      }
+    }
+    if (typeof config.fontSize === 'number') {
+      this.fontSize = config.fontSize;
+      if (this._els.fontSizeRange) {
+        this._els.fontSizeRange.value = config.fontSize;
+      }
+      if (this._els.fontSizeInput) {
+        this._els.fontSizeInput.value = config.fontSize;
+      }
+      if (this.actions && this.actions.setFontSize) {
+        this.actions.setFontSize(config.fontSize);
+      }
+    }
   }
 }
 

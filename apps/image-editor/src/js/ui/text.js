@@ -224,6 +224,7 @@ class Text extends Submenu {
       this.effect[styleType] = !this.effect[styleType];
       button.classList.toggle('active');
       this.actions.changeTextStyle(styleObj);
+      this._fireConfigChanged();
     }
   }
 
@@ -245,6 +246,7 @@ class Text extends Submenu {
       this.actions.changeTextStyle({ textAlign: styleType });
 
       this.align = styleTypeAlias;
+      this._fireConfigChanged();
     }
   }
 
@@ -261,6 +263,7 @@ class Text extends Submenu {
       },
       !isLast
     );
+    this._fireConfigChanged();
   }
 
   /**
@@ -273,6 +276,51 @@ class Text extends Submenu {
     this.actions.changeTextStyle({
       fill: color,
     });
+    this._fireConfigChanged();
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取文字持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      textColor: this.textColor,
+      fontSize: this.fontSize,
+      effect: Object.assign({}, this.effect),
+      align: this.align,
+    };
+  }
+
+  /**
+   * 恢复文字持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  setPersistentConfig(config = {}) {
+    if (config.textColor) {
+      this.textColor = config.textColor;
+    }
+    if (typeof config.fontSize === 'number') {
+      this.fontSize = config.fontSize;
+    }
+    if (config.effect) {
+      ['bold', 'italic', 'underline'].forEach((effectName) => {
+        if (typeof config.effect[effectName] === 'boolean') {
+          this.setEffectState(effectName, config.effect[effectName] ? effectName : 'normal');
+        }
+      });
+    }
+    if (config.align) {
+      this.setAlignState(config.align);
+    }
   }
 }
 

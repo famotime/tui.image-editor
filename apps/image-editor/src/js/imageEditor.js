@@ -1928,6 +1928,31 @@ class ImageEditor {
   compress(options) {
     return this.execute(commands.COMPRESS_IMAGE, options);
   }
+
+  /**
+   * Clear persistent UI and tool configuration
+   * @example
+   * imageEditor.clearPersistentConfig();
+   */
+  clearPersistentConfig() {
+    if (this.ui) {
+      this.ui.clearPersistentConfig();
+    }
+  }
+
+  /**
+   * Get persistent UI and tool configuration snapshot
+   * @returns {Object}
+   * @example
+   * const config = imageEditor.getPersistentConfig();
+   */
+  getPersistentConfig() {
+    if (this.ui) {
+      return this.ui.getPersistentConfig();
+    }
+
+    return {};
+  }
 }
 
 action.mixin(ImageEditor);

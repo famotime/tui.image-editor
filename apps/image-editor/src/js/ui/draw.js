@@ -153,8 +153,9 @@ class Draw extends Submenu {
    * Executed when the menu starts.
    */
   changeStartMode() {
-    this.type = 'free';
-    this._els.lineSelectButton.classList.add('free');
+    this.type = this.savedType || 'free';
+    this._els.lineSelectButton.classList.remove('free', 'line');
+    this._els.lineSelectButton.classList.add(this.type);
     this.setDrawMode();
   }
 
@@ -177,8 +178,10 @@ class Draw extends Submenu {
 
       this.changeStandbyMode();
       this.type = lineType;
+      this.savedType = lineType;
       this._els.lineSelectButton.classList.add(lineType);
       this.setDrawMode();
+      this._fireConfigChanged();
     }
   }
 
@@ -205,6 +208,7 @@ class Draw extends Submenu {
     const allBtns = this._els.arrowSelectButton.querySelectorAll('.tui-image-editor-button');
     allBtns.forEach((btn) => btn.classList.remove('active'));
     button.classList.add('active');
+    this._fireConfigChanged();
   }
 
   /**
@@ -219,6 +223,7 @@ class Draw extends Submenu {
     } else {
       this.setDrawMode();
     }
+    this._fireConfigChanged();
   }
 
   /**
@@ -233,6 +238,7 @@ class Draw extends Submenu {
     } else {
       this.setDrawMode();
     }
+    this._fireConfigChanged();
   }
 
   /**
@@ -246,6 +252,64 @@ class Draw extends Submenu {
       this.changeStartMode();
     } else {
       this.setDrawMode();
+    }
+    this._fireConfigChanged();
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取画笔持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      type: this.type || this.savedType || 'free',
+      arrowType: this.arrowType,
+      color: this.color,
+      width: this.width,
+      opacity: this.opacity,
+    };
+  }
+
+  /**
+   * 恢复画笔持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  // eslint-disable-next-line complexity
+  setPersistentConfig(config = {}) {
+    if (config.color) {
+      this.color = config.color;
+      this._els.drawColorPicker.color = config.color;
+    }
+    if (typeof config.width === 'number') {
+      this.width = config.width;
+      this._els.drawRange.value = config.width;
+    }
+    if (typeof config.opacity === 'number') {
+      this.opacity = config.opacity;
+      this._els.drawOpacityRange.value = config.opacity * 100;
+    }
+    if (config.arrowType) {
+      this.arrowType = config.arrowType;
+      if (this._els.arrowSelectButton) {
+        const allBtns = this._els.arrowSelectButton.querySelectorAll('.tui-image-editor-button');
+        allBtns.forEach((btn) => btn.classList.remove('active'));
+        const btnClass = config.arrowType === 'none' ? 'arrow-none' : `arrow-${config.arrowType}`;
+        const targetBtn = this._els.arrowSelectButton.querySelector(`.${btnClass}`);
+        if (targetBtn) {
+          targetBtn.classList.add('active');
+        }
+      }
+    }
+    if (config.type) {
+      this.savedType = config.type;
     }
   }
 }

@@ -139,10 +139,11 @@ class Icon extends Submenu {
     this.actions.stopDrawingMode();
     this.actions.discardSelection();
     this.changeStandbyMode();
-    this.iconType = 'icon-arrow';
-    this._els.addIconButton.classList.add('icon-arrow');
+    const type = this.savedIconType || 'icon-arrow';
+    this.iconType = type;
+    this._els.addIconButton.classList.add(type);
     this.actions.changeSelectableAll(false);
-    this.actions.addIcon('icon-arrow', this._els.iconColorpicker.color);
+    this.actions.addIcon(type, this._els.iconColorpicker.color);
   }
 
   /**
@@ -156,6 +157,7 @@ class Icon extends Submenu {
     if (this.iconType) {
       this.actions.addIcon(this.iconType, color);
     }
+    this._fireConfigChanged();
   }
 
   /**
@@ -179,7 +181,9 @@ class Icon extends Submenu {
       } else {
         this.actions.addIcon(iconType, iconColor);
         this.iconType = iconType;
+        this.savedIconType = iconType;
       }
+      this._fireConfigChanged();
     }
   }
 
@@ -200,6 +204,38 @@ class Icon extends Submenu {
     if (file) {
       imgUrl = URL.createObjectURL(file);
       this.actions.registerCustomIcon(imgUrl, file);
+    }
+  }
+
+  /**
+   * 触发配置变更事件
+   * @private
+   */
+  _fireConfigChanged() {
+    this.fire('toolConfigChanged', this.getPersistentConfig());
+  }
+
+  /**
+   * 获取图标持久化配置
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return {
+      color: this._els.iconColorpicker.color,
+      iconType: this.iconType || this.savedIconType || 'icon-arrow',
+    };
+  }
+
+  /**
+   * 恢复图标持久化配置
+   * @param {Object} [config] - 配置项
+   */
+  setPersistentConfig(config = {}) {
+    if (config.color) {
+      this.setIconPickerColor(config.color);
+    }
+    if (config.iconType) {
+      this.savedIconType = config.iconType;
     }
   }
 }

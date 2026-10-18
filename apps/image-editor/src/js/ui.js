@@ -27,6 +27,7 @@ import Layer from '@/ui/layer';
 import Locale from '@/ui/locale/locale';
 import { makeHelpMenuWithPartitions, HELP_MENU_TITLE_KEYS } from '@/ui/helpMenu';
 import { layerIcons } from '@/ui/icons/layerIcons';
+import PersistenceManager from '@/ui/persistenceManager';
 
 const SUB_UI_COMPONENT = {
   Shape,
@@ -140,6 +141,17 @@ function getPointerPos(event) {
 class Ui {
   constructor(element, options, actions) {
     this.options = this._initializeOption(options);
+    const persistenceOpt =
+      typeof this.options.persistence === 'boolean'
+        ? { enable: this.options.persistence }
+        : extend({ enable: true, storageKey: 'tui_image_editor_state' }, this.options.persistence);
+    this._persistenceManager = new PersistenceManager(persistenceOpt);
+
+    const toolbarState = this._persistenceManager.getToolbarState();
+    if (toolbarState && toolbarState.menuBarPosition && (!options || !options.menuBarPosition)) {
+      this.options.menuBarPosition = toolbarState.menuBarPosition;
+    }
+
     this._actions = actions;
     this.submenu = false;
     this.imageSize = {};
@@ -171,6 +183,9 @@ class Ui {
     this._removeUiEvent();
     this._destroyAllMenu();
     this._selectedElement.innerHTML = '';
+    if (this._persistenceManager) {
+      this._persistenceManager.destroy();
+    }
 
     assignmentForDestroy(this);
   }
@@ -259,6 +274,7 @@ class Ui {
       selectElementClassList.remove('tui-image-editor-top-optimization');
     }
 
+    this._clampPalettes();
     this._updateToolbarOverflow();
   }
 
@@ -366,6 +382,10 @@ class Ui {
           height: '100%',
         },
         menuBarPosition: 'bottom',
+        persistence: {
+          enable: true,
+          storageKey: 'tui_image_editor_state',
+        },
       },
       options
     );
@@ -419,6 +439,11 @@ class Ui {
         menuBarPosition: this.options.menuBarPosition,
         usageStatistics: this.options.usageStatistics,
       });
+
+      const savedToolConfig = this._persistenceManager.getToolConfig(menuName);
+      if (savedToolConfig && this[menuName].setPersistentConfig) {
+        this[menuName].setPersistentConfig(savedToolConfig);
+      }
     });
   }
 
@@ -603,6 +628,142 @@ class Ui {
     this._attachSubmenuWheelEvent();
     this._makeSubmenuMoreElement();
     this._initToolbarOverflow();
+    this._restorePalettes();
+  }
+
+  /**
+   * Restore toolbar and layer palette positions and collapsed states from persistence
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _restorePalettes() {
+    const leftPalette = this._selectedElement.querySelector('.tui-image-editor-left-palette');
+    const toolbarState = this._persistenceManager.getToolbarState();
+    if (toolbarState && leftPalette) {
+      if (toolbarState.position && typeof toolbarState.position.left === 'number') {
+        leftPalette.style.setProperty('left', `${toolbarState.position.left}px`, 'important');
+        leftPalette.style.setProperty('top', `${toolbarState.position.top}px`, 'important');
+        leftPalette.style.setProperty('right', 'auto', 'important');
+        leftPalette.style.setProperty('bottom', 'auto', 'important');
+      }
+      if (toolbarState.collapsed) {
+        this._setPaletteCollapsed(true);
+      }
+    }
+
+    const rightPalette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    const layerState = this._persistenceManager.getLayerState();
+    if (layerState && rightPalette) {
+      if (layerState.position && typeof layerState.position.left === 'number') {
+        rightPalette.style.setProperty('left', `${layerState.position.left}px`, 'important');
+        rightPalette.style.setProperty('top', `${layerState.position.top}px`, 'important');
+        rightPalette.style.setProperty('right', 'auto', 'important');
+        rightPalette.style.setProperty('bottom', 'auto', 'important');
+      }
+      if (layerState.collapsed) {
+        this._setLayerPaletteCollapsed(true);
+      }
+    }
+  }
+
+  /**
+   * Set left palette collapsed state and update toggle button UI
+   * @param {boolean} collapsed - Collapsed or not
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _setPaletteCollapsed(collapsed) {
+    const toggleBtn = this._selectedElement.querySelector('.tui-image-editor-palette-toggle-btn');
+    if (collapsed) {
+      this._selectedElement.classList.add(
+        'palette-collapsed',
+        'tui-image-editor-palette-collapsed'
+      );
+    } else {
+      this._selectedElement.classList.remove(
+        'palette-collapsed',
+        'tui-image-editor-palette-collapsed'
+      );
+    }
+    if (toggleBtn) {
+      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
+      const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具';
+      toggleBtn.textContent = collapsed ? '▼' : '▲';
+      toggleBtn.setAttribute('tooltip-content', collapsed ? expandText : collapseText);
+    }
+  }
+
+  /**
+   * Set right layer palette collapsed state and update toggle button UI
+   * @param {boolean} collapsed - Collapsed or not
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _setLayerPaletteCollapsed(collapsed) {
+    const rightPalette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    if (!rightPalette) {
+      return;
+    }
+    const toggleBtn = rightPalette.querySelector('.tui-image-editor-palette-toggle-btn');
+    if (collapsed) {
+      rightPalette.classList.add('palette-collapsed');
+    } else {
+      rightPalette.classList.remove('palette-collapsed');
+    }
+    if (toggleBtn) {
+      const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
+      const expandText = (this._locale && this._locale.localize('Expand')) || '展开图层';
+      toggleBtn.innerHTML = collapsed ? layerIcons.chevronDown : layerIcons.chevronUp;
+      toggleBtn.setAttribute('tooltip-content', collapsed ? expandText : collapseText);
+    }
+  }
+
+  /**
+   * Clamp floating palettes within workspace boundaries
+   * @private
+   */
+  // eslint-disable-next-line complexity
+  _clampPalettes() {
+    if (!this._selectedElement) {
+      return;
+    }
+    const workspace =
+      this._selectedElement.querySelector('.tui-image-editor-workspace') || this._selectedElement;
+    if (!workspace || !workspace.clientWidth || !workspace.clientHeight) {
+      return;
+    }
+
+    const leftPalette = this._selectedElement.querySelector('.tui-image-editor-left-palette');
+    if (leftPalette && leftPalette.style.left) {
+      const currentLeft = parseInt(leftPalette.style.left, 10);
+      const currentTop = parseInt(leftPalette.style.top, 10);
+      if (!isNaN(currentLeft) && !isNaN(currentTop)) {
+        const maxLeft = Math.max(0, workspace.clientWidth - leftPalette.offsetWidth);
+        const maxTop = Math.max(0, workspace.clientHeight - leftPalette.offsetHeight);
+        const clampedLeft = Math.max(0, Math.min(maxLeft, currentLeft));
+        const clampedTop = Math.max(0, Math.min(maxTop, currentTop));
+        if (clampedLeft !== currentLeft || clampedTop !== currentTop) {
+          leftPalette.style.setProperty('left', `${clampedLeft}px`, 'important');
+          leftPalette.style.setProperty('top', `${clampedTop}px`, 'important');
+        }
+      }
+    }
+
+    const rightPalette = this._selectedElement.querySelector('.tui-image-editor-right-palette');
+    if (rightPalette && rightPalette.style.left) {
+      const currentLeft = parseInt(rightPalette.style.left, 10);
+      const currentTop = parseInt(rightPalette.style.top, 10);
+      if (!isNaN(currentLeft) && !isNaN(currentTop)) {
+        const maxLeft = Math.max(0, workspace.clientWidth - rightPalette.offsetWidth);
+        const maxTop = Math.max(0, workspace.clientHeight - rightPalette.offsetHeight);
+        const clampedLeft = Math.max(0, Math.min(maxLeft, currentLeft));
+        const clampedTop = Math.max(0, Math.min(maxTop, currentTop));
+        if (clampedLeft !== currentLeft || clampedTop !== currentTop) {
+          rightPalette.style.setProperty('left', `${clampedLeft}px`, 'important');
+          rightPalette.style.setProperty('top', `${clampedTop}px`, 'important');
+        }
+      }
+    }
   }
 
   /**
@@ -630,6 +791,7 @@ class Ui {
       const activeTooltipText = isCollapsed ? expandText : collapseText;
       toggleBtn.removeAttribute('title');
       toggleBtn.setAttribute('tooltip-content', activeTooltipText);
+      this._persistenceManager.saveToolbarCollapsed(isCollapsed);
       this.resizeEditor();
     };
     toggleBtn.addEventListener('click', this._onTogglePalette);
@@ -701,6 +863,10 @@ class Ui {
       document.removeEventListener('mouseup', onPointerUp);
       document.removeEventListener('touchmove', onPointerMove);
       document.removeEventListener('touchend', onPointerUp);
+      this._persistenceManager.saveToolbarPosition({
+        left: palette.offsetLeft,
+        top: palette.offsetTop,
+      });
     };
 
     const onPointerDown = (e) => {
@@ -769,6 +935,7 @@ class Ui {
 
       toggleBtn.innerHTML = isCollapsed ? layerIcons.chevronDown : layerIcons.chevronUp;
       toggleBtn.setAttribute('tooltip-content', isCollapsed ? expandText : collapseText);
+      this._persistenceManager.saveLayerCollapsed(isCollapsed);
       this.resizeEditor();
     };
     toggleBtn.addEventListener('click', this._onToggleLayerPalette);
@@ -840,6 +1007,10 @@ class Ui {
       document.removeEventListener('mouseup', onPointerUp);
       document.removeEventListener('touchmove', onPointerMove);
       document.removeEventListener('touchend', onPointerUp);
+      this._persistenceManager.saveLayerPosition({
+        left: palette.offsetLeft,
+        top: palette.offsetTop,
+      });
     };
 
     const onPointerDown = (e) => {
@@ -1870,6 +2041,9 @@ class Ui {
     this[menuName].on(eventNames.INPUT_BOX_EDITING_STOPPED, () =>
       this.fire(eventNames.INPUT_BOX_EDITING_STOPPED)
     );
+    this[menuName].on('toolConfigChanged', (config) => {
+      this._persistenceManager.saveToolConfig(menuName, config);
+    });
   }
 
   /**
@@ -1892,7 +2066,25 @@ class Ui {
       this._buttonElements[menuName].removeEventListener('click', this.eventHandler[menuName]);
       this[menuName].off(eventNames.INPUT_BOX_EDITING_STARTED);
       this[menuName].off(eventNames.INPUT_BOX_EDITING_STOPPED);
+      this[menuName].off('toolConfigChanged');
     });
+  }
+
+  /**
+   * Clear persistent configuration from storage
+   */
+  clearPersistentConfig() {
+    if (this._persistenceManager) {
+      this._persistenceManager.clear();
+    }
+  }
+
+  /**
+   * Get persistent configuration snapshot
+   * @returns {Object}
+   */
+  getPersistentConfig() {
+    return this._persistenceManager ? this._persistenceManager.getState() : {};
   }
 
   /**
@@ -2129,6 +2321,7 @@ class Ui {
     if (isSameMenu && toggle) {
       this.submenu = null;
       this._updateActiveToolBadge(null);
+      this._persistenceManager.saveActiveMenu(null);
     } else {
       this._buttonElements[menuName].classList.add('active');
       this._mainElement.classList.add(`tui-image-editor-menu-${menuName}`);
@@ -2138,6 +2331,7 @@ class Ui {
       this.submenu = menuName;
       this._updateActiveToolBadge(menuName);
       this[this.submenu].changeStartMode();
+      this._persistenceManager.saveActiveMenu(menuName);
     }
 
     this.resizeEditor();
@@ -2147,11 +2341,20 @@ class Ui {
    * Init menu
    * @private
    */
+  // eslint-disable-next-line complexity
   _initMenu() {
-    if (this.options.initMenu) {
+    let targetMenu = this.options.initMenu;
+    if (!targetMenu) {
+      const savedMenu = this._persistenceManager.getActiveMenu();
+      if (savedMenu && this.options.menu.indexOf(savedMenu) > -1) {
+        targetMenu = savedMenu;
+      }
+    }
+
+    if (targetMenu && this._buttonElements[targetMenu]) {
       const evt = document.createEvent('MouseEvents');
       evt.initEvent('click', true, false);
-      this._buttonElements[this.options.initMenu].dispatchEvent(evt);
+      this._buttonElements[targetMenu].dispatchEvent(evt);
     }
 
     if (this.icon) {
