@@ -51,7 +51,7 @@ const ImageEditorComponent = forwardRef((props, ref) => {
         imageEditorInst.current = null;
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -79,15 +79,15 @@ class ImageEditor extends React.Component {
     super(props);
     this.editorRef = React.createRef();
   }
-  
+
   getInstance() {
     return this.editorRef.current ? this.editorRef.current.getInstance() : null;
   }
-  
+
   getRootElement() {
     return this.editorRef.current ? this.editorRef.current.getRootElement() : null;
   }
-  
+
   render() {
     return <ImageEditorComponent ref={this.editorRef} {...this.props} />;
   }

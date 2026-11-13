@@ -267,6 +267,7 @@ declare namespace tuiImageEditor {
   }
 
   class ImageEditor {
+    public static localeZhCN: Record<string, string>;
     constructor(wrapper: string | Element, options: IOptions);
     public ui: UI;
 

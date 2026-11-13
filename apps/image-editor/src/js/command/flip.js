@@ -15,9 +15,13 @@ const command = {
   execute(graphics, type) {
     const flipComp = graphics.getComponent(FLIP);
 
-    this.undoData.setting = flipComp.getCurrentSetting();
+    if (!this.isRedo) {
+      this.undoData.setting = flipComp.getCurrentSetting();
+    }
 
-    return flipComp[type]();
+    const targetId = this.undoData && this.undoData.setting ? this.undoData.setting.targetId : null;
+
+    return flipComp[type](targetId);
   },
 
   /**

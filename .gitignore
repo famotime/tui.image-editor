@@ -67,3 +67,9 @@ api
 
 dist
 !_*/dist/
+
+# Test artifacts & MCP
+.playwright-mcp/
+coverage/
+url.txt
+errorVariable.txt

@@ -417,16 +417,18 @@ class Layer {
     }
     this._canvasEventsAttached = true;
 
-    const onCanvasChange = () => this.refresh();
-    const onSelectionChange = () => this._syncSelection();
+    this._canvasListeners = {
+      onCanvasChange: () => this.refresh(),
+      onSelectionChange: () => this._syncSelection(),
+    };
 
     canvas.on({
-      'object:added': onCanvasChange,
-      'object:removed': onCanvasChange,
-      'object:modified': onCanvasChange,
-      'selection:created': onSelectionChange,
-      'selection:updated': onSelectionChange,
-      'selection:cleared': onSelectionChange,
+      'object:added': this._canvasListeners.onCanvasChange,
+      'object:removed': this._canvasListeners.onCanvasChange,
+      'object:modified': this._canvasListeners.onCanvasChange,
+      'selection:created': this._canvasListeners.onSelectionChange,
+      'selection:updated': this._canvasListeners.onSelectionChange,
+      'selection:cleared': this._canvasListeners.onSelectionChange,
     });
   }
 
@@ -614,6 +616,22 @@ class Layer {
    * Destroy layer instance
    */
   destroy() {
+    if (this._canvasEventsAttached && this.actions.getCanvas) {
+      const canvas = this.actions.getCanvas();
+      if (canvas && canvas.off && this._canvasListeners) {
+        canvas.off({
+          'object:added': this._canvasListeners.onCanvasChange,
+          'object:removed': this._canvasListeners.onCanvasChange,
+          'object:modified': this._canvasListeners.onCanvasChange,
+          'selection:created': this._canvasListeners.onSelectionChange,
+          'selection:updated': this._canvasListeners.onSelectionChange,
+          'selection:cleared': this._canvasListeners.onSelectionChange,
+        });
+      }
+      this._canvasEventsAttached = false;
+      this._canvasListeners = null;
+    }
+    this._list = null;
     this.container = null;
     this.paletteElement = null;
   }

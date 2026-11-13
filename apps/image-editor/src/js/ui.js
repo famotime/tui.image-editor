@@ -688,7 +688,7 @@ class Ui {
     if (toggleBtn) {
       const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
       const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具';
-      toggleBtn.textContent = collapsed ? '▼' : '▲';
+      toggleBtn.innerHTML = collapsed ? layerIcons.chevronDown : layerIcons.chevronUp;
       toggleBtn.setAttribute('tooltip-content', collapsed ? expandText : collapseText);
     }
   }
@@ -787,7 +787,7 @@ class Ui {
       const collapseText = (this._locale && this._locale.localize('Collapse')) || '折叠';
       const expandText = (this._locale && this._locale.localize('Expand')) || '展开工具';
 
-      toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+      toggleBtn.innerHTML = isCollapsed ? layerIcons.chevronDown : layerIcons.chevronUp;
       const activeTooltipText = isCollapsed ? expandText : collapseText;
       toggleBtn.removeAttribute('title');
       toggleBtn.setAttribute('tooltip-content', activeTooltipText);

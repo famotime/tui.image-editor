@@ -22,7 +22,7 @@ describe('basicUtil', () => {
   });
 
   it('converts hex colors to rgba strings', () => {
-    expect(getRgb('#abc', 0.5)).toBe('rgba(171, 202, 188, 0.5)');
+    expect(getRgb('#abc', 0.5)).toBe('rgba(170, 187, 204, 0.5)');
     expect(getRgb('#aabbcc')).toBe('rgba(170, 187, 204, 1)');
   });
 

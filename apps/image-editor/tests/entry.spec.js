@@ -13,4 +13,12 @@ describe('entry', () => {
 
     expect(command).not.toBeNull();
   });
+
+  it('should export localeZhCN and attach to ImageEditor', () => {
+    const entry = require('../src');
+
+    expect(entry.localeZhCN).toBeDefined();
+    expect(entry.localeZhCN.Crop).toBe('裁剪');
+    expect(entry.default.localeZhCN).toBe(entry.localeZhCN);
+  });
 });

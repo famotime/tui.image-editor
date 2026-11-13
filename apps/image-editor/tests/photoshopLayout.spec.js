@@ -62,7 +62,7 @@ describe('Photoshop Layout UI Integration', () => {
     expect(title.textContent).toBe('Toolbar');
     expect(menuItems.length).toBe(3); // crop, draw, text
     expect(toggleBtn).not.toBeNull();
-    expect(toggleBtn.textContent).toBe('▲');
+    expect(toggleBtn.querySelector('svg.lucide-icon')).not.toBeNull();
     expect(toggleBtn.getAttribute('tooltip-content')).toBe('Collapse');
 
     // 验证左侧工具栏各个菜单项均具有 tooltip-content 属性
@@ -74,14 +74,14 @@ describe('Photoshop Layout UI Integration', () => {
     toggleBtn.click();
     expect(container.classList.contains('palette-collapsed')).toBe(true);
     expect(container.classList.contains('tui-image-editor-palette-collapsed')).toBe(true);
-    expect(toggleBtn.textContent).toBe('▼');
+    expect(toggleBtn.querySelector('svg.lucide-icon')).not.toBeNull();
     expect(toggleBtn.getAttribute('tooltip-content')).toBe('Expand');
 
     // Toggle expand
     toggleBtn.click();
     expect(container.classList.contains('palette-collapsed')).toBe(false);
     expect(container.classList.contains('tui-image-editor-palette-collapsed')).toBe(false);
-    expect(toggleBtn.textContent).toBe('▲');
+    expect(toggleBtn.querySelector('svg.lucide-icon')).not.toBeNull();
     expect(toggleBtn.getAttribute('tooltip-content')).toBe('Collapse');
   });
 

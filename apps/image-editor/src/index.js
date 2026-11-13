@@ -30,6 +30,9 @@ import '@/command/changeLayerOrder';
 import '@/command/changeLayerOpacity';
 import '@/command/cropImageObject';
 
+import zhCN from '@/ui/locale/zh_CN';
+
 ImageEditor['default'] = ImageEditor;
+ImageEditor.localeZhCN = zhCN;
 export default ImageEditor;
-export { ImageEditor };
+export { ImageEditor, zhCN as localeZhCN };

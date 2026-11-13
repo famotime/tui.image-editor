@@ -161,4 +161,5 @@ const zhCN = {
   'Compare Split': '左右对比',
 };
 
+export { zhCN };
 export default zhCN;

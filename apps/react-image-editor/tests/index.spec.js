@@ -19,7 +19,7 @@ describe('ImageEditor Component', () => {
     TuiImageEditor.mockClear();
   });
 
-  it('instantiates tui-image-editor once even in React 18 Strict Mode', () => {
+  it('properly cleans up and re-instantiates in React 18 Strict Mode', () => {
     const { unmount } = render(
       <StrictMode>
         <ImageEditor

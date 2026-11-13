@@ -286,5 +286,16 @@ describe('ImageEditor', () => {
       expect(resetSpy).not.toHaveBeenCalled();
       expect(pasteSpy).not.toHaveBeenCalled();
     });
+
+    it('should safely return rejected promise when removing non-existent object', async () => {
+      await expect(imageEditor.removeObject(999999)).rejects.toBe('The object is not in canvas.');
+    });
+
+    it('should safely handle _onKeyDown when graphics is null', () => {
+      imageEditor._graphics = null;
+      expect(() => {
+        imageEditor._onKeyDown({ keyCode: keyCodes.DEL });
+      }).not.toThrow();
+    });
   });
 });

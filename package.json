@@ -50,7 +50,10 @@
     "build": "lerna run build",
     "build:image-editor": "lerna run --scope tui-image-editor build",
     "build:react": "lerna run --scope @toast-ui/react-image-editor build",
-    "build:vue": "lerna run --scope @toast-ui/vue-image-editor build"
+    "build:vue": "lerna run --scope @toast-ui/vue-image-editor build",
+    "test": "lerna run test",
+    "test:types": "npm --prefix apps/image-editor run test:types",
+    "lint": "eslint apps/image-editor/src apps/react-image-editor/src apps/vue-image-editor/src"
   },
   "workspaces": [
     "apps/*"

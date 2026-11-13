@@ -15,7 +15,7 @@ export default ({
             <div class="tui-image-editor-controls tui-image-editor-left-palette left-palette">
                 <div class="tui-image-editor-palette-header">
                     <span class="tui-image-editor-palette-title">${toolbarTitle}</span>
-                    <button type="button" class="tui-image-editor-palette-toggle-btn" tooltip-content="${collapseText}">▲</button>
+                    <button type="button" class="tui-image-editor-palette-toggle-btn tie-toolbar-toggle-btn" tooltip-content="${collapseText}">${layerIcons.chevronUp}</button>
                 </div>
                 <div class="tui-image-editor-palette-body">
                     <ul class="tui-image-editor-menu"></ul>

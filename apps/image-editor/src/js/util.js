@@ -1,6 +1,5 @@
 import isUndefined from 'tui-code-snippet/type/isUndefined';
 import forEach from 'tui-code-snippet/collection/forEach';
-import sendHostname from 'tui-code-snippet/request/sendHostname';
 import extend from 'tui-code-snippet/object/extend';
 import isString from 'tui-code-snippet/type/isString';
 import pick from 'tui-code-snippet/object/pick';
@@ -88,8 +87,7 @@ export function sendHostName() {
     return;
   }
   hostnameSent = true;
-
-  sendHostname('image-editor', 'UA-129999381-1');
+  // Google Universal Analytics (UA-*) was shut down in 2023. Kept as no-op for backward compatibility.
 }
 
 /**

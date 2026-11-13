@@ -390,6 +390,10 @@ class ImageEditor {
    */
   /* eslint-disable complexity */
   _onKeyDown(e) {
+    if (!this._graphics) {
+      return;
+    }
+
     const { ctrlKey, keyCode, metaKey, target } = e;
     const isModifierKey = ctrlKey || metaKey;
     const targetNodeName = target && target.nodeName ? target.nodeName.toUpperCase() : '';
@@ -950,7 +954,9 @@ class ImageEditor {
    * imageEditor.stopDrawingMode();
    */
   stopDrawingMode() {
-    this._graphics.stopDrawingMode();
+    if (this._graphics) {
+      this._graphics.stopDrawingMode();
+    }
   }
 
   /**
@@ -1599,9 +1605,12 @@ class ImageEditor {
    * imageEditor.removeObject(id);
    */
   removeObject(id) {
-    const { type } = this._graphics.getObject(id);
+    const obj = this._graphics ? this._graphics.getObject(id) : null;
+    if (!obj) {
+      return Promise.reject(rejectMessages.noObject);
+    }
 
-    return this.execute(commands.REMOVE_OBJECT, id, getObjectType(type));
+    return this.execute(commands.REMOVE_OBJECT, id, getObjectType(obj.type));
   }
 
   /**
@@ -1738,8 +1747,10 @@ class ImageEditor {
   destroy() {
     this.stopDrawingMode();
     this._detachDomEvents();
-    this._graphics.destroy();
-    this._graphics = null;
+    if (this._graphics) {
+      this._graphics.destroy();
+      this._graphics = null;
+    }
 
     if (this.ui) {
       this._detachColorPickerInputBoxEvents();

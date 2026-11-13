@@ -254,6 +254,13 @@ describe('Layer Management & Multi-Image Addition', () => {
       expect(lockBtn.querySelector('svg.lucide-icon')).not.toBeNull();
       expect(delBtn.querySelector('svg.lucide-icon')).not.toBeNull();
     });
+
+    it('unbinds canvas listeners on destroy to prevent memory leaks', () => {
+      const offSpy = jest.spyOn(canvas, 'off');
+      layer.destroy();
+
+      expect(offSpy).toHaveBeenCalled();
+    });
   });
 
   describe('Multi-Image Drag & Drop Interaction', () => {
@@ -319,6 +326,12 @@ describe('Layer Management & Multi-Image Addition', () => {
       // Undo restores the layer flip
       await invoker.undo();
       expect(imgObj.flipX).toBe(false);
+      expect(mockBg.flipX).toBeFalsy();
+
+      // Redo restores the layer flip even if activeObject is cleared
+      canvas.discardActiveObject();
+      await invoker.redo();
+      expect(imgObj.flipX).toBe(true);
       expect(mockBg.flipX).toBeFalsy();
     });
 

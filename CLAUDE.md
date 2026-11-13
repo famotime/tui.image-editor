@@ -89,7 +89,7 @@ cd apps/image-editor && npm run serve
 - 最新模块职责清单见 `docs/project-structure.md`。
 - 核心包新增测试覆盖：`eventBinder.spec.js`、`graphicsRegistry.spec.js`、`helpMenu.spec.js`、`basicUtil.spec.js`。
 - Wrapper 新增覆盖：React handler prop 删除解绑；Vue option merge 不污染默认 include UI 配置。
-- `getRgb('#abc')` 测试锁定当前历史行为，后续如需修正 shorthand 解析应单独评估兼容性。
+- `getRgb('#abc')` 已按 CSS 规范修正 3 位 hex shorthand 展开为 `#aabbcc` (rgba(170, 187, 204, a))。
 
 ## Coding Conventions
 

@@ -160,10 +160,11 @@ class Flip extends Component {
 
   /**
    * Reset flip settings
+   * @param {number} [targetId] - target object id
    * @returns {Promise}
    */
-  reset() {
-    const current = this.getCurrentSetting();
+  reset(targetId) {
+    const current = this.getCurrentSetting(targetId);
 
     return this.set({
       flipX: false,
@@ -174,10 +175,11 @@ class Flip extends Component {
 
   /**
    * Flip x
+   * @param {number} [targetId] - target object id
    * @returns {Promise}
    */
-  flipX() {
-    const current = this.getCurrentSetting();
+  flipX(targetId) {
+    const current = this.getCurrentSetting(targetId);
 
     return this.set({
       flipX: !current.flipX,
@@ -188,10 +190,11 @@ class Flip extends Component {
 
   /**
    * Flip y
+   * @param {number} [targetId] - target object id
    * @returns {Promise}
    */
-  flipY() {
-    const current = this.getCurrentSetting();
+  flipY(targetId) {
+    const current = this.getCurrentSetting(targetId);
 
     return this.set({
       flipX: current.flipX,
