@@ -38,9 +38,14 @@ class Lasso extends Component {
     canvas.defaultCursor = 'crosshair';
     canvas.selection = false;
 
-    // 让除背景图外的所有元素都变得可交互且可选择，这样可以移动、缩放已选择的元素
+    // 让除背景图和锁定元素外的所有元素都变得可交互且可选择，这样可以移动、缩放已选择的元素
     canvas.forEachObject((obj) => {
-      if (obj !== canvas.backgroundImage) {
+      if (
+        obj !== canvas.backgroundImage &&
+        !obj.locked &&
+        !obj.__isLayerLocked &&
+        !obj.lockMovementX
+      ) {
         obj.set({
           selectable: true,
           evented: true,
@@ -70,6 +75,9 @@ class Lasso extends Component {
       canvas.remove(this._selectionHelper);
       this._selectionHelper = null;
     }
+
+    this._startPoint = null;
+    this._points = [];
   }
 
   /**

@@ -152,6 +152,8 @@ class Text extends Component {
       'object:scaling': this._listeners.scaling,
       'text:changed': this._listeners.textChanged,
     });
+
+    this.isPrevEditing = false;
   }
 
   /**
@@ -369,6 +371,9 @@ class Text extends Component {
    * @private
    */
   _onInput() {
+    if (!this._textarea) {
+      return;
+    }
     const ratio = this.getCanvasRatio();
     const obj = this._editingObj;
     const textareaStyle = this._textarea.style;
@@ -382,6 +387,9 @@ class Text extends Component {
    * @private
    */
   _onKeyDown() {
+    if (!this._textarea) {
+      return;
+    }
     const ratio = this.getCanvasRatio();
     const obj = this._editingObj;
     const textareaStyle = this._textarea.style;
@@ -399,6 +407,9 @@ class Text extends Component {
    * @private
    */
   _onBlur() {
+    if (!this._textarea) {
+      return;
+    }
     const ratio = this.getCanvasRatio();
     const editingObj = this._editingObj;
     const editingObjInfos = this._editingObjInfos;
@@ -436,6 +447,9 @@ class Text extends Component {
    * @private
    */
   _onScroll() {
+    if (!this._textarea) {
+      return;
+    }
     this._textarea.scrollLeft = 0;
     this._textarea.scrollTop = 0;
   }

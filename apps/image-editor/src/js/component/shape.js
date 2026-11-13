@@ -165,13 +165,23 @@ export default class Shape extends Component {
 
     this._isSelected = false;
 
-    canvas.defaultCursor = 'default';
+    if (canvas) {
+      canvas.defaultCursor = 'default';
+      canvas.selection = true;
+      canvas.uniformScaling = false;
+      canvas.off({
+        'mouse:down': this._handlers.mousedown,
+        'mouse:move': this._handlers.mousemove,
+        'mouse:up': this._handlers.mouseup,
+      });
 
-    canvas.selection = true;
-    canvas.uniformScaling = false;
-    canvas.off({
-      'mouse:down': this._handlers.mousedown,
-    });
+      if (this._shapeObj && (this._shapeObj.width <= 0 || this._shapeObj.height <= 0)) {
+        canvas.remove(this._shapeObj);
+      }
+    }
+
+    this._shapeObj = null;
+    this._withShiftKey = false;
 
     fabric.util.removeListener(document, 'keydown', this._handlers.keydown);
     fabric.util.removeListener(document, 'keyup', this._handlers.keyup);
@@ -487,6 +497,7 @@ export default class Shape extends Component {
       } else {
         canvas.remove(shape);
       }
+      this._shapeObj = null;
     }
 
     canvas.off({

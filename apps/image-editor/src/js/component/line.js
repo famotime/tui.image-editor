@@ -69,11 +69,15 @@ class Line extends Component {
     this.setHeadOption(setting);
     this.setBrush(setting);
 
-    canvas.forEachObject((obj) => {
-      obj.set({
-        evented: false,
+    if (this.graphics && this.graphics.suspendObjectsInteraction) {
+      this.graphics.suspendObjectsInteraction();
+    } else {
+      canvas.forEachObject((obj) => {
+        obj.set({
+          evented: false,
+        });
       });
-    });
+    }
 
     canvas.on({
       'mouse:down': this._listeners.mousedown,
@@ -108,16 +112,31 @@ class Line extends Component {
   end() {
     const canvas = this.getCanvas();
 
-    canvas.defaultCursor = 'default';
-    canvas.selection = true;
+    if (canvas) {
+      canvas.defaultCursor = 'default';
+      canvas.selection = true;
 
-    canvas.forEachObject((obj) => {
-      obj.set({
-        evented: true,
+      if (this.graphics && this.graphics.resumeObjectsInteraction) {
+        this.graphics.resumeObjectsInteraction();
+      } else {
+        canvas.forEachObject((obj) => {
+          obj.set({
+            evented: true,
+          });
+        });
+      }
+
+      canvas.off({
+        'mouse:down': this._listeners.mousedown,
+        'mouse:move': this._listeners.mousemove,
+        'mouse:up': this._listeners.mouseup,
       });
-    });
 
-    canvas.off('mouse:down', this._listeners.mousedown);
+      if (this._line) {
+        canvas.remove(this._line);
+        this._line = null;
+      }
+    }
   }
 
   /**
@@ -155,6 +174,9 @@ class Line extends Component {
    * @private
    */
   _onFabricMouseMove(fEvent) {
+    if (!this._line) {
+      return;
+    }
     const canvas = this.getCanvas();
     const pointer = canvas.getPointer(fEvent.e);
 
@@ -175,14 +197,15 @@ class Line extends Component {
   _onFabricMouseUp() {
     const canvas = this.getCanvas();
 
-    const line = this._createLineEventObjectProperties();
-    if (line.width <= 0 && line.height <= 0) {
-      canvas.remove(this._line);
-    } else {
-      this.fire(eventNames.OBJECT_ADDED, line);
+    if (this._line) {
+      const line = this._createLineEventObjectProperties();
+      if (line.width <= 0 && line.height <= 0) {
+        canvas.remove(this._line);
+      } else {
+        this.fire(eventNames.OBJECT_ADDED, line);
+      }
+      this._line = null;
     }
-
-    this._line = null;
 
     canvas.off({
       'mouse:move': this._listeners.mousemove,

@@ -140,7 +140,9 @@ class Filter extends Component {
   _apply(sourceImg, callback) {
     sourceImg.filters.push();
     const result = sourceImg.applyFilters();
-    if (result) {
+    if (result && typeof result.then === 'function') {
+      result.then(callback)['catch'](callback);
+    } else {
       callback();
     }
   }

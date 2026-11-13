@@ -80,7 +80,15 @@ class Command {
    * @returns {boolean} isRedo
    */
   get isRedo() {
+    if (typeof this._isRedo === 'boolean') {
+      return this._isRedo;
+    }
+
     return Object.keys(this.undoData).length > 0;
+  }
+
+  set isRedo(val) {
+    this._isRedo = val;
   }
 
   /**

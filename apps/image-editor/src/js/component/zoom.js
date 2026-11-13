@@ -202,7 +202,11 @@ class Zoom extends Component {
 
     const canvas = this.getCanvas();
 
-    this._changeObjectsEventedState(false);
+    if (this.graphics && this.graphics.suspendObjectsInteraction) {
+      this.graphics.suspendObjectsInteraction();
+    } else {
+      this._changeObjectsEventedState(false);
+    }
 
     this.zoomArea = new fabric.Rect({
       left: 0,
@@ -239,7 +243,11 @@ class Zoom extends Component {
       'mouse:up': stopZoom,
     });
 
-    this._changeObjectsEventedState(true);
+    if (this.graphics && this.graphics.resumeObjectsInteraction) {
+      this.graphics.resumeObjectsInteraction();
+    } else {
+      this._changeObjectsEventedState(true);
+    }
 
     canvas.remove(this.zoomArea);
     this.zoomArea = null;
@@ -277,12 +285,19 @@ class Zoom extends Component {
     const currentDrawingMode = this.graphics.getDrawingMode();
     if (currentDrawingMode !== 'NORMAL' && currentDrawingMode !== 'ZOOM') {
       this._originalDrawingMode = currentDrawingMode;
+      this._originalDrawingModeOptions = this.graphics.getDrawingModeOptions
+        ? this.graphics.getDrawingModeOptions()
+        : null;
       this.graphics.stopDrawingMode();
     }
 
     const canvas = this.getCanvas();
 
-    this._changeObjectsEventedState(false);
+    if (this.graphics && this.graphics.suspendObjectsInteraction) {
+      this.graphics.suspendObjectsInteraction();
+    } else {
+      this._changeObjectsEventedState(false);
+    }
 
     canvas.discardActiveObject();
     canvas.off('mouse:down', this._listeners.startHand);
@@ -300,19 +315,35 @@ class Zoom extends Component {
     this.zoomMode = zoomModes.DEFAULT;
     const canvas = this.getCanvas();
 
-    this._changeObjectsEventedState(true);
+    if (canvas) {
+      if (this.graphics && this.graphics.resumeObjectsInteraction) {
+        this.graphics.resumeObjectsInteraction();
+      } else {
+        this._changeObjectsEventedState(true);
+      }
 
-    canvas.off('mouse:down', this._listeners.startHand);
-    canvas.selection = true;
-    canvas.defaultCursor = 'auto';
+      const { startHand, moveHand, stopHand } = this._listeners;
+      canvas.off({
+        'mouse:down': startHand,
+        'mouse:move': moveHand,
+        'mouse:up': stopHand,
+      });
+      canvas.selection = true;
+      canvas.defaultCursor = 'auto';
+    }
 
     this._startHandPoint = null;
 
-    canvas.fire(HAND_STOPPED);
+    if (canvas) {
+      canvas.fire(HAND_STOPPED);
+    }
 
     if (this._originalDrawingMode) {
-      this.graphics.startDrawingMode(this._originalDrawingMode);
+      const mode = this._originalDrawingMode;
+      const options = this._originalDrawingModeOptions;
       delete this._originalDrawingMode;
+      delete this._originalDrawingModeOptions;
+      this.graphics.startDrawingMode(mode, options);
     }
   }
 
@@ -634,6 +665,9 @@ class Zoom extends Component {
    * @private
    */
   _onMouseMoveWithHandMode({ e }) {
+    if (!this._startHandPoint) {
+      return;
+    }
     const canvas = this.getCanvas();
     const currentPoint = this._getEventPointer(e);
     const deltaX = currentPoint.x - this._startHandPoint.x;

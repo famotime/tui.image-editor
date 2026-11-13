@@ -146,9 +146,13 @@ class Resize extends Component {
       dimensions.width && initialCssWidth ? initialCssWidth / dimensions.width : 1;
 
     if (!this._resizezone) {
-      canvas.forEachObject((obj) => {
-        obj.evented = false;
-      });
+      if (this.graphics && this.graphics.suspendObjectsInteraction) {
+        this.graphics.suspendObjectsInteraction();
+      } else {
+        canvas.forEachObject((obj) => {
+          obj.evented = false;
+        });
+      }
 
       const canvasImage = this.getCanvasImage();
       if (canvasImage) {
@@ -193,9 +197,13 @@ class Resize extends Component {
       this._resizezone = null;
       canvas.selection = true;
 
-      canvas.forEachObject((obj) => {
-        obj.evented = true;
-      });
+      if (this.graphics && this.graphics.resumeObjectsInteraction) {
+        this.graphics.resumeObjectsInteraction();
+      } else {
+        canvas.forEachObject((obj) => {
+          obj.evented = true;
+        });
+      }
       canvas.renderAll();
     }
   }

@@ -44,6 +44,7 @@ class Invoker {
    */
   _invokeExecution(command, isRedo = false) {
     this.lock();
+    command.isRedo = isRedo;
 
     let { args } = command;
     if (!args) {
@@ -138,9 +139,17 @@ class Invoker {
   executeSilent(...args) {
     this._isSilent = true;
 
-    return this.execute(...args, this._isSilent).then(() => {
-      this._isSilent = false;
-    });
+    return this.execute(...args, this._isSilent)
+      .then((val) => {
+        this._isSilent = false;
+
+        return val;
+      })
+      ['catch']((err) => {
+        this._isSilent = false;
+
+        return Promise.reject(err);
+      });
   }
 
   /**
@@ -182,7 +191,11 @@ class Invoker {
       command = null;
     }
     if (command) {
-      promise = this._invokeUndo(command);
+      promise = this._invokeUndo(command)['catch']((err) => {
+        this.pushUndoStack(command, true);
+
+        return Promise.reject(err);
+      });
       this._fireUndoStackChanged();
     } else {
       message = rejectMessages.undo;
@@ -209,7 +222,11 @@ class Invoker {
       command = null;
     }
     if (command) {
-      promise = this._invokeExecution(command, true);
+      promise = this._invokeExecution(command, true)['catch']((err) => {
+        this.pushRedoStack(command, true);
+
+        return Promise.reject(err);
+      });
       this._fireRedoStackChanged();
     } else {
       message = rejectMessages.redo;

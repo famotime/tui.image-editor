@@ -91,10 +91,14 @@ class Cropper extends Component {
       this._targetObject = null;
     }
 
-    canvas.forEachObject((obj) => {
-      // {@link http://fabricjs.com/docs/fabric.Object.html#evented}
-      obj.evented = false;
-    });
+    if (this.graphics && this.graphics.suspendObjectsInteraction) {
+      this.graphics.suspendObjectsInteraction();
+    } else {
+      canvas.forEachObject((obj) => {
+        // {@link http://fabricjs.com/docs/fabric.Object.html#evented}
+        obj.evented = false;
+      });
+    }
 
     const cropzoneRect = {
       left: 0,
@@ -137,19 +141,33 @@ class Cropper extends Component {
     const canvas = this.getCanvas();
     const cropzone = this._cropzone;
 
-    if (!cropzone) {
-      return;
+    if (canvas) {
+      canvas.off({
+        'mouse:down': this._listeners.mousedown,
+        'mouse:move': this._listeners.mousemove,
+        'mouse:up': this._listeners.mouseup,
+      });
+      canvas.selection = true;
+      canvas.defaultCursor = 'default';
+
+      if (this.graphics && this.graphics.resumeObjectsInteraction) {
+        this.graphics.resumeObjectsInteraction();
+      } else {
+        canvas.forEachObject((obj) => {
+          obj.evented = true;
+        });
+      }
+
+      if (cropzone) {
+        canvas.remove(cropzone);
+      }
     }
-    canvas.remove(cropzone);
-    canvas.selection = true;
-    canvas.defaultCursor = 'default';
-    canvas.off('mouse:down', this._listeners.mousedown);
-    canvas.forEachObject((obj) => {
-      obj.evented = true;
-    });
 
     this._cropzone = null;
     this._targetObject = null;
+    this._startX = null;
+    this._startY = null;
+    this._withShiftKey = false;
 
     fabric.util.removeListener(document, 'keydown', this._listeners.keydown);
     fabric.util.removeListener(document, 'keyup', this._listeners.keyup);
@@ -211,10 +229,13 @@ class Cropper extends Component {
    * @private
    */
   _onFabricMouseMove(fEvent) {
+    const cropzone = this._cropzone;
+    if (!cropzone) {
+      return;
+    }
     const canvas = this.getCanvas();
     const pointer = canvas.getPointer(fEvent.e);
     const { x, y } = pointer;
-    const cropzone = this._cropzone;
 
     if (Math.abs(x - this._startX) + Math.abs(y - this._startY) > MOUSE_MOVE_THRESHOLD) {
       canvas.remove(cropzone);
@@ -308,11 +329,15 @@ class Cropper extends Component {
     const listeners = this._listeners;
     const canvas = this.getCanvas();
 
-    canvas.setActiveObject(cropzone);
-    canvas.off({
-      'mouse:move': listeners.mousemove,
-      'mouse:up': listeners.mouseup,
-    });
+    if (canvas) {
+      if (cropzone) {
+        canvas.setActiveObject(cropzone);
+      }
+      canvas.off({
+        'mouse:move': listeners.mousemove,
+        'mouse:up': listeners.mouseup,
+      });
+    }
   }
 
   /**

@@ -188,7 +188,16 @@ class ImageEditor {
       options
     );
 
-    this.mode = null;
+    Object.defineProperty(this, 'mode', {
+      get: () => (this._graphics ? this._graphics.getDrawingMode() : null),
+      set: (val) => {
+        if (this._graphics && val) {
+          this._graphics.startDrawingMode(val);
+        }
+      },
+      configurable: true,
+      enumerable: true,
+    });
 
     this.activeObjectId = null;
 

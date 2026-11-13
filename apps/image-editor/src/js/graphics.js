@@ -11,6 +11,7 @@ import {
   setCachedUndoDataForDimension,
 } from '@/helper/selectionModifyHelper';
 import { createComponentInstances, createDrawingModeInstances } from '@/graphicsRegistry';
+import EditorStateMachine from '@/editorStateMachine';
 import { getProperties, includes, isShape, stamp } from '@/util';
 import {
   componentNames as components,
@@ -91,6 +92,16 @@ class Graphics {
      * @private
      */
     this._canvas = null;
+
+    /**
+     * Editor state machine
+     * @type {EditorStateMachine}
+     * @private
+     */
+    this._stateMachine = new EditorStateMachine();
+    this._stateMachine.on('modeChanged', (mode) => {
+      this._drawingMode = mode;
+    });
 
     /**
      * Drawing mode
@@ -428,7 +439,32 @@ class Graphics {
    * @returns {string}
    */
   getDrawingMode() {
-    return this._drawingMode;
+    return this._stateMachine ? this._stateMachine.mode : this._drawingMode;
+  }
+
+  /**
+   * Get drawing mode options
+   * @returns {Object|null}
+   */
+  getDrawingModeOptions() {
+    return this._stateMachine ? this._stateMachine.options : null;
+  }
+
+  /**
+   * Get editor state machine
+   * @returns {EditorStateMachine}
+   */
+  getStateMachine() {
+    return this._stateMachine;
+  }
+
+  /**
+   * Check if the mode should be kept on selection cleared
+   * @param {string} modeName
+   * @returns {boolean}
+   */
+  shouldKeepModeOnDeselect(modeName) {
+    return this._stateMachine ? this._stateMachine.shouldKeepModeOnDeselect(modeName) : false;
   }
 
   /**
@@ -441,6 +477,10 @@ class Graphics {
    */
   startDrawingMode(mode, option) {
     if (this._isSameDrawingMode(mode)) {
+      if (this._stateMachine) {
+        this._stateMachine.transition(mode, option);
+      }
+
       return true;
     }
 
@@ -452,6 +492,9 @@ class Graphics {
       drawingModeInstance.start(this, option);
 
       this._drawingMode = mode;
+      if (this._stateMachine) {
+        this._stateMachine.transition(mode, option);
+      }
     }
 
     return !!drawingModeInstance;
@@ -465,11 +508,94 @@ class Graphics {
       return;
     }
 
-    const drawingModeInstance = this._getDrawingModeInstance(this.getDrawingMode());
+    const currentMode = this.getDrawingMode();
+    const drawingModeInstance = this._getDrawingModeInstance(currentMode);
     if (drawingModeInstance && drawingModeInstance.end) {
       drawingModeInstance.end(this);
     }
     this._drawingMode = drawingModes.NORMAL;
+    if (this._stateMachine) {
+      this._stateMachine.transition(drawingModes.NORMAL);
+    }
+  }
+
+  /**
+   * Temporarily suspend the current drawing mode (used during Hand/Pan mode)
+   * @returns {boolean} true if a non-normal mode was suspended
+   */
+  suspendDrawingMode() {
+    const currentMode = this.getDrawingMode();
+    if (currentMode !== drawingModes.NORMAL && currentMode !== drawingModes.ZOOM) {
+      const drawingModeInstance = this._getDrawingModeInstance(currentMode);
+      if (drawingModeInstance && drawingModeInstance.end) {
+        drawingModeInstance.end(this);
+      }
+      this._drawingMode = drawingModes.NORMAL;
+
+      return this._stateMachine ? this._stateMachine.suspend() : true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Restore the previously suspended drawing mode
+   * @returns {{mode: string, options: Object|null}|null} Restored mode or null
+   */
+  restoreDrawingMode() {
+    if (!this._stateMachine) {
+      return null;
+    }
+
+    const suspended = this._stateMachine.restore();
+    if (suspended) {
+      const drawingModeInstance = this._getDrawingModeInstance(suspended.mode);
+      if (drawingModeInstance && drawingModeInstance.start) {
+        drawingModeInstance.start(this, suspended.options);
+        this._drawingMode = suspended.mode;
+      }
+
+      return suspended;
+    }
+
+    return null;
+  }
+
+  /**
+   * Suspend interaction on objects while preserving their original locked/evented state
+   */
+  suspendObjectsInteraction() {
+    const canvas = this.getCanvas();
+    if (!canvas) {
+      return;
+    }
+
+    canvas.forEachObject((obj) => {
+      if (typeof obj._originalEvented === 'undefined') {
+        obj._originalEvented = obj.evented;
+      }
+      obj.evented = false;
+    });
+  }
+
+  /**
+   * Restore interaction on objects to their original locked/evented state
+   */
+  resumeObjectsInteraction() {
+    const canvas = this.getCanvas();
+    if (!canvas) {
+      return;
+    }
+
+    canvas.forEachObject((obj) => {
+      if (obj.locked || obj.__isLayerLocked) {
+        obj.evented = false;
+        obj.selectable = false;
+      } else {
+        obj.evented = true;
+      }
+      delete obj._originalEvented;
+    });
   }
 
   /**

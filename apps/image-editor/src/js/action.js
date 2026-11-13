@@ -80,9 +80,7 @@ export default {
     const toggleHandMode = () => {
       const zoomMode = this._graphics.getZoomMode();
 
-      this.stopDrawingMode();
       if (zoomMode !== zoomModes.HAND) {
-        this.startDrawingMode(drawingModes.ZOOM);
         this._graphics.startHandMode();
       } else {
         this._graphics.endHandMode();
@@ -1064,6 +1062,8 @@ export default {
             }
             this.ui.icon.setIconPickerColor(obj.fill);
           }
+        } else if (obj.type === 'image') {
+          this.ui.changeHelpButtonEnabled('delete', true);
         }
       },
       /* eslint-enable complexity */
@@ -1112,7 +1112,24 @@ export default {
         if (this.ui.submenu === 'text') {
           this.changeCursor('text');
         } else if (
-          !includes(['draw', 'crop', 'resize', 'shape', 'icon', 'mosaic', 'lasso'], this.ui.submenu)
+          this._graphics &&
+          this._graphics.shouldKeepModeOnDeselect
+            ? !this._graphics.shouldKeepModeOnDeselect(this.ui.submenu) &&
+              !this._graphics.shouldKeepModeOnDeselect(this.getDrawingMode())
+            : !includes(
+                [
+                  'draw',
+                  'crop',
+                  'resize',
+                  'shape',
+                  'icon',
+                  'mosaic',
+                  'lasso',
+                  'annotation',
+                  'eraser',
+                ],
+                this.ui.submenu
+              )
         ) {
           this.stopDrawingMode();
         }
@@ -1437,6 +1454,8 @@ export default {
           const target = this._graphics ? this._graphics.getObject(id) : null;
           if (target) {
             target.set({
+              locked,
+              __isLayerLocked: locked,
               selectable: !locked,
               evented: !locked,
               lockMovementX: locked,

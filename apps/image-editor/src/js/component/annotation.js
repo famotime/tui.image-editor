@@ -116,6 +116,8 @@ class Annotation extends Component {
       'mouse:up': this._listeners.mouseup,
       'object:moving': this._listeners.moving,
     });
+
+    this._isMouseDown = false;
   }
 
   _onSelectionCleared() {
